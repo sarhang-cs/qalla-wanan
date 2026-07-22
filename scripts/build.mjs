@@ -29,7 +29,7 @@ const config = {
   VITE_SUPABASE_ANON_KEY: read('VITE_SUPABASE_ANON_KEY'),
   VITE_ROUTING_BASE_URL: read('VITE_ROUTING_BASE_URL', 'https://router.project-osrm.org'),
   VITE_MYSQL_API_BASE_URL: read('VITE_MYSQL_API_BASE_URL'),
-  VITE_MAP_DATA_VERSION: read('VITE_MAP_DATA_VERSION', '2026-07-22-qalla-wanan-r4-geo-stability')
+  VITE_MAP_DATA_VERSION: read('VITE_MAP_DATA_VERSION', '2026-07-22-qalla-wanan-r5-native-map-data')
 };
 
 fs.rmSync(dist, { recursive: true, force: true });

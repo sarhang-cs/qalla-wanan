@@ -1,60 +1,110 @@
 {
   "ok": true,
-  "release": "R4-GEO-STABILITY",
-  "builtAt": "2026-07-22T15:15:27.914118Z",
-  "mapDataVersion": "2026-07-22-qalla-wanan-r4-geo-stability",
-  "placeCount": 47040,
-  "counts": {
-    "region": 1,
-    "governorate": 8,
-    "city": 11,
-    "town": 215,
-    "village": 6433,
-    "hamlet": 14,
-    "suburb": 43,
-    "locality": 233,
-    "natural": 5210,
-    "road": 1805,
-    "poi": 33067
+  "release": "R5-NATIVE-MAP-DATA",
+  "mapDataVersion": "2026-07-22-qalla-wanan-r5-native-map-data",
+  "generatedAt": "2026-07-22T15:55:46.555522+00:00",
+  "runtime": {
+    "mapEngine": "MapLibre GL JS",
+    "placeLabelSource": "public/data/nav/labels-native.geojson",
+    "placeLabelRenderer": "native WebGL symbol layers",
+    "htmlCanvasDomLabelOverlay": false,
+    "labelFadeDurationMs": 0,
+    "variableTextAnchor": false,
+    "coordinateMutation": 0,
+    "gpsRenderer": "native GeoJSON circle layers",
+    "routeRenderer": "native GeoJSON line layers",
+    "outsideMask": "canonical polygon mask rendered above labels"
   },
-  "bbox": [
-    41.285803,
-    33.305387,
-    46.34873,
-    37.377264
-  ],
-  "dataAudit": {
-    "canonicalSourceRecords": 47041,
-    "exactIdMatches": 47040,
-    "exactNameMatches": 47040,
-    "coordinatesAtFullSourcePrecision": 47040,
+  "data": {
+    "sourceRecords": 47040,
+    "nativeFeatures": 47040,
+    "nativeRenderFeatures": 47032,
+    "visuallySuppressedDuplicateRepresentations": 8,
     "outsideCanonicalBoundary": 0,
-    "duplicateDisplayIds": 0,
-    "mergedDuplicateSourceRecords": [
+    "coordinateMismatch": 0,
+    "counts": {
+      "region": 1,
+      "governorate": 8,
+      "city": 11,
+      "town": 215,
+      "village": 6433,
+      "hamlet": 14,
+      "suburb": 43,
+      "locality": 233,
+      "natural": 5210,
+      "road": 1805,
+      "poi": 33067
+    },
+    "bbox": [
+      41.285803,
+      33.305387,
+      46.34873,
+      37.377264
+    ],
+    "labelsNativeBytes": 20908712,
+    "searchIndexBytes": 6985353,
+    "fullSourceBytes": 63887466,
+    "sourceAndRuntimeDataBytes": 91926673,
+    "fontBytes": 52256,
+    "fullSourceAssets": [
       {
-        "kept_id": "osm-way-787134307-hotel",
-        "merged_source_id": "osm-node-7358798548-motel",
-        "name": "هۆتێلی سێوەر",
-        "reason": "same named physical venue represented by an OSM building and an OSM node at sub-meter separation"
+        "path": "public/data/nav/full-source/kri-base.pmtiles",
+        "bytes": 15198962,
+        "sha256": "d169633076785cb361abcc5c3c9ef27a63ed5efd98669c2285d7e4fb30b7a0ea"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-boundary.geojson",
+        "bytes": 73449,
+        "sha256": "0cbfa40a7151f61eaceb4211a05ef37e1503df359f3ab757c1ba48ff845df520"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-localities-render.geojson",
+        "bytes": 10759294,
+        "sha256": "d465b850630e1d2f3ca26ace4b93e014073d46237de947c065e00630c3d522fe"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-natural-features.geojson",
+        "bytes": 8020337,
+        "sha256": "7fae384a1446719bcc1a2848063f88303348f305d91df198b61a130014b9fd2c"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-outside-mask.geojson",
+        "bytes": 71693,
+        "sha256": "d3248aaf50b279ed38881305d4f4b8ec9eb819bd4cb703ed7b1cf598eb622a9b"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-pois-render.geojson",
+        "bytes": 22802763,
+        "sha256": "fc5b31290baa058469ffe1446ae45836d8012a3f1c0feaed0d9cef88e80ed451"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-road-labels.geojson",
+        "bytes": 2608617,
+        "sha256": "42f1692c0a2f5f72b202466150464fe3698ccbc9a384dc3423b5ea03284fdf8b"
+      },
+      {
+        "path": "public/data/nav/full-source/kri-roads.pmtiles",
+        "bytes": 4352351,
+        "sha256": "d5e18d6bce28cd8b5d161eff12fa2026976fd7a0d2ae0f3bd2c46d8463c685dd"
       }
     ]
   },
-  "rootFixes": [
-    "Replaced DOM place markers with one canvas label renderer anchored to immutable source coordinates",
-    "Boundary-clipped the complete text rectangle using screen-to-geographic unprojection",
-    "Replaced DOM GPS marker with native MapLibre GeoJSON layers and adaptive fix filtering",
-    "Validated and stabilized native route geometry with request cancellation and controlled rerouting",
-    "Rebuilt all display coordinates at full canonical source precision",
-    "Embedded the requested UniQAIDAR Hewal font in source and production build",
-    "Added data and runtime contract checks that reject regression to movable DOM markers"
-  ],
-  "videoReviewed": {
-    "file": "255578.mp4",
-    "durationSeconds": 16.069356,
-    "observed": [
-      "label visibility and placement changed discontinuously during zoom",
-      "DOM text could render beyond the canonical boundary mask",
-      "label recreation made source-anchored features look geographically displaced"
-    ]
-  }
+  "validation": {
+    "npmCheck": "passed",
+    "npmBuild": "passed",
+    "productionBuildBytes": 92098757,
+    "nativeSourceIdMatch": 47040,
+    "nativeSourceCoordinateMatch": 47040,
+    "forbiddenDomMarkers": 0,
+    "forbiddenCanvasLabelRenderer": 0,
+    "testedContracts": [
+      "data integrity",
+      "canonical-boundary containment",
+      "runtime renderer ownership",
+      "JavaScript syntax",
+      "production build"
+    ],
+    "notClaimed": "No claim of exhaustive real-device/browser GPS accuracy until the deployed build is tested on the user device."
+  },
+  "repository": "https://github.com/sarhang-cs/qalla-wanan"
 }

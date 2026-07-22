@@ -5,10 +5,16 @@ const CONFIG = window.__APP_CONFIG__ || {};
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');
 const EARTH_RADIUS_M = 6371008.8;
+const LABEL_FONT_STACK = ['Qalla Hewal', 'Noto Sans Arabic', 'sans-serif'];
+const NATIVE_LABEL_LAYER_IDS = [
+  'nav-label-region', 'nav-label-governorate', 'nav-label-city', 'nav-label-town',
+  'nav-label-locality', 'nav-label-natural', 'nav-label-road',
+  'nav-label-poi-landmark', 'nav-label-poi-regional', 'nav-label-poi-local',
+  'nav-label-poi-detail', 'nav-label-custom'
+];
 
 let map = null;
 let mapReadyPromise = null;
-let labelLayer = null;
 let boundaryGeometry = null;
 let allItems = [];
 let searchIndex = [];
@@ -22,6 +28,7 @@ let routeLastAt = 0;
 let routeLastOrigin = null;
 let routeAbortController = null;
 let gpsState = null;
+let itemById = new Map();
 
 const q = (selector) => document.querySelector(selector);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -75,7 +82,7 @@ function baseStyle() {
     });
   }
 
-  return { version: 8, sources, layers };
+  return { version: 8, sources, layers, transition: { duration: 0, delay: 0 } };
 }
 
 function emptyFeatureCollection() {
@@ -222,6 +229,23 @@ function pointInBoundary(lng, lat) {
   return true;
 }
 
+function geometryBbox(geometry) {
+  const bbox = [Infinity, Infinity, -Infinity, -Infinity];
+  const visit = (value) => {
+    if (!Array.isArray(value)) return;
+    if (value.length >= 2 && Number.isFinite(value[0]) && Number.isFinite(value[1])) {
+      bbox[0] = Math.min(bbox[0], value[0]);
+      bbox[1] = Math.min(bbox[1], value[1]);
+      bbox[2] = Math.max(bbox[2], value[0]);
+      bbox[3] = Math.max(bbox[3], value[1]);
+      return;
+    }
+    for (const child of value) visit(child);
+  };
+  visit(geometry?.coordinates);
+  return bbox.every(Number.isFinite) ? bbox : [41.285803, 33.305387, 46.34873, 37.377264];
+}
+
 function normalizeText(text) {
   return String(text || '')
     .toLocaleLowerCase('ku')
@@ -252,276 +276,129 @@ const kindNames = {
   road: 'ڕێگا', poi: 'شوێن/دوکان', custom: 'شوێنی تۆمارکراو'
 };
 
-const labelStyles = {
-  region: { size: 21, weight: 900, fill: '#ffe39a', halo: 5 },
-  governorate: { size: 16, weight: 900, fill: '#fff2c7', halo: 4 },
-  city: { size: 15, weight: 900, fill: '#ffffff', halo: 4 },
-  town: { size: 14, weight: 850, fill: '#ffffff', halo: 3.5 },
-  village: { size: 12, weight: 800, fill: '#ffffff', halo: 3 },
-  hamlet: { size: 11, weight: 760, fill: '#f1f5fb', halo: 3 },
-  suburb: { size: 11, weight: 760, fill: '#f1f5fb', halo: 3 },
-  neighbourhood: { size: 11, weight: 760, fill: '#f1f5fb', halo: 3 },
-  locality: { size: 11, weight: 760, fill: '#f1f5fb', halo: 3 },
-  natural: { size: 11, weight: 760, fill: '#c8f5dc', halo: 3 },
-  road: { size: 10, weight: 730, fill: '#ffe0a1', halo: 3 },
-  poi: { size: 10.5, weight: 760, fill: '#ffffff', halo: 3 },
-  custom: { size: 10.5, weight: 760, fill: '#ffffff', halo: 3 }
-};
+const nativeLabelDefinitions = [
+  { id: 'nav-label-region', tier: 'region', minzoom: 5.0, maxzoom: 9.4, size: ['interpolate', ['linear'], ['zoom'], 5, 16, 8, 22], color: '#ffe39a', halo: 2.4, overlap: true },
+  { id: 'nav-label-governorate', tier: 'governorate', minzoom: 5.8, maxzoom: 10.4, size: ['interpolate', ['linear'], ['zoom'], 5.8, 12, 9.5, 16], color: '#fff0be', halo: 2.1, overlap: true },
+  { id: 'nav-label-city', tier: 'city', minzoom: 6.2, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 6.2, 12, 10, 15, 16, 18], color: '#ffffff', halo: 2.2, overlap: true },
+  { id: 'nav-label-town', tier: 'town', minzoom: 8.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 8, 10.5, 13, 13.5, 17, 15], color: '#ffffff', halo: 2.0, overlap: false },
+  { id: 'nav-label-locality', tier: 'locality', minzoom: 10.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 10, 9.5, 15, 12, 18, 13], color: '#f4f7fb', halo: 1.8, overlap: false },
+  { id: 'nav-label-natural', tier: 'natural', minzoom: 10.5, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 10.5, 9.5, 15, 11.5, 18, 13], color: '#c8f5dc', halo: 1.8, overlap: false },
+  { id: 'nav-label-road', tier: 'road', minzoom: 12.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 12, 9, 16, 11, 19, 12], color: '#ffe0a1', halo: 1.7, overlap: false },
+  { id: 'nav-label-poi-landmark', tier: 'poi_landmark', minzoom: 9.2, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 9.2, 9.5, 14, 11.5, 18, 13], color: '#ffffff', halo: 1.9, overlap: false },
+  { id: 'nav-label-poi-regional', tier: 'poi_regional', minzoom: 11.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 11, 9.2, 15, 11.2, 18, 12.5], color: '#ffffff', halo: 1.8, overlap: false },
+  { id: 'nav-label-poi-local', tier: 'poi_local', minzoom: 13.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 13, 9, 17, 11.2, 20, 12.5], color: '#ffffff', halo: 1.7, overlap: false },
+  { id: 'nav-label-poi-detail', tier: 'poi_detail', minzoom: 15.0, maxzoom: 20, size: ['interpolate', ['linear'], ['zoom'], 15, 8.8, 18, 10.8, 20, 12], color: '#ffffff', halo: 1.6, overlap: false }
+];
 
-class SpatialPointIndex {
-  constructor(items, cellDegrees = 0.2) {
-    this.cellDegrees = cellDegrees;
-    this.buckets = new Map();
-    this.rebuild(items);
-  }
-
-  key(lng, lat) {
-    return `${Math.floor(lng / this.cellDegrees)}:${Math.floor(lat / this.cellDegrees)}`;
-  }
-
-  rebuild(items) {
-    this.buckets.clear();
-    for (const item of items) {
-      const key = this.key(item[2], item[3]);
-      if (!this.buckets.has(key)) this.buckets.set(key, []);
-      this.buckets.get(key).push(item);
-    }
-  }
-
-  query(bounds, zoom) {
-    const west = bounds.getWest();
-    const east = bounds.getEast();
-    const south = bounds.getSouth();
-    const north = bounds.getNorth();
-    const minX = Math.floor(west / this.cellDegrees);
-    const maxX = Math.floor(east / this.cellDegrees);
-    const minY = Math.floor(south / this.cellDegrees);
-    const maxY = Math.floor(north / this.cellDegrees);
-    const result = [];
-    for (let x = minX; x <= maxX; x++) {
-      for (let y = minY; y <= maxY; y++) {
-        const bucket = this.buckets.get(`${x}:${y}`);
-        if (!bucket) continue;
-        for (const item of bucket) {
-          if (item[5] <= zoom && item[2] >= west && item[2] <= east && item[3] >= south && item[3] <= north) {
-            result.push(item);
-          }
-        }
-      }
-    }
-    return result;
-  }
+function nativeLabelLayout(definition) {
+  return {
+    'symbol-placement': 'point',
+    'symbol-z-order': 'source',
+    'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
+    'text-field': ['coalesce', ['get', 'display_name'], ['get', 'name']],
+    'text-font': LABEL_FONT_STACK,
+    'text-size': definition.size,
+    'text-anchor': 'center',
+    'text-justify': 'center',
+    'text-offset': [0, 0],
+    'text-max-width': 14,
+    'text-line-height': 1.05,
+    'text-padding': definition.overlap ? 1 : 2,
+    'text-allow-overlap': definition.overlap,
+    'text-ignore-placement': false,
+    'text-optional': false,
+    'text-rotation-alignment': 'viewport',
+    'text-pitch-alignment': 'viewport',
+    'text-keep-upright': true
+  };
 }
 
-class CanvasLabelLayer {
-  constructor(mapInstance, items) {
-    this.map = mapInstance;
-    this.items = items;
-    this.index = new SpatialPointIndex(items);
-    this.selectedId = null;
-    this.hitRects = [];
-    this.frame = 0;
-    this.lastDrawAt = 0;
-    this.canvas = document.createElement('canvas');
-    this.canvas.className = 'nav-label-canvas';
-    this.canvas.setAttribute('aria-hidden', 'true');
-    this.context = this.canvas.getContext('2d', { alpha: true, desynchronized: true });
-    this.map.getContainer().appendChild(this.canvas);
-    this.drawBound = this.scheduleDraw.bind(this);
-    this.map.on('render', this.drawBound);
-    this.map.on('resize', this.drawBound);
-    this.map.on('styledata', this.drawBound);
-    this.scheduleDraw();
-  }
+function nativeLabelPaint(definition) {
+  return {
+    'text-color': definition.color,
+    'text-opacity': 1,
+    'text-halo-color': 'rgba(1,6,18,0.97)',
+    'text-halo-width': definition.halo,
+    'text-halo-blur': 0.25
+  };
+}
 
-  append(items) {
-    if (!items?.length) return;
-    this.items.push(...items);
-    this.index.rebuild(this.items);
-    this.scheduleDraw();
-  }
-
-  setSelected(id) {
-    this.selectedId = id || null;
-    this.scheduleDraw();
-  }
-
-  scheduleDraw() {
-    if (this.frame) return;
-    this.frame = requestAnimationFrame((time) => {
-      this.frame = 0;
-      if (time - this.lastDrawAt < 24 && this.map.isMoving()) {
-        this.scheduleDraw();
-        return;
-      }
-      this.lastDrawAt = time;
-      this.draw();
+function installNativeLabelLayers() {
+  map.addSource('nav-label-source', {
+    type: 'geojson',
+    data: `${DATA_BASE}/labels-native.geojson`,
+    promoteId: 'id',
+    cluster: false,
+    tolerance: 0,
+    buffer: 128,
+    maxzoom: 19
+  });
+  for (const definition of nativeLabelDefinitions) {
+    map.addLayer({
+      id: definition.id,
+      type: 'symbol',
+      source: 'nav-label-source',
+      minzoom: definition.minzoom,
+      maxzoom: definition.maxzoom,
+      filter: ['all', ['==', ['get', 'render'], 1], ['==', ['get', 'tier'], definition.tier]],
+      layout: nativeLabelLayout(definition),
+      paint: nativeLabelPaint(definition)
     });
   }
+  map.addSource('nav-custom-label-source', { type: 'geojson', data: emptyFeatureCollection(), promoteId: 'id', cluster: false, tolerance: 0, buffer: 128, maxzoom: 19 });
+  map.addLayer({
+    id: 'nav-label-custom',
+    type: 'symbol',
+    source: 'nav-custom-label-source',
+    minzoom: 11.5,
+    maxzoom: 20,
+    layout: nativeLabelLayout({ size: ['interpolate', ['linear'], ['zoom'], 11.5, 9.5, 16, 11.5, 19, 13], overlap: false }),
+    paint: nativeLabelPaint({ color: '#ffffff', halo: 1.9 })
+  });
+}
 
-  resizeCanvas() {
-    const container = this.map.getContainer();
-    const width = Math.max(1, container.clientWidth);
-    const height = Math.max(1, container.clientHeight);
-    const dpr = clamp(window.devicePixelRatio || 1, 1, 2.5);
-    const pixelWidth = Math.round(width * dpr);
-    const pixelHeight = Math.round(height * dpr);
-    if (this.canvas.width !== pixelWidth || this.canvas.height !== pixelHeight) {
-      this.canvas.width = pixelWidth;
-      this.canvas.height = pixelHeight;
-      this.canvas.style.width = `${width}px`;
-      this.canvas.style.height = `${height}px`;
-    }
-    this.context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    return { width, height };
-  }
+function compactItemToFeature(item) {
+  return {
+    type: 'Feature',
+    id: item[0],
+    properties: {
+      id: item[0], name: item[1], display_name: item[1], kind: item[4], tier: 'custom',
+      minzoom: item[5], priority: item[6], context: item[7] || '', category: item[8] || '', render: 1
+    },
+    geometry: { type: 'Point', coordinates: [item[2], item[3]] }
+  };
+}
 
-  styleFor(item, zoom) {
-    const base = labelStyles[item[4]] || labelStyles.poi;
-    const selected = item[0] === this.selectedId;
-    const zoomBoost = item[4] === 'region' ? 0 : zoom >= 15 ? 1.5 : zoom >= 12 ? 0.5 : 0;
-    return {
-      size: base.size + zoomBoost + (selected ? 1 : 0),
-      weight: base.weight,
-      fill: selected ? '#ffe39a' : base.fill,
-      halo: base.halo + (selected ? 1 : 0)
-    };
-  }
+function setNativeCustomLabels(items) {
+  const source = map?.getSource('nav-custom-label-source');
+  if (!source) return;
+  source.setData({ type: 'FeatureCollection', features: items.map(compactItemToFeature) });
+}
 
-  candidates(zoom) {
-    const source = this.index.query(this.map.getBounds(), zoom);
-    const governorateNames = zoom < 8.2
-      ? new Set(source.filter((item) => item[4] === 'governorate').map((item) => normalizeText(item[1])))
-      : null;
-    const filtered = governorateNames
-      ? source.filter((item) => !(item[4] === 'city' && governorateNames.has(normalizeText(item[1]))))
-      : source;
-    filtered.sort((a, b) => {
-      const selected = Number(b[0] === this.selectedId) - Number(a[0] === this.selectedId);
-      if (selected) return selected;
-      return (b[6] - a[6]) || (a[5] - b[5]) || String(a[0]).localeCompare(String(b[0]));
-    });
-    return filtered;
-  }
+function nativeFeatureToItem(feature) {
+  const properties = feature?.properties || {};
+  const coordinates = feature?.geometry?.coordinates;
+  if (!Array.isArray(coordinates) || coordinates.length < 2) return null;
+  const id = String(properties.id || feature.id || '').trim();
+  const name = String(properties.name || properties.display_name || '').trim();
+  const lng = Number(coordinates[0]);
+  const lat = Number(coordinates[1]);
+  if (!id || !name || !Number.isFinite(lng) || !Number.isFinite(lat)) return null;
+  return [
+    id, name, lng, lat, String(properties.kind || 'poi'),
+    Number(properties.minzoom) || 12, Number(properties.priority) || 50,
+    String(properties.context || ''), String(properties.category || '')
+  ];
+}
 
-  rectInsideBoundary(rect) {
-    const inset = 1;
-    const samples = [
-      [rect.x + inset, rect.y + inset],
-      [rect.x + rect.w - inset, rect.y + inset],
-      [rect.x + inset, rect.y + rect.h - inset],
-      [rect.x + rect.w - inset, rect.y + rect.h - inset],
-      [rect.x + rect.w / 2, rect.y + rect.h / 2]
-    ];
-    return samples.every(([x, y]) => {
-      const lngLat = this.map.unproject([x, y]);
-      return pointInBoundary(lngLat.lng, lngLat.lat);
-    });
-  }
-
-  draw() {
-    if (!this.map || !this.map.isStyleLoaded()) return;
-    const { width, height } = this.resizeCanvas();
-    const ctx = this.context;
-    ctx.clearRect(0, 0, width, height);
-    ctx.direction = 'rtl';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.lineJoin = 'round';
-    ctx.miterLimit = 2;
-
-    const zoom = this.map.getZoom();
-    const band = Math.floor(zoom * 2) / 2;
-    const maxLabels = width < 500
-      ? (band >= 15 ? 320 : band >= 12 ? 230 : band >= 9 ? 170 : 90)
-      : (band >= 15 ? 850 : band >= 12 ? 620 : band >= 9 ? 430 : 180);
-    const topSafe = 92;
-    const bottomSafe = 116;
-    const sideSafe = 5;
-    const cellSize = band < 8 ? 28 : band < 11 ? 22 : band < 14 ? 18 : 15;
-    const occupied = new Set();
-    const hitRects = [];
-    const drawnNameCells = new Set();
-    let drawn = 0;
-
-    for (const item of this.candidates(zoom)) {
-      if (drawn >= maxLabels) break;
-      if (!pointInBoundary(item[2], item[3])) continue;
-      const point = this.map.project([item[2], item[3]]);
-      if (!Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
-      if (point.x < sideSafe || point.x > width - sideSafe || point.y < topSafe || point.y > height - bottomSafe) continue;
-
-      const style = this.styleFor(item, zoom);
-      ctx.font = `${style.weight} ${style.size}px "Qalla Hewal", "Noto Sans Arabic", Tahoma, Arial, sans-serif`;
-      const metrics = ctx.measureText(item[1]);
-      const textWidth = Math.ceil(Math.min(250, Math.max(22, metrics.width)));
-      const textHeight = Math.ceil(style.size * 1.45);
-      const rect = {
-        x: point.x - textWidth / 2 - 3,
-        y: point.y - textHeight / 2 - 2,
-        w: textWidth + 6,
-        h: textHeight + 4
-      };
-      if (rect.x < sideSafe || rect.x + rect.w > width - sideSafe || rect.y < topSafe || rect.y + rect.h > height - bottomSafe) continue;
-      if (!this.rectInsideBoundary(rect)) continue;
-
-      const selected = item[0] === this.selectedId;
-      const normalizedName = normalizeText(item[1]);
-      const nameCell = `${normalizedName}:${Math.floor(point.x / 90)}:${Math.floor(point.y / 90)}`;
-      if (!selected && drawnNameCells.has(nameCell)) continue;
-
-      const left = Math.floor(rect.x / cellSize);
-      const right = Math.floor((rect.x + rect.w) / cellSize);
-      const top = Math.floor(rect.y / cellSize);
-      const bottom = Math.floor((rect.y + rect.h) / cellSize);
-      let collision = false;
-      for (let gx = left; gx <= right && !collision; gx++) {
-        for (let gy = top; gy <= bottom; gy++) {
-          if (occupied.has(`${gx}:${gy}`)) { collision = true; break; }
-        }
-      }
-      const major = ['region', 'governorate'].includes(item[4]);
-      if (collision && !major && !selected) continue;
-
-      ctx.strokeStyle = 'rgba(0,0,0,0.96)';
-      ctx.lineWidth = style.halo;
-      ctx.strokeText(item[1], point.x, point.y, 250);
-      ctx.fillStyle = style.fill;
-      ctx.fillText(item[1], point.x, point.y, 250);
-      if (selected) {
-        ctx.strokeStyle = '#ffe39a';
-        ctx.lineWidth = 1.4;
-        ctx.beginPath();
-        ctx.moveTo(point.x - textWidth / 2, point.y + style.size * 0.72);
-        ctx.lineTo(point.x + textWidth / 2, point.y + style.size * 0.72);
-        ctx.stroke();
-      }
-
-      for (let gx = left; gx <= right; gx++) {
-        for (let gy = top; gy <= bottom; gy++) occupied.add(`${gx}:${gy}`);
-      }
-      drawnNameCells.add(nameCell);
-      hitRects.push({ ...rect, item });
-      drawn++;
-    }
-    this.hitRects = hitRects;
-  }
-
-  hitTest(x, y) {
-    for (let index = this.hitRects.length - 1; index >= 0; index--) {
-      const rect = this.hitRects[index];
-      if (x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h) return rect.item;
-    }
-    return null;
-  }
-
-  destroy() {
-    if (this.frame) cancelAnimationFrame(this.frame);
-    this.map.off('render', this.drawBound);
-    this.map.off('resize', this.drawBound);
-    this.map.off('styledata', this.drawBound);
-    this.canvas.remove();
-  }
+function nativeLabelAtPoint(point) {
+  if (!map) return null;
+  const layers = NATIVE_LABEL_LAYER_IDS.filter((id) => map.getLayer(id));
+  if (!layers.length) return null;
+  const feature = map.queryRenderedFeatures(point, { layers })[0];
+  if (!feature) return null;
+  const id = String(feature.properties?.id || feature.id || '');
+  return itemById.get(id) || nativeFeatureToItem(feature);
 }
 
 function installMapUi() {
@@ -591,6 +468,7 @@ function sanitizeItems(items) {
 }
 
 function rebuildSearchIndex() {
+  itemById = new Map(allItems.map((item) => [String(item[0]), item]));
   searchIndex = allItems.map((item) => ({
     item,
     name: normalizeText(item[1]),
@@ -605,6 +483,11 @@ function searchItems(query) {
   if (needle.length < 2) {
     box.innerHTML = '';
     box.classList.remove('show');
+    return;
+  }
+  if (!searchIndex.length) {
+    box.innerHTML = '<div class="nav-search-item"><div class="nav-search-copy"><b>داتای گەڕان خەریکە بار دەبێت</b><small>دوای چرکەیەک دووبارە بنووسە</small></div></div>';
+    box.classList.add('show');
     return;
   }
   const matches = [];
@@ -624,7 +507,7 @@ function searchItems(query) {
   } else {
     box.innerHTML = top.map((item) => `<button class="nav-search-item" data-nav-result="${escapeHtml(item[0])}"><div class="nav-search-copy"><b>${escapeHtml(item[1])}</b><small>${escapeHtml(item[7] || item[8] || kindNames[item[4]] || '')}</small></div><span class="nav-search-kind">${escapeHtml(kindNames[item[4]] || 'شوێن')}</span></button>`).join('');
     box.querySelectorAll('[data-nav-result]').forEach((button) => button.addEventListener('click', () => {
-      const item = allItems.find((candidate) => candidate[0] === button.dataset.navResult);
+      const item = itemById.get(String(button.dataset.navResult));
       if (item) selectDestination(item);
     }));
   }
@@ -643,7 +526,6 @@ function selectDestination(item) {
     return;
   }
   selectedDestination = item;
-  labelLayer?.setSelected(item[0]);
   setSourcePoint('nav-destination', [item[2], item[3]], { id: item[0] });
   hideSearchResults();
   q('#map-search').value = item[1];
@@ -655,7 +537,6 @@ function selectDestination(item) {
 
 function clearDestination() {
   selectedDestination = null;
-  labelLayer?.setSelected(null);
   q('#nav-route-panel')?.classList.remove('show');
   q('#map-search').value = '';
   setSourcePoint('nav-destination', null);
@@ -844,21 +725,40 @@ async function toggle3D() {
   toast(terrainEnabled ? 'دیمەنی ٣D چالاک کرا' : 'دیمەنی دوو ڕەهەندی چالاک کرا');
 }
 
+async function loadDeferredCatalog() {
+  try {
+    const labelsResponse = await fetch(`${DATA_BASE}/labels.compact.json`);
+    if (!labelsResponse.ok) throw new Error(`label catalog HTTP ${labelsResponse.status}`);
+    const labels = await labelsResponse.json();
+    allItems = sanitizeItems(labels.items || []);
+    rebuildSearchIndex();
+
+    const databaseItems = sanitizeItems(await loadPublishedPlaces());
+    if (databaseItems.length) {
+      const existingIds = new Set(allItems.map((item) => String(item[0])));
+      const uniqueDatabaseItems = databaseItems.filter((item) => !existingIds.has(String(item[0])));
+      allItems.push(...uniqueDatabaseItems);
+      setNativeCustomLabels(uniqueDatabaseItems);
+      rebuildSearchIndex();
+    }
+    setStatus(`${allItems.length.toLocaleString('en-US')} ناوی شوێن و گەڕان ئامادەیە`, 3000);
+  } catch (error) {
+    console.warn('[NAV deferred catalog]', error);
+    toast('گەڕان هێشتا ئامادە نییە؛ نەخشە بەردەوام کار دەکات');
+  }
+}
+
 async function createMap() {
   installMapUi();
-  const [labelsResponse, boundaryResponse, maskResponse] = await Promise.all([
-    fetch(`${DATA_BASE}/labels.compact.json`),
+  const [boundaryResponse, maskResponse] = await Promise.all([
     fetch(`${DATA_BASE}/boundary.geojson`),
     fetch(`${DATA_BASE}/outside-mask.geojson`)
   ]);
-  if (!labelsResponse.ok || !boundaryResponse.ok || !maskResponse.ok) throw new Error('NAV data files failed to load');
-  const labels = await labelsResponse.json();
+  if (!boundaryResponse.ok || !maskResponse.ok) throw new Error('NAV boundary files failed to load');
   const boundary = await boundaryResponse.json();
   const mask = await maskResponse.json();
   boundaryGeometry = boundary.features?.[0]?.geometry || null;
-  allItems = sanitizeItems(labels.items || []);
-  rebuildSearchIndex();
-  const bbox = labels.bbox;
+  const bbox = geometryBbox(boundaryGeometry);
 
   if (document.fonts?.load) {
     try { await document.fonts.load('12px \"Qalla Hewal\"'); } catch { /* browser font fallback remains available */ }
@@ -876,6 +776,8 @@ async function createMap() {
     touchPitch: true,
     attributionControl: true,
     antialias: true,
+    fadeDuration: 0,
+    crossSourceCollisions: true,
     maxBounds: [[bbox[0] - 1.25, bbox[1] - 1], [bbox[2] + 1.25, bbox[3] + 1]]
   });
 
@@ -888,12 +790,14 @@ async function createMap() {
     map.on('error', (event) => console.warn('[NAV map resource]', event.error || event));
   });
 
+  // Labels are installed as native MapLibre symbol layers before the outside mask.
+  // The mask therefore clips any glyph pixels that cross the canonical boundary.
+  installNativeLabelLayers();
   addRuntimeLayers(boundary, mask);
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
-  labelLayer = new CanvasLabelLayer(map, allItems);
   map.on('zoom', updateGpsAccuracyPaint);
   map.on('click', (event) => {
-    const label = labelLayer?.hitTest(event.point.x, event.point.y);
+    const label = nativeLabelAtPoint(event.point);
     if (label) {
       selectDestination(label);
       return;
@@ -901,15 +805,16 @@ async function createMap() {
     if (!pointInBoundary(event.lngLat.lng, event.lngLat.lat)) toast('دەرەوەی سنووری کارپێکردنی نەخشە داخراوە');
   });
 
-  const databaseItems = sanitizeItems(await loadPublishedPlaces());
-  if (databaseItems.length) {
-    const existingIds = new Set(allItems.map((item) => item[0]));
-    const uniqueDatabaseItems = databaseItems.filter((item) => !existingIds.has(item[0]));
-    allItems.push(...uniqueDatabaseItems);
-    labelLayer.append(uniqueDatabaseItems);
-    rebuildSearchIndex();
-  }
-  setStatus(`${allItems.length.toLocaleString('en-US')} ناوی شوێن ئامادەیە`, 3000);
+  map.on('sourcedata', (event) => {
+    if (event.sourceId === 'nav-label-source' && map.isSourceLoaded('nav-label-source')) {
+      setStatus('ناوەکانی نەخشە بە شێوەی native ئامادەن', 2200);
+    }
+  });
+
+  const scheduleDeferred = window.requestIdleCallback
+    ? (callback) => window.requestIdleCallback(callback, { timeout: 1600 })
+    : (callback) => window.setTimeout(callback, 250);
+  scheduleDeferred(() => { void loadDeferredCatalog(); });
   return map;
 }
 
@@ -927,10 +832,7 @@ function init() {
 
 window.navKurdMapInit = init;
 window.navKurdMapResize = () => {
-  if (map) {
-    map.resize();
-    labelLayer?.scheduleDraw();
-  }
+  if (map) map.resize();
 };
 window.navKurdMapSearch = (value) => {
   clearTimeout(searchTimer);

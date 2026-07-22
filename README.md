@@ -1,4 +1,3 @@
-# Qalla Wanan — NAV KURD Map R4
+# Qalla Wanan — R5 Native Map Data
 
-Root-cause geospatial stability release for map labels, GPS and route rendering.
-See `README_CKB.md` for the full Sorani Kurdish deployment and audit guide.
+Native MapLibre WebGL symbol labels, exact source coordinates, zero label fade, native GPS/route layers, canonical boundary clipping, and the full NAV KURD source data bundle. See `README_CKB.md`.

@@ -1,0 +1,108 @@
+{
+  "ok": true,
+  "release": "2026-07-22-qalla-wanan-r5-native-map-data",
+  "sourceRecords": 47040,
+  "nativeGeoJSONFeatures": 47040,
+  "nativeRenderFeatures": 47032,
+  "visualMajorDuplicatesSuppressed": 8,
+  "counts": {
+    "region": 1,
+    "governorate": 8,
+    "city": 11,
+    "town": 215,
+    "village": 6433,
+    "hamlet": 14,
+    "suburb": 43,
+    "locality": 233,
+    "natural": 5210,
+    "road": 1805,
+    "poi": 33067
+  },
+  "visibleCounts": {
+    "region": 1,
+    "governorate": 8,
+    "city": 7,
+    "town": 211,
+    "village": 6433,
+    "hamlet": 14,
+    "suburb": 43,
+    "locality": 233,
+    "natural": 5210,
+    "road": 1805,
+    "poi": 33067
+  },
+  "majorDuplicateGroups": [
+    {
+      "name": "ئاکرێ",
+      "kept_id": "osm-node-599171922",
+      "hidden_visual_ids": [
+        "geonames-98822",
+        "geonames-445694"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "تەلەعفەر",
+      "kept_id": "osm-node-6007351271",
+      "hidden_visual_ids": [
+        "geonames-90393"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "دووبز",
+      "kept_id": "osm-node-2486472611",
+      "hidden_visual_ids": [
+        "geonames-97001"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "بێستانەی گەورە",
+      "kept_id": "osm-way-303702847",
+      "hidden_visual_ids": [
+        "osm-node-2479369784"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "قوشتەپە",
+      "kept_id": "osm-way-1332407212",
+      "hidden_visual_ids": [
+        "osm-node-12407555502"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "قەرەهەنجیر",
+      "kept_id": "osm-way-558473033",
+      "hidden_visual_ids": [
+        "osm-node-7416752807"
+      ],
+      "distance_rule_m": 5000
+    },
+    {
+      "name": "هەڵەبجەی تازە",
+      "kept_id": "osm-way-263782377",
+      "hidden_visual_ids": [
+        "osm-node-2694351421"
+      ],
+      "distance_rule_m": 5000
+    }
+  ],
+  "coordinateMutation": 0,
+  "labelRenderer": "MapLibre native WebGL symbol layers",
+  "overlayRenderer": false,
+  "sha256": "bc0cf1984d58f04b45b71c3eaee636c4ac327a5afdda5aff9a7b242d7b4b8d78",
+  "bbox": [
+    41.285803,
+    33.305387,
+    46.34873,
+    37.377264
+  ],
+  "notes": [
+    "Every source record remains present in the native GeoJSON source.",
+    "Only clearly duplicated city/town representations within 5 km are visually suppressed; source records remain searchable and auditable.",
+    "Governorate anchors are explicitly prefixed with پارێزگای to distinguish administrative centroids from city coordinates."
+  ]
+}

@@ -6,5 +6,5 @@ window.__APP_CONFIG__ = Object.freeze({
   "VITE_SUPABASE_ANON_KEY":"",
   "VITE_ROUTING_BASE_URL":"https://router.project-osrm.org",
   "VITE_MYSQL_API_BASE_URL":"",
-  "VITE_MAP_DATA_VERSION":"2026-07-22-qalla-wanan-r4-geo-stability"
+  "VITE_MAP_DATA_VERSION":"2026-07-22-qalla-wanan-r5-native-map-data"
 });

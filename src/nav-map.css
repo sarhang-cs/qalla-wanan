@@ -10,11 +10,11 @@
 #leafmap{background:#050a12}
 #map-chips,#map-card{display:none!important}
 .maplibregl-map{font:inherit}
+.maplibregl-canvas{outline:none}
 .maplibregl-ctrl-bottom-right{right:10px;bottom:calc(var(--taskbar-h) + var(--safe-b) + 4px)}
 .maplibregl-ctrl-attrib{font-size:8px!important;background:rgba(4,9,18,.62)!important;color:#dbe5f2!important;border-radius:8px!important;direction:ltr}
 .maplibregl-ctrl-attrib a{color:#f4f7fb!important}
 
-.nav-label-canvas{position:absolute;inset:0;z-index:5;display:block;width:100%;height:100%;pointer-events:none;contain:strict}
 #nav-map-results{position:absolute;z-index:31;top:calc(env(safe-area-inset-top) + 70px);right:58px;left:58px;max-height:min(44dvh,330px);overflow:auto;background:rgba(8,19,15,.94);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 16px 38px rgba(0,0,0,.38);backdrop-filter:blur(16px);display:none}
 #nav-map-results.show{display:block}
 .nav-search-item{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.09);text-align:right;color:#fff;background:transparent}
