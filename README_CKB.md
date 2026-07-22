@@ -1,36 +1,67 @@
-# Qalla Wanan — R5 Native Map Data
+# Qalla Wanan — NAV KURD Map R6
 
-ئەم وەشانە سیستەمی Canvas/DOM overlay ـی ناوی شوێنەکان بە تەواوی لابردووە. هەموو ناوەکان لە `labels-native.geojson` وەک source ـی نەخشە دەچنە ناو MapLibre و بە `symbol` layer ـی WebGL دەردەکەون.
+ئەم وەشانە چارەسەری بنەڕەتیی کێشەکانی نووسینی کوردی، جێگیری ناوەکان، گلیچی Zoom، بارکردن و ساتەلایتە.
 
-## گرنگترین قراردادەکان
+## تەکنەلۆجیا
 
-- هەر ناوێک بە longitude/latitude ـی سەرچاوەکەی خۆی بەستراوە.
-- Zoom، pan، GPS، route، collision و 3D coordinate ناگۆڕن.
-- `fadeDuration: 0` ـە؛ ناوەکان بە هێواشی لە شوێنێکەوە بۆ شوێنێکی تر ناگەڕێنەوە.
-- `text-variable-anchor` و offset ـی گۆڕاو بەکارنەهاتووە.
-- mask لە سەر label layer ـەکانە؛ هیچ بەشی دەق لە دەرەوەی canonical boundary نابینرێت.
-- GPS marker و route line هەردووکیان native GeoJSON layers ـن؛ DOM marker نییە.
-- هەموو 47,040 source record لە native map source ـدا ماون.
-- 8 تۆماری city/town کە دوو سەرچاوە هەمان شوێنیان نیشان دەدا تەنها لە render پاشەکشە کراون؛ تۆمارە سەرچاوەکان نەسڕاونەتەوە.
-- ناوی پارێزگا بە `پارێزگای ...` نیشان دەدرێت تا centroid ـی پارێزگا لە ناوی شاری هەمان ناو جیا بکرێتەوە.
+- JavaScript ES Modules
+- MapLibre GL JS 5.24.0 و WebGL
+- MapLibre RTL Text Plugin بۆ Bidi و Arabic shaping ـی کوردی/عەرەبی
+- GeoJSON source و native symbol/circle/line layers
+- Supabase: PostgreSQL + RLS؛ PostGIS لە migration ـی 002 بۆ شوێنە زیادکراوەکانی داهاتوو
+- GitHub Actions + GitHub Pages
 
-## داتای ناو پەکەج
+## گۆڕانکارییە بنەڕەتییەکان
 
-- `labels-native.geojson`: 47,040 point feature، نزیکەی 20 MB.
-- `labels.compact.json`: index ـی گەڕان، نزیکەی 7 MB.
-- full source assets: PMTiles و GeoJSON ـەکانی localities، POI، natural و road labels، زیاتر لە 63 MB.
-- `kri-base.pmtiles` و `kri-roads.pmtiles` بۆ offline/Hostinger و گەشەپێدانی داهاتوو پارێزراون؛ UI هەر Satellite-only ـە.
+1. ناوەکان DOM یان Canvas overlay نین؛ هەموویان native MapLibre symbol layer ـن.
+2. RTL plugin پێش دروستکردنی map بار دەبێت و loader چاوەڕێی تەواوبوونی دەکات.
+3. coordinate ـی هیچ تۆمارێک لە runtime ناگۆڕدرێت.
+4. `text-allow-overlap=false` و collision index ـی MapLibre ڕێگری لە تێکچوونی ناوەکان دەکات.
+5. `fadeDuration=0`، fixed center anchor و `renderWorldCopies=false` گلیچی ناوەکان لە Zoom/Pan کەم دەکات.
+6. داتای render بۆ دوو source ـی کەم‌قەبارە دابەش کراوە: major و POI.
+7. source ـی GeoJSON لە z14 overzoom دەکرێت؛ ئەمە worker load و إعادة-tiling لە deep zoom کەم دەکات.
+8. worker pool بەپێی CPU/RAM ـی ئامێر ڕێکدەخرێت.
+9. ساتەلایتی Esri تەنها تا native z17 داوا دەکرێت و لە deep zoom overzoom دەکرێت، بۆیە tile ـی خاکستەری “Map data not yet available” داوا ناکرێت.
+10. mask و boundary لە یەکەم frame ـەوە لە style ـدا هەن، نەک دوای باربوون.
+11. GPS marker، accuracy و route هەموویان native GeoJSON layers ـن.
+12. loader چاوەڕێی font، RTL، major labels، POI labels، search catalog و map idle دەکات.
+
+## داتا
+
+- سەرچاوەی تۆمارەکان: 47,040
+- تۆماری render: 46,827
+- هەموو 47,040 تۆمارەکە لە search catalog و full source ماون.
+- 213 نمایشەی نزیک-دووبارە تەنها لە render suppression کراون؛ سڕاونەتەوە نین.
+- coordinate mismatch: 0
+- تۆماری دەرەوەی canonical boundary: 0
+- full-source map assets: زیاتر لە 63 MB
+
+ئەم ژمارانە دڵنیایی لە integrity ـی پەکەج دەدەن، بەڵام مانای ئەوە نییە هەموو ناوەکانی OSM/GeoNames لە ڕووی واقیعی و زمانەوانی 100% بێهەڵەن؛ ئەو audit ـە بەشی داتای سەرچاوەیی جیاوازە.
 
 ## Variable ـە پێویستەکان
 
-- `VITE_MAPTILER_KEY`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_PUBLISHABLE_KEY`
+لە GitHub → Settings → Secrets and variables → Actions → Variables:
 
-هیچ Variable ـی نوێ بۆ R5 پێویست نییە.
+```text
+VITE_MAPTILER_KEY
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
+```
 
-## GitHub
+Variable ـی نوێ پێویست نییە. `service_role`، database password یان secret key هەرگیز مەخەرە frontend/GitHub Pages.
 
-تەنها ئەم repository ـە بەکاردێت:
+## Supabase
 
-`https://github.com/sarhang-cs/qalla-wanan`
+`001_initial_schema.sql` پێشتر بۆ خشتە و RLS ـە.
+
+`002_map_performance.sql` optional ـە و بۆ شوێنە dynamic ـەکانی داهاتوو PostGIS، spatial index و bbox RPC زیاد دەکات. بۆ 47,040 تۆماری static ـی ناو پەکەج پێویست نییە.
+
+## دامەزراندن لە Termux
+
+ZIP ـەکە بخەرە Downloads و `TERMUX_INSTALL_R6_AND_PUSH.sh` جێبەجێ بکە. سکریپتەکە:
+
+- backup دروست دەکات؛
+- `.git` و `.env.local` پارێزراو دەهێڵێتەوە؛
+- تەنها repo ـی `sarhang-cs/qalla-wanan` بەکار دەهێنێت؛
+- check و build دەکات؛
+- پاشان push دەکات.

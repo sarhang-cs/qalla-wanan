@@ -1,5 +1,16 @@
 const cfg = () => window.__APP_CONFIG__ || {};
 
+
+async function fetchWithTimeout(url, options = {}, timeout = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function cleanPlace(row) {
   const lng = Number(row.longitude ?? row.lng);
   const lat = Number(row.latitude ?? row.lat);
@@ -24,7 +35,7 @@ async function fromSupabase(config) {
   // New sb_publishable_* keys are public browser keys, but they are not JWTs.
   // Only legacy anon JWT keys belong in Authorization: Bearer.
   if (!String(key).startsWith('sb_publishable_')) headers.Authorization = `Bearer ${key}`;
-  const response = await fetch(endpoint, { headers, credentials: 'omit' });
+  const response = await fetchWithTimeout(endpoint, { headers, credentials: 'omit' }, 8000);
   if (!response.ok) throw new Error(`Supabase REST HTTP ${response.status}`);
   return (await response.json()).map(cleanPlace).filter(Boolean);
 }
@@ -32,9 +43,9 @@ async function fromSupabase(config) {
 async function fromMysqlApi(config) {
   const base = String(config.VITE_MYSQL_API_BASE_URL || '').replace(/\/$/, '');
   if (!base) return [];
-  const response = await fetch(`${base}/places.php?status=published`, {
+  const response = await fetchWithTimeout(`${base}/places.php?status=published`, {
     headers: { Accept: 'application/json' }, credentials: 'omit'
-  });
+  }, 8000);
   if (!response.ok) throw new Error(`MySQL API HTTP ${response.status}`);
   const payload = await response.json();
   const rows = Array.isArray(payload) ? payload : (payload.data || []);

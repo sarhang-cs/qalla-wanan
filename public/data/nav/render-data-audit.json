@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "release": "2026-07-22-qalla-wanan-r6-rtl-stable",
+  "sourceRecords": 47040,
+  "renderRecords": 46827,
+  "majorRecords": 13927,
+  "poiRecords": 32900,
+  "visualDuplicatesSuppressed": 213,
+  "allSourceRecordsPreservedInCatalog": true,
+  "majorBytes": 4344455,
+  "poiBytes": 10864197,
+  "combinedRenderBytes": 15208652,
+  "majorSha256": "50aa3dab944bb4dc11db23f4beccad4cdaa25c16bbe05b8b242d0c2a400cb098",
+  "poiSha256": "9c60efbab94004c1173bfe0792dfbbf883f6d4405b00be8e5112ff663724d1f6"
+}

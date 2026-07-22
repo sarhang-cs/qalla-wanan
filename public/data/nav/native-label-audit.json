@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r5-native-map-data",
+  "release": "2026-07-22-qalla-wanan-r6-rtl-stable",
   "sourceRecords": 47040,
   "nativeGeoJSONFeatures": 47040,
   "nativeRenderFeatures": 47032,
@@ -104,5 +104,6 @@
     "Every source record remains present in the native GeoJSON source.",
     "Only clearly duplicated city/town representations within 5 km are visually suppressed; source records remain searchable and auditable.",
     "Governorate anchors are explicitly prefixed with پارێزگای to distinguish administrative centroids from city coordinates."
-  ]
+  ],
+  "renderer": "source-of-truth retained; runtime uses R6 split native MapLibre symbol layers"
 }

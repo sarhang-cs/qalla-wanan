@@ -4,10 +4,13 @@ import crypto from 'node:crypto';
 const root = 'public/data/nav';
 const labels = JSON.parse(fs.readFileSync(`${root}/labels.compact.json`, 'utf8'));
 const native = JSON.parse(fs.readFileSync(`${root}/labels-native.geojson`, 'utf8'));
+const major = JSON.parse(fs.readFileSync(`${root}/labels-major.geojson`, 'utf8'));
+const poi = JSON.parse(fs.readFileSync(`${root}/labels-poi.geojson`, 'utf8'));
 const boundary = JSON.parse(fs.readFileSync(`${root}/boundary.geojson`, 'utf8'));
 const mask = JSON.parse(fs.readFileSync(`${root}/outside-mask.geojson`, 'utf8'));
 const provenance = JSON.parse(fs.readFileSync(`${root}/provenance-audit.json`, 'utf8'));
 const nativeAudit = JSON.parse(fs.readFileSync(`${root}/native-label-audit.json`, 'utf8'));
+const renderAudit = JSON.parse(fs.readFileSync(`${root}/render-data-audit.json`, 'utf8'));
 
 function pointInRing(point, ring) {
   const [x, y] = point;
@@ -42,10 +45,10 @@ if (!Array.isArray(labels.items) || labels.items.length < 40000) throw new Error
 if (native.type !== 'FeatureCollection' || !Array.isArray(native.features)) throw new Error('native labels are not a FeatureCollection');
 if (native.features.length !== labels.items.length) throw new Error(`native/source count mismatch: ${native.features.length}/${labels.items.length}`);
 
-const ids = new Set();
+const sourceIds = new Set();
 let outside = 0;
 let coordinateMismatch = 0;
-let renderCount = 0;
+let malformedNames = 0;
 for (let index = 0; index < labels.items.length; index++) {
   const row = labels.items[index];
   const feature = native.features[index];
@@ -54,19 +57,38 @@ for (let index = 0; index < labels.items.length; index++) {
   const [nativeLng, nativeLat] = feature.geometry.coordinates;
   if (String(feature.properties?.id) !== String(id) || String(feature.properties?.name) !== String(name)) throw new Error(`native identity mismatch at ${index}`);
   if (nativeLng !== lng || nativeLat !== lat) coordinateMismatch++;
-  if (ids.has(String(id))) throw new Error(`duplicate id: ${id}`);
-  ids.add(String(id));
+  if (sourceIds.has(String(id))) throw new Error(`duplicate id: ${id}`);
+  sourceIds.add(String(id));
   if (!insideGeometry([nativeLng, nativeLat], geometry)) outside++;
-  if (feature.properties?.render === 1) renderCount++;
+  if (!String(name || '').trim() || /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(String(name))) malformedNames++;
 }
+if (outside) throw new Error(`${outside} source labels outside canonical boundary`);
+if (coordinateMismatch) throw new Error(`${coordinateMismatch} source coordinate mismatches`);
+if (malformedNames) throw new Error(`${malformedNames} malformed source names`);
 
-if (outside !== 0) throw new Error(`${outside} native labels outside canonical boundary`);
-if (coordinateMismatch !== 0) throw new Error(`${coordinateMismatch} native coordinate mismatches`);
+const renderFeatures = [...major.features, ...poi.features];
+const renderIds = new Set();
+let renderOutside = 0;
+for (const feature of renderFeatures) {
+  const id = String(feature.properties?.id || feature.id || '');
+  if (!id || !sourceIds.has(id)) throw new Error(`render feature is not source-linked: ${id}`);
+  if (renderIds.has(id)) throw new Error(`duplicate render id: ${id}`);
+  renderIds.add(id);
+  if (!insideGeometry(feature.geometry.coordinates, geometry)) renderOutside++;
+  const keys = Object.keys(feature.properties || {}).sort().join(',');
+  if (keys !== 'category,context,id,kind,name,priority,tier') throw new Error(`unexpected render properties for ${id}: ${keys}`);
+}
+if (renderOutside) throw new Error(`${renderOutside} render labels outside canonical boundary`);
+if (major.features.length !== renderAudit.majorRecords || poi.features.length !== renderAudit.poiRecords) throw new Error('split render count mismatch');
+if (renderFeatures.length !== renderAudit.renderRecords) throw new Error('combined render count mismatch');
+if (labels.items.length !== renderAudit.sourceRecords) throw new Error('render audit source count mismatch');
+if (renderFeatures.length + renderAudit.visualDuplicatesSuppressed !== labels.items.length) throw new Error('render suppression arithmetic mismatch');
+
+const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+if (sha(`${root}/labels-major.geojson`) !== renderAudit.majorSha256) throw new Error('major labels SHA-256 mismatch');
+if (sha(`${root}/labels-poi.geojson`) !== renderAudit.poiSha256) throw new Error('POI labels SHA-256 mismatch');
 if (provenance.ok !== true || provenance.exactIdMatches !== labels.items.length) throw new Error('source provenance audit mismatch');
-if (nativeAudit.ok !== true || nativeAudit.nativeGeoJSONFeatures !== labels.items.length || nativeAudit.nativeRenderFeatures !== renderCount) throw new Error('native label audit mismatch');
-
-const nativeHash = crypto.createHash('sha256').update(fs.readFileSync(`${root}/labels-native.geojson`)).digest('hex');
-if (nativeHash !== nativeAudit.sha256) throw new Error('native label SHA-256 mismatch');
+if (nativeAudit.ok !== true || nativeAudit.nativeGeoJSONFeatures !== labels.items.length) throw new Error('native source audit mismatch');
 
 const requiredLargeAssets = {
   'full-source/kri-base.pmtiles': 10_000_000,
@@ -87,15 +109,18 @@ for (const [relative, minimum] of Object.entries(requiredLargeAssets)) {
 
 console.log(JSON.stringify({
   ok: true,
-  release: nativeAudit.release,
+  release: renderAudit.release,
   sourceRecords: labels.items.length,
-  nativeFeatures: native.features.length,
-  nativeRenderFeatures: renderCount,
-  visualMajorDuplicatesSuppressed: labels.items.length - renderCount,
+  renderRecords: renderFeatures.length,
+  visualDuplicatesSuppressed: renderAudit.visualDuplicatesSuppressed,
+  allSourceRecordsPreservedInCatalog: renderAudit.allSourceRecordsPreservedInCatalog,
   outsideCanonicalBoundary: outside,
+  renderOutsideCanonicalBoundary: renderOutside,
   coordinateMismatch,
-  duplicateIds: labels.items.length - ids.size,
-  nativeGeoJSONBytes: fs.statSync(`${root}/labels-native.geojson`).size,
+  duplicateSourceIds: labels.items.length - sourceIds.size,
+  duplicateRenderIds: renderFeatures.length - renderIds.size,
+  malformedNames,
+  splitRenderBytes: fs.statSync(`${root}/labels-major.geojson`).size + fs.statSync(`${root}/labels-poi.geojson`).size,
   fullSourceBytes,
   sourceLinked: provenance.exactIdMatches
 }, null, 2));

@@ -1,8 +1,12 @@
 {
+  "release": "R6-RTL-STABLE-NATIVE-MAP",
+  "mapDataVersion": "2026-07-22-qalla-wanan-r6-rtl-stable",
   "sourceRecords": 47040,
-  "nativeFeatures": 47040,
-  "nativeRenderFeatures": 47032,
-  "visuallySuppressedDuplicateRepresentations": 8,
+  "renderRecords": 46827,
+  "majorRenderRecords": 13927,
+  "poiRenderRecords": 32900,
+  "visuallySuppressedDuplicateRepresentations": 213,
+  "allSourceRecordsPreservedInSearchCatalog": true,
   "outsideCanonicalBoundary": 0,
   "coordinateMismatch": 0,
   "counts": {
@@ -24,11 +28,39 @@
     46.34873,
     37.377264
   ],
-  "labelsNativeBytes": 20908712,
-  "searchIndexBytes": 6985353,
+  "runtimeAssets": [
+    {
+      "path": "public/data/nav/labels-major.geojson",
+      "bytes": 4344455,
+      "sha256": "50aa3dab944bb4dc11db23f4beccad4cdaa25c16bbe05b8b242d0c2a400cb098"
+    },
+    {
+      "path": "public/data/nav/labels-poi.geojson",
+      "bytes": 10864197,
+      "sha256": "9c60efbab94004c1173bfe0792dfbbf883f6d4405b00be8e5112ff663724d1f6"
+    },
+    {
+      "path": "public/data/nav/labels.compact.json",
+      "bytes": 6985357,
+      "sha256": "22ae7a954b5073e5295e90b73cc93913feae74a28853b5c35b528fb23e7088b7"
+    },
+    {
+      "path": "public/data/nav/boundary.geojson",
+      "bytes": 73449,
+      "sha256": "0cbfa40a7151f61eaceb4211a05ef37e1503df359f3ab757c1ba48ff845df520"
+    },
+    {
+      "path": "public/data/nav/outside-mask.geojson",
+      "bytes": 71693,
+      "sha256": "d3248aaf50b279ed38881305d4f4b8ec9eb819bd4cb703ed7b1cf598eb622a9b"
+    },
+    {
+      "path": "public/fonts/UniQAIDAR_Hewal_031.ttf",
+      "bytes": 52256,
+      "sha256": "213fb41f5b169c6593efc000273f32fc598aa4260152cf9e6b5d2d58c956c20c"
+    }
+  ],
   "fullSourceBytes": 63887466,
-  "sourceAndRuntimeDataBytes": 91926673,
-  "fontBytes": 52256,
   "fullSourceAssets": [
     {
       "path": "public/data/nav/full-source/kri-base.pmtiles",
