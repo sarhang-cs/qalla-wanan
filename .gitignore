@@ -6,3 +6,7 @@ dist
 .DS_Store
 public/fonts/.DS_Store
 hostinger-api/config.php
+node_modules/
+dist/
+.env.development.local
+.env.production.local
