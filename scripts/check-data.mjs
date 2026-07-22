@@ -125,7 +125,7 @@ for (const [relative, minimum] of Object.entries(requiredLargeAssets)) {
 
 console.log(JSON.stringify({
   ok: true,
-  release: '2026-07-22-qalla-wanan-r7-progressive-stable',
+  release: '2026-07-22-qalla-wanan-r8-native-label-recovery',
   sourceRecords: labels.items.length,
   renderRecords: renderFeatures.length,
   visualDuplicatesSuppressed: renderAudit.visualDuplicatesSuppressed,

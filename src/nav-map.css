@@ -1,11 +1,19 @@
 @font-face{
+  font-family:"UniQAIDAR Hewal 031";
+  src:url("../fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+
+@font-face{
   font-family:"Qalla Hewal";
   src:url("../fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
   font-style:normal;
   font-weight:400;
-  font-display:block;
+  font-display:swap;
 }
-:root{--app-font:"Qalla Hewal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+:root{--app-font:"UniQAIDAR Hewal 031","Qalla Hewal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
 #view-map,#leafmap,#view-map *{font-family:var(--app-font)!important}
 #leafmap{background:#050a12}
 #map-chips,#map-card{display:none!important}

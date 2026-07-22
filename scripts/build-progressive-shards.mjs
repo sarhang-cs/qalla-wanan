@@ -39,7 +39,7 @@ fs.rmSync(shardDir, { recursive: true, force: true });
 fs.mkdirSync(shardDir, { recursive: true });
 fs.writeFileSync(path.join(dataDir, 'labels-core.geojson'), JSON.stringify({ type: 'FeatureCollection', features: core }));
 
-const index = { version: '2026-07-22-qalla-wanan-r7-progressive-stable', gridOrigin: GRID_ORIGIN, gridSize: GRID_SIZE, count: detailCount, coreCount: core.length, shards: {} };
+const index = { version: '2026-07-22-qalla-wanan-r8-native-label-recovery', gridOrigin: GRID_ORIGIN, gridSize: GRID_SIZE, count: detailCount, coreCount: core.length, shards: {} };
 for (const [key, features] of [...shards.entries()].sort(([a], [b]) => a.localeCompare(b, 'en'))) {
   const file = `${key}.geojson`;
   fs.writeFileSync(path.join(shardDir, file), JSON.stringify({ type: 'FeatureCollection', features }));
