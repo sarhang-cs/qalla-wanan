@@ -1,6 +1,6 @@
 import { loadPublishedPlaces } from './backend.js';
 
-const DATA_BASE = '/data/nav';
+const DATA_BASE = './data/nav';
 const CONFIG = window.__APP_CONFIG__ || {};
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');

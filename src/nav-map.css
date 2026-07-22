@@ -1,6 +1,6 @@
 @font-face{
   font-family:"Qalla Hewal";
-  src:url("/fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
+  src:url("../fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
   font-style:normal;
   font-weight:100 900;
   font-display:swap;
