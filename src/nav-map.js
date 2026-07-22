@@ -2,7 +2,7 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-23-qalla-wanan-r12-compact-large-rtl').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
@@ -15,16 +15,16 @@ const SAFE_LABEL_FONT_STACK = ['Noto Sans Arabic', 'Noto Naskh Arabic', 'Arial',
 const CAPSULE_IMAGE_IDS = new Set(['nav-capsule-major', 'nav-capsule-place', 'nav-capsule-poi']);
 const CAPSULE_IMAGE_STYLES = Object.freeze({
   'nav-capsule-major': {
-    top: 'rgba(15,24,48,0.95)', bottom: 'rgba(5,10,25,0.91)',
-    edge: 'rgba(180,199,239,0.24)', highlight: 'rgba(255,255,255,0.070)'
+    top: 'rgba(11,20,40,0.92)', bottom: 'rgba(3,8,22,0.88)',
+    edge: 'rgba(154,184,235,0.18)', highlight: 'rgba(255,255,255,0.045)'
   },
   'nav-capsule-place': {
-    top: 'rgba(12,20,42,0.92)', bottom: 'rgba(4,9,23,0.87)',
-    edge: 'rgba(167,188,231,0.20)', highlight: 'rgba(255,255,255,0.055)'
+    top: 'rgba(9,17,36,0.90)', bottom: 'rgba(3,8,21,0.86)',
+    edge: 'rgba(145,174,224,0.16)', highlight: 'rgba(255,255,255,0.038)'
   },
   'nav-capsule-poi': {
-    top: 'rgba(9,16,34,0.89)', bottom: 'rgba(3,8,21,0.84)',
-    edge: 'rgba(153,177,224,0.17)', highlight: 'rgba(255,255,255,0.045)'
+    top: 'rgba(7,14,30,0.88)', bottom: 'rgba(2,7,18,0.84)',
+    edge: 'rgba(136,164,213,0.14)', highlight: 'rgba(255,255,255,0.032)'
   }
 });
 const NATIVE_LABEL_LAYER_IDS = [
@@ -184,9 +184,9 @@ function baseStyle(boundary, mask) {
       minzoom: 11.8,
       maxzoom: 21,
       layout: nativeLabelLayout({
-        size: ['interpolate', ['linear'], ['zoom'], 11.8, 14, 17, 17, 20.5, 19],
-        capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6],
-        padding: 2, maxWidth: 20, overlap: false, opacity: 0.92
+        size: ['interpolate', ['linear'], ['zoom'], 11.8, 18, 17, 21, 20.5, 23],
+        capsule: 'nav-capsule-poi', boxPadding: [1.5, 4.2, 1.5, 4.2],
+        padding: 3, maxWidth: 11, overlap: false, opacity: 0.91
       }),
       paint: nativeLabelPaint({ opacity: 0.92 })
     },
@@ -260,7 +260,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R11 Satellite GPS Capsules 69000',
+    name: 'Qalla Wanan NAV KURD R12 Compact Large RTL 69000',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -355,17 +355,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.5, size: ['interpolate', ['linear'], ['zoom'], 5.0, 21, 8.2, 27], capsule: 'nav-capsule-major', boxPadding: [3, 8, 3, 8], padding: 3, maxWidth: 24, overlap: true, opacity: 0.97 },
-  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.5, 16.5, 10.2, 20.5], capsule: 'nav-capsule-major', boxPadding: [3, 7, 3, 7], padding: 2.5, maxWidth: 22, overlap: false, opacity: 0.96 },
-  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.5, size: ['interpolate', ['linear'], ['zoom'], 5.9, 16, 10, 18, 17, 20], capsule: 'nav-capsule-major', boxPadding: [3, 7, 3, 7], padding: 2.5, maxWidth: 22, overlap: false, opacity: 0.96 },
-  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.2, size: ['interpolate', ['linear'], ['zoom'], 7.2, 14.5, 13, 16.5, 19, 18], capsule: 'nav-capsule-place', boxPadding: [2.5, 6.5, 2.5, 6.5], padding: 2.2, maxWidth: 21, overlap: false, opacity: 0.94 },
-  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 13, 15, 14.5, 20, 16], capsule: 'nav-capsule-place', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.93 },
-  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 12.8, 15, 14.3, 20, 15.8], capsule: 'nav-capsule-place', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.92 },
-  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 12, 17, 13.2, 20, 14.2], capsule: 'nav-capsule-place', boxPadding: [2, 5.5, 2, 5.5], padding: 1.8, maxWidth: 24, overlap: false, opacity: 0.91 },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.8, 13, 15, 14.5, 20, 16], capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.92 },
-  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 11.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.3, 12.5, 16, 14, 20, 15.5], capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.91 },
-  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 13.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.2, 12, 18, 13.5, 20.5, 14.7], capsule: 'nav-capsule-poi', boxPadding: [2, 5.5, 2, 5.5], padding: 1.8, maxWidth: 19, overlap: false, opacity: 0.90 },
-  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 15.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.0, 11.5, 19, 12.8, 20.5, 13.8], capsule: 'nav-capsule-poi', boxPadding: [2, 5, 2, 5], padding: 1.6, maxWidth: 18, overlap: false, opacity: 0.88 }
+  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.7, size: ['interpolate', ['linear'], ['zoom'], 5.0, 27, 8.4, 35], capsule: 'nav-capsule-major', boxPadding: [2, 5, 2, 5], padding: 4, maxWidth: 14, overlap: true, opacity: 0.96 },
+  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 11.0, size: ['interpolate', ['linear'], ['zoom'], 5.5, 22, 10.5, 29], capsule: 'nav-capsule-major', boxPadding: [2, 5, 2, 5], padding: 3.5, maxWidth: 13, overlap: false, opacity: 0.95 },
+  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.8, size: ['interpolate', ['linear'], ['zoom'], 5.9, 21, 11, 24.5, 17.5, 28], capsule: 'nav-capsule-major', boxPadding: [2, 5, 2, 5], padding: 3.5, maxWidth: 13, overlap: false, opacity: 0.95 },
+  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.4, size: ['interpolate', ['linear'], ['zoom'], 7.2, 19, 13, 22, 19.5, 25], capsule: 'nav-capsule-place', boxPadding: [1.6, 4.5, 1.6, 4.5], padding: 3.2, maxWidth: 12, overlap: false, opacity: 0.93 },
+  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.8, 17.5, 15, 20, 20.5, 22.5], capsule: 'nav-capsule-place', boxPadding: [1.5, 4.2, 1.5, 4.2], padding: 3, maxWidth: 11, overlap: false, opacity: 0.92 },
+  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.4, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.4, 17, 15, 19.5, 20.5, 22], capsule: 'nav-capsule-place', boxPadding: [1.5, 4.2, 1.5, 4.2], padding: 3, maxWidth: 11, overlap: false, opacity: 0.91 },
+  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 11.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.0, 16, 17, 18, 20.5, 20], capsule: 'nav-capsule-place', boxPadding: [1.3, 4, 1.3, 4], padding: 2.8, maxWidth: 12, overlap: false, opacity: 0.90 },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 10.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.0, 18.5, 15, 21, 20.5, 23.5], capsule: 'nav-capsule-poi', boxPadding: [1.5, 4.3, 1.5, 4.3], padding: 3, maxWidth: 11, overlap: false, opacity: 0.91 },
+  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 11.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.6, 17.5, 16, 20, 20.5, 22], capsule: 'nav-capsule-poi', boxPadding: [1.4, 4.1, 1.4, 4.1], padding: 2.9, maxWidth: 11, overlap: false, opacity: 0.90 },
+  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 13.5, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.5, 16.5, 18, 18.5, 20.5, 20.5], capsule: 'nav-capsule-poi', boxPadding: [1.3, 3.9, 1.3, 3.9], padding: 2.7, maxWidth: 10, overlap: false, opacity: 0.89 },
+  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 15.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.3, 15.5, 19, 17.5, 20.5, 19], capsule: 'nav-capsule-poi', boxPadding: [1.2, 3.7, 1.2, 3.7], padding: 2.5, maxWidth: 10, overlap: false, opacity: 0.87 }
 ];
 
 function nativeLabelLayout(definition) {
@@ -375,11 +375,11 @@ function nativeLabelLayout(definition) {
     'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
     'symbol-avoid-edges': true,
     'icon-image': definition.capsule || 'nav-capsule-poi',
-    'icon-size': 1,
+    'icon-size': 0.96,
     'icon-anchor': 'center',
     'icon-text-fit': 'both',
-    'icon-text-fit-padding': definition.boxPadding || [4, 8, 4, 8],
-    'icon-padding': 1,
+    'icon-text-fit-padding': definition.boxPadding || [1.5, 4, 1.5, 4],
+    'icon-padding': 2,
     'icon-allow-overlap': Boolean(definition.overlap),
     'icon-ignore-placement': false,
     'icon-optional': false,
@@ -392,10 +392,10 @@ function nativeLabelLayout(definition) {
     'text-justify': 'center',
     'text-offset': [0, 0],
     'text-max-width': definition.maxWidth,
-    'text-line-height': 1.05,
+    'text-line-height': 1.08,
     'text-writing-mode': ['horizontal'],
     'text-letter-spacing': 0,
-    'text-padding': definition.padding,
+    'text-padding': definition.padding ?? 3,
     'text-allow-overlap': Boolean(definition.overlap),
     'text-ignore-placement': false,
     'text-optional': false,
@@ -428,8 +428,8 @@ function roundedRectPath(context, x, y, width, height, radius) {
 }
 
 function createCapsuleLabelImage(style) {
-  const width = 80;
-  const height = 36;
+  const width = 64;
+  const height = 28;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -442,20 +442,20 @@ function createCapsuleLabelImage(style) {
   gradient.addColorStop(1, style.bottom);
 
   context.save();
-  context.shadowColor = 'rgba(0,0,0,0.28)';
-  context.shadowBlur = 5;
-  context.shadowOffsetY = 2;
-  roundedRectPath(context, 3, 4, width - 6, height - 8, 11);
+  context.shadowColor = 'rgba(0,0,0,0.22)';
+  context.shadowBlur = 3;
+  context.shadowOffsetY = 1;
+  roundedRectPath(context, 2, 3, width - 4, height - 6, 9);
   context.fillStyle = gradient;
   context.fill();
   context.restore();
 
-  roundedRectPath(context, 3, 3, width - 6, height - 8, 11);
+  roundedRectPath(context, 2, 2, width - 4, height - 5, 9);
   context.lineWidth = 1;
   context.strokeStyle = style.edge;
   context.stroke();
 
-  roundedRectPath(context, 6, 5, width - 12, 8, 6);
+  roundedRectPath(context, 5, 4, width - 10, 5, 4);
   context.fillStyle = style.highlight;
   context.fill();
   return context.getImageData(0, 0, width, height);
@@ -466,9 +466,9 @@ function ensureCapsuleLabelImage(id) {
   const image = createCapsuleLabelImage(CAPSULE_IMAGE_STYLES[id]);
   map.addImage(id, image, {
     pixelRatio: 2,
-    stretchX: [[30, 50]],
-    stretchY: [[14, 22]],
-    content: [16, 7, 64, 29]
+    stretchX: [[23, 41]],
+    stretchY: [[10, 18]],
+    content: [10, 4, 54, 24]
   });
 }
 

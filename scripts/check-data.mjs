@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const root = 'public/data/nav';
-const release = '2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps';
+const release = '2026-07-23-qalla-wanan-r12-compact-large-rtl';
 const labels = JSON.parse(fs.readFileSync(`${root}/labels.compact.json`, 'utf8'));
 const native = JSON.parse(fs.readFileSync(`${root}/labels-native.geojson`, 'utf8'));
 const major = JSON.parse(fs.readFileSync(`${root}/labels-major.geojson`, 'utf8'));
@@ -56,7 +56,7 @@ function insideGeometry(point, geometry) {
 const geometry = boundary.features?.[0]?.geometry;
 if (!geometry) throw new Error('canonical boundary geometry missing');
 if (!mask.features?.length) throw new Error('outside mask missing');
-if (!Array.isArray(labels.items) || labels.items.length !== 69_000) throw new Error(`R11 requires exactly 69,000 catalog records, found ${labels.items?.length}`);
+if (!Array.isArray(labels.items) || labels.items.length !== 69_000) throw new Error(`R12 requires exactly 69,000 catalog records, found ${labels.items?.length}`);
 if (labels.count !== 69_000) throw new Error(`catalog count metadata mismatch: ${labels.count}`);
 if (native.type !== 'FeatureCollection' || !Array.isArray(native.features)) throw new Error('native labels are not a FeatureCollection');
 if (native.features.length !== 69_000 || native.features.length !== labels.items.length) throw new Error(`native/source count mismatch: ${native.features.length}/${labels.items.length}`);
@@ -85,6 +85,7 @@ if (malformedNames) throw new Error(`${malformedNames} malformed source names`);
 const renderFeatures = [...major.features, ...poi.features, ...detail.features];
 const renderIds = new Set();
 let renderOutside = 0;
+let malformedDisplayNames = 0;
 for (const feature of renderFeatures) {
   const id = String(feature.properties?.id || feature.id || '');
   if (!id || !sourceIds.has(id)) throw new Error(`render feature is not source-linked: ${id}`);
@@ -92,13 +93,16 @@ for (const feature of renderFeatures) {
   renderIds.add(id);
   if (!insideGeometry(feature.geometry.coordinates, geometry)) renderOutside++;
   const keys = Object.keys(feature.properties || {}).sort().join(',');
-  if (keys !== 'category,context,id,kind,name,priority,tier') throw new Error(`unexpected render properties for ${id}: ${keys}`);
+  if (keys !== 'category,context,display_name,id,kind,name,priority,tier') throw new Error(`unexpected render properties for ${id}: ${keys}`);
+  const displayName = String(feature.properties?.display_name || '');
+  if (!displayName.trim() || /[\u200E\u200F\u202A-\u202E\u2066-\u2069]/.test(displayName)) malformedDisplayNames++;
 }
 if (renderOutside) throw new Error(`${renderOutside} render labels outside canonical boundary`);
+if (malformedDisplayNames) throw new Error(`${malformedDisplayNames} malformed RTL display names`);
 if (renderFeatures.length !== 69_000 || renderIds.size !== 69_000) throw new Error(`not all 69,000 records are in native map sources: ${renderFeatures.length}/${renderIds.size}`);
 if (major.features.length !== renderAudit.majorRecords || poi.features.length !== renderAudit.poiRecords || detail.features.length !== renderAudit.detailRecords) throw new Error('split render count mismatch');
 if (renderFeatures.length !== renderAudit.renderRecords || labels.items.length !== renderAudit.sourceRecords) throw new Error('render audit count mismatch');
-if (renderAudit.visualDuplicatesSuppressed !== 0) throw new Error('R11 must not suppress source records');
+if (renderAudit.visualDuplicatesSuppressed !== 0) throw new Error('R12 must not suppress source records');
 
 const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 if (sha(`${root}/labels-major.geojson`) !== renderAudit.majorSha256) throw new Error('major labels SHA-256 mismatch');
@@ -141,6 +145,7 @@ console.log(JSON.stringify({
   duplicateSourceIds: labels.items.length - sourceIds.size,
   duplicateRenderIds: renderFeatures.length - renderIds.size,
   malformedNames,
+  malformedDisplayNames,
   splitRenderBytes: fs.statSync(`${root}/labels-major.geojson`).size + fs.statSync(`${root}/labels-poi.geojson`).size + fs.statSync(`${root}/labels-detail.geojson`).size,
   fullSourceBytes,
   sourceLinked: provenance.exactIdMatches,

@@ -84,6 +84,8 @@
 }
 
 
-/* R11 NAV KURD compact capsule labels: the actual capsules are native MapLibre images. */
+/* R12 compact capsules with larger native Kurdish labels: the actual capsules are native MapLibre images. */
 #map-side{gap:10px}
 #btn-locate{background:rgba(247,250,252,.96);color:#0b1824}
+
+/* R12 native label typography contract: app font is preloaded; label boxes are WebGL nine-slice images, not DOM overlays. */

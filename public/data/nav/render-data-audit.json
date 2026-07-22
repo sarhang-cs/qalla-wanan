@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r10-glass-69000",
+  "release": "2026-07-23-qalla-wanan-r12-compact-large-rtl",
   "sourceRecords": 69000,
   "renderRecords": 69000,
   "majorRecords": 28926,
@@ -8,11 +8,11 @@
   "detailRecords": 29291,
   "visualDuplicatesSuppressed": 0,
   "allSourceRecordsPreservedInCatalog": true,
-  "majorBytes": 9408361,
-  "poiBytes": 3631918,
-  "detailBytes": 9615663,
-  "combinedRenderBytes": 22655942,
-  "majorSha256": "133c9d555ad2fe71fc7addd4c23e7bc49835aec9475969cecc62dcb2ef757897",
-  "poiSha256": "34e3643646ab7ddb5a1af4384820173de52d4aa86e330acc814ee971c8d06f21",
-  "detailSha256": "c099e3bd97aad609c99056f2b4a19d3d23445830e445c5d490766b34ac625d77"
+  "majorBytes": 10504824,
+  "poiBytes": 4071492,
+  "detailBytes": 10890419,
+  "combinedRenderBytes": 25466735,
+  "majorSha256": "f39a6cbe5686b35389643ba5634c4dfedc5de0f314d4f943418dcff9b643c258",
+  "poiSha256": "d8981ef41794cc74a9018c3b311c7e46ab504968de4e7b29a12057dc840b0929",
+  "detailSha256": "2cb8a95a0ce9b887211ead82fa7ceab15360a35999f8bfeaa6abb346771536c1"
 }

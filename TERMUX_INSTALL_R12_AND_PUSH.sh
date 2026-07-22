@@ -5,18 +5,18 @@ REPO_URL="https://github.com/sarhang-cs/qalla-wanan.git"
 TARGET="$HOME/QALLA-WANAN-NAV-KURD-MAP-R1"
 SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$HOME/QALLA-WANAN-backup-before-R11-$STAMP"
-GIT_RESTORE="$HOME/.qalla-r11-git-restore"
-ENV_KEEP="$HOME/.qalla-r11-env-local-$STAMP"
-FONT_KEEP="$HOME/.qalla-r11-font-$STAMP.ttf"
+BACKUP="$HOME/QALLA-WANAN-backup-before-R12-$STAMP"
+GIT_RESTORE="$HOME/.qalla-r12-git-restore"
+ENV_KEEP="$HOME/.qalla-r12-env-local-$STAMP"
+FONT_KEEP="$HOME/.qalla-r12-font-$STAMP.ttf"
 
 printf '\n=================================================\n'
-printf ' QALLA WANAN R11 — NAV CAPSULE + SATELLITE + GPS\n'
+printf ' QALLA WANAN R12 — COMPACT LARGE RTL + SATELLITE + GPS\n'
 printf '=================================================\n'
 
 pkg install -y git nodejs >/dev/null
 for required in package.json src/nav-map.js scripts/check-data.mjs public/data/nav/labels-native.geojson; do
-  [ -s "$SOURCE/$required" ] || { echo "❌ پەکەجی R11 ناتەواوە: $required"; exit 1; }
+  [ -s "$SOURCE/$required" ] || { echo "❌ پەکەجی R12 ناتەواوە: $required"; exit 1; }
 done
 
 mkdir -p "$TARGET"
@@ -81,20 +81,22 @@ test -s dist/data/nav/labels-major.geojson
 test -s dist/data/nav/labels-poi.geojson
 test -s dist/data/nav/labels-detail.geojson
 grep -q "nav-capsule-major" src/nav-map.js
+grep -q "slim.display_name = normalizeDisplayName" scripts/build-render-data.mjs
+grep -q "20.5" src/nav-map.js
 grep -q "text-halo-width': 0" src/nav-map.js
 ! grep -q "toggle3D\|setTerrain\|navKurdToggle3D\|btn-layers" src/nav-map.js index.html
 
 printf '📤 Push بۆ تەنها sarhang-cs/qalla-wanan...\n'
 git add -A
 if ! git diff --cached --quiet; then
-  git commit -m "R11: NAV KURD capsule labels, satellite-only map and stable GPS"
+  git commit -m "R12: compact capsules, larger RTL labels, satellite-only map and stable GPS"
 else
   echo "ℹ️ هیچ گۆڕانکارییەکی نوێ بۆ Commit نییە."
 fi
 git push -u origin main
 
 printf '\n=================================================\n'
-printf '✅ R11 Push کرا\n'
+printf '✅ R12 Push کرا\n'
 printf '✅ 69,000 تۆمار پارێزرا و پشکنرا\n'
 printf '✅ Satellite + GPS/route تەنها map runtime ـن\n'
 printf '✅ Repo: https://github.com/sarhang-cs/qalla-wanan\n'

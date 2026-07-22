@@ -2,9 +2,14 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const base = 'public/data/nav';
-const release = '2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps';
+const release = '2026-07-23-qalla-wanan-r12-compact-large-rtl';
 const source = JSON.parse(fs.readFileSync(`${base}/labels-native.geojson`, 'utf8'));
 const keepProperties = ['id', 'name', 'kind', 'tier', 'priority', 'context', 'category'];
+const normalizeDisplayName = (value) => String(value || '')
+  .normalize('NFC')
+  .replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, '')
+  .replace(/\s+/g, ' ')
+  .trim();
 const major = [];
 const poi = [];
 const detail = [];
@@ -15,6 +20,7 @@ for (const feature of source.features || []) {
   if (!id || properties.render === 0) continue;
   const slim = {};
   for (const key of keepProperties) slim[key] = properties[key] ?? '';
+  slim.display_name = normalizeDisplayName(properties.display_name || properties.name);
   const next = { type: 'Feature', id, properties: slim, geometry: feature.geometry };
   if (String(properties.tier || '') === 'poi_detail') detail.push(next);
   else if (String(properties.tier || '').startsWith('poi_')) poi.push(next);
@@ -35,7 +41,7 @@ const poiMeta = write('labels-poi.geojson', poi);
 const detailMeta = write('labels-detail.geojson', detail);
 const renderRecords = major.length + poi.length + detail.length;
 if (renderRecords !== 69_000 || renderRecords !== source.features.length) {
-  throw new Error(`R11 render count mismatch: source=${source.features.length} render=${renderRecords}`);
+  throw new Error(`R12 render count mismatch: source=${source.features.length} render=${renderRecords}`);
 }
 
 const audit = {

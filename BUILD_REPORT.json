@@ -1,21 +1,20 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps",
-  "package_version": "1.8.0",
-  "generated_at_utc": "2026-07-22T21:03:57.572815+00:00",
+  "release": "2026-07-23-qalla-wanan-r12-compact-large-rtl",
+  "package_version": "1.9.0",
+  "generated_at_utc": "2026-07-23T00:00:00Z",
   "checks": {
     "data_integrity": "passed",
     "exact_source_records": 69000,
     "exact_native_render_records": 69000,
-    "baseline_records_preserved": 47040,
-    "source_backed_records_added": 21960,
     "source_linked_records": 69000,
     "fake_or_placeholder_records_added": 0,
     "coordinate_mismatch": 0,
     "outside_canonical_boundary": 0,
     "duplicate_source_ids": 0,
     "duplicate_render_ids": 0,
-    "malformed_names": 0,
+    "malformed_source_names": 0,
+    "malformed_rtl_display_names": 0,
     "runtime_contract": "passed",
     "javascript_syntax": "passed",
     "production_build": "passed",
@@ -23,52 +22,42 @@
   },
   "renderer": {
     "labels": "MapLibre native WebGL symbol layers",
-    "background": "compact dark translucent NAV KURD capsule fitted with icon-text-fit",
+    "background": "64x28 compact dark nine-slice capsules fitted with icon-text-fit",
+    "text_size_range_px": "15.5-35 by category and zoom",
     "text_color": "#f8fbff",
     "black_text_halo": false,
+    "rtl_normalization": "NFC + removal of bidi embedding/isolate controls in render copies",
     "fixed_point_anchor": true,
     "variable_anchor": false,
     "dom_marker_labels": false,
     "canvas_label_overlay": false,
     "viewport_source_mutation": false,
     "coordinate_mutation": 0,
-    "label_sources": [
-      "nav-label-major",
-      "nav-label-poi",
-      "nav-label-detail"
-    ],
-    "basemap": "satellite only (MapTiler primary when configured, Esri fallback)",
+    "basemap": "satellite only (MapTiler when configured, Esri fallback)",
     "terrain_3d": false,
     "gps": "native MapLibre GeoJSON circle layers",
     "route": "native MapLibre GeoJSON line layers"
   },
-  "visual_spec": {
-    "reference": "user-provided NAV KURD dark label capsule screenshot",
-    "capsule": "dark navy translucent rounded capsule with subtle cool edge and minimal padding",
-    "text": "white, centered, larger Kurdish text, no black outline",
-    "density": "zoom-tiered categories; all records remain available without displaying every record at every zoom"
-  },
-  "data_sources": {
-    "preserved_baseline": "Verified 47,040-record Qalla Wanan/NAV KURD baseline",
-    "additions": [
-      "OpenStreetMap/Geofabrik Iraq 2026-07-13",
-      "GeoNames IQ + alternateNamesV2 2026-07-13"
-    ],
-    "invented_translations": false,
-    "manual_fake_coordinates": false
+  "data": {
+    "source_records": 69000,
+    "render_records": 69000,
+    "major_records": 28926,
+    "poi_records": 10783,
+    "detail_records": 29291,
+    "full_source_bytes": 108501210
   },
   "files": {
     "labels_major": {
-      "bytes": 9408361,
-      "sha256": "133c9d555ad2fe71fc7addd4c23e7bc49835aec9475969cecc62dcb2ef757897"
+      "bytes": 10504824,
+      "sha256": "f39a6cbe5686b35389643ba5634c4dfedc5de0f314d4f943418dcff9b643c258"
     },
     "labels_poi": {
-      "bytes": 3631918,
-      "sha256": "34e3643646ab7ddb5a1af4384820173de52d4aa86e330acc814ee971c8d06f21"
+      "bytes": 4071492,
+      "sha256": "d8981ef41794cc74a9018c3b311c7e46ab504968de4e7b29a12057dc840b0929"
     },
     "labels_detail": {
-      "bytes": 9615663,
-      "sha256": "c099e3bd97aad609c99056f2b4a19d3d23445830e445c5d490766b34ac625d77"
+      "bytes": 10890419,
+      "sha256": "2cb8a95a0ce9b887211ead82fa7ceab15360a35999f8bfeaa6abb346771536c1"
     },
     "labels_native": {
       "bytes": 36081448,
@@ -77,13 +66,9 @@
     "search_catalog": {
       "bytes": 10586420,
       "sha256": "626662d7cca1d44af1dc73d64a2e7663202afe7dfd0ad608417c265d2422156e"
-    },
-    "full_69000": {
-      "bytes": 36081448,
-      "sha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44"
     }
   },
-  "font_handling": "Installer preserves the Kurdish font already present in the user project; the package does not redistribute a font file.",
+  "font_handling": "Installer preserves the user-provided UniQAIDAR font already in the project; no font binary is redistributed.",
   "variables_required": [
     "VITE_MAPTILER_KEY",
     "VITE_SUPABASE_URL",
@@ -91,5 +76,5 @@
   ],
   "new_sql_required": false,
   "authorized_repository": "https://github.com/sarhang-cs/qalla-wanan",
-  "visual_test_note": "Static runtime/data/build contracts passed. Final visual confirmation remains on the deployed mobile browser."
+  "visual_test_note": "Static source, data, runtime-contract, syntax and production-build checks passed. Final GPU rendering is confirmed after deployment on the target mobile browser."
 }

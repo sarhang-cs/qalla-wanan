@@ -1,1 +1,1 @@
-R11 preserves the existing project font during installation. If absent, the native Kurdish/Arabic fallback stack is used.
+R12 preserves the existing user-provided Kurdish font during installation. The font file is not redistributed in this package.
