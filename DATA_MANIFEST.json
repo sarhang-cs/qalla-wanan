@@ -1,18 +1,43 @@
 {
-  "release": "2026-07-22-qalla-wanan-r9-full-native-labels",
-  "architecture": "immutable MapLibre GeoJSON sources in initial style",
-  "source_records": 47040,
-  "render_records": 46827,
-  "major_records": 13927,
-  "poi_records": 32900,
-  "visual_duplicates_suppressed": 213,
+  "release": "2026-07-22-qalla-wanan-r10-glass-69000",
+  "architecture": "three immutable MapLibre GeoJSON sources in the initial style; native symbol labels with glass icon-text-fit backgrounds",
+  "source_records": 69000,
+  "baseline_records_preserved": 47040,
+  "source_backed_records_added": 21960,
+  "render_records": 69000,
+  "visual_duplicates_suppressed": 0,
   "coordinate_mutation": 0,
   "outside_canonical_boundary": 0,
-  "runtime_assets": {
-    "labels-major.geojson": 4344455,
-    "labels-poi.geojson": 10864197,
-    "labels.compact.json": 6985357
+  "kind_counts": {
+    "city": 17,
+    "governorate": 8,
+    "hamlet": 17,
+    "locality": 1537,
+    "natural": 9282,
+    "poi": 40074,
+    "region": 1,
+    "road": 6213,
+    "suburb": 186,
+    "town": 247,
+    "village": 11418
   },
-  "unused_progressive_shards_removed": true,
-  "all_source_records_preserved_in_search_catalog": true
+  "tier_counts": {
+    "city": 17,
+    "governorate": 8,
+    "locality": 13158,
+    "natural": 9282,
+    "poi_detail": 29291,
+    "poi_landmark": 1314,
+    "poi_local": 4998,
+    "poi_regional": 4471,
+    "region": 1,
+    "road": 6213,
+    "town": 247
+  },
+  "raw_input_hashes": {
+    "iraq-260713.osm.pbf": "a8e16e22e48e597a32f9d10c144658eaa28110e7109fb824580f90a645fe96cf",
+    "iraq-260713-free.gpkg.zip": "d0c0f6c83a461eecd37c343117bb20cf2df8e67bbb6b83db092cdef37b470979",
+    "IQ.zip": "9c44c7341adc523eaab6e75a979ecdd2ce9c09af8bd1e7d40f5382dee26ea273",
+    "alternateNamesV2.zip": "7b4894b44ac4cd8eaad8396e25d2e8497d65deaa3aa6127fd9e966133fea69e6"
+  }
 }

@@ -1,109 +1,45 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r6-rtl-stable",
-  "sourceRecords": 47040,
-  "nativeGeoJSONFeatures": 47040,
-  "nativeRenderFeatures": 47032,
-  "visualMajorDuplicatesSuppressed": 8,
+  "release": "2026-07-22-qalla-wanan-r10-glass-69000",
+  "sourceRecords": 69000,
+  "nativeGeoJSONFeatures": 69000,
+  "nativeRenderFeatures": 69000,
+  "visualDuplicatesSuppressed": 0,
   "counts": {
-    "region": 1,
+    "city": 17,
     "governorate": 8,
-    "city": 11,
-    "town": 215,
-    "village": 6433,
-    "hamlet": 14,
-    "suburb": 43,
-    "locality": 233,
-    "natural": 5210,
-    "road": 1805,
-    "poi": 33067
-  },
-  "visibleCounts": {
+    "hamlet": 17,
+    "locality": 1537,
+    "natural": 9282,
+    "poi": 40074,
     "region": 1,
-    "governorate": 8,
-    "city": 7,
-    "town": 211,
-    "village": 6433,
-    "hamlet": 14,
-    "suburb": 43,
-    "locality": 233,
-    "natural": 5210,
-    "road": 1805,
-    "poi": 33067
+    "road": 6213,
+    "suburb": 186,
+    "town": 247,
+    "village": 11418
   },
-  "majorDuplicateGroups": [
-    {
-      "name": "ئاکرێ",
-      "kept_id": "osm-node-599171922",
-      "hidden_visual_ids": [
-        "geonames-98822",
-        "geonames-445694"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "تەلەعفەر",
-      "kept_id": "osm-node-6007351271",
-      "hidden_visual_ids": [
-        "geonames-90393"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "دووبز",
-      "kept_id": "osm-node-2486472611",
-      "hidden_visual_ids": [
-        "geonames-97001"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "بێستانەی گەورە",
-      "kept_id": "osm-way-303702847",
-      "hidden_visual_ids": [
-        "osm-node-2479369784"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "قوشتەپە",
-      "kept_id": "osm-way-1332407212",
-      "hidden_visual_ids": [
-        "osm-node-12407555502"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "قەرەهەنجیر",
-      "kept_id": "osm-way-558473033",
-      "hidden_visual_ids": [
-        "osm-node-7416752807"
-      ],
-      "distance_rule_m": 5000
-    },
-    {
-      "name": "هەڵەبجەی تازە",
-      "kept_id": "osm-way-263782377",
-      "hidden_visual_ids": [
-        "osm-node-2694351421"
-      ],
-      "distance_rule_m": 5000
-    }
-  ],
+  "tierCounts": {
+    "city": 17,
+    "governorate": 8,
+    "locality": 13158,
+    "natural": 9282,
+    "poi_detail": 29291,
+    "poi_landmark": 1314,
+    "poi_local": 4998,
+    "poi_regional": 4471,
+    "region": 1,
+    "road": 6213,
+    "town": 247
+  },
   "coordinateMutation": 0,
-  "labelRenderer": "MapLibre native WebGL symbol layers",
+  "outsideCanonicalBoundary": 0,
+  "labelRenderer": "MapLibre native WebGL symbol layers with nine-slice glass icon-text-fit backgrounds",
   "overlayRenderer": false,
-  "sha256": "bc0cf1984d58f04b45b71c3eaee636c4ac327a5afdda5aff9a7b242d7b4b8d78",
+  "sourceSha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44",
   "bbox": [
-    41.285803,
-    33.305387,
-    46.34873,
-    37.377264
-  ],
-  "notes": [
-    "Every source record remains present in the native GeoJSON source.",
-    "Only clearly duplicated city/town representations within 5 km are visually suppressed; source records remain searchable and auditable.",
-    "Governorate anchors are explicitly prefixed with پارێزگای to distinguish administrative centroids from city coordinates."
-  ],
-  "renderer": "source-of-truth retained; runtime uses R6 split native MapLibre symbol layers"
+    41.285802647000025,
+    33.305386992000024,
+    46.34872977600003,
+    37.37726400600002
+  ]
 }

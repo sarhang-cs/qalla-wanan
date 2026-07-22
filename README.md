@@ -1,3 +1,5 @@
-# Qalla Wanan — NAV KURD R9 Full Native Labels
+# Qalla Wanan — NAV KURD R10 Glass 69,000
 
-Stable MapLibre native-label integration using immutable full major and POI GeoJSON sources in the initial map style. No DOM/canvas label overlays and no viewport label-source replacement.
+Production map integration with exactly 69,000 source-backed place records. Labels are native MapLibre WebGL symbol layers with larger text and native nine-slice glass backgrounds (`icon-text-fit`), no black text halo, no DOM/canvas overlay, no viewport label-source mutation, and no coordinate movement during zoom or pan.
+
+Data sources include the preserved 47,040-record baseline plus 21,960 validated additions derived from OpenStreetMap/Geofabrik Iraq and GeoNames IQ/alternateNamesV2. Every published coordinate is clipped to the canonical Kurdistan boundary and audited for source provenance.

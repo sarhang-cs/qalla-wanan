@@ -2,7 +2,7 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r9-full-native-labels').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r10-glass-69000').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
@@ -12,6 +12,12 @@ const LABEL_FONT_FAMILY = 'UniQAIDAR Hewal 031';
 const LABEL_FONT_URL = new URL('../fonts/UniQAIDAR_Hewal_031.ttf', import.meta.url).href;
 const LABEL_FONT_STACK = [LABEL_FONT_FAMILY, 'Qalla Hewal', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Arial', 'sans-serif'];
 const SAFE_LABEL_FONT_STACK = ['Noto Sans Arabic', 'Noto Naskh Arabic', 'Arial', 'sans-serif'];
+const GLASS_IMAGE_IDS = new Set(['nav-glass-warm', 'nav-glass-major', 'nav-glass-poi']);
+const GLASS_IMAGE_STYLES = Object.freeze({
+  'nav-glass-warm': { top: 'rgba(255,250,232,0.86)', bottom: 'rgba(245,232,194,0.72)', edge: 'rgba(255,255,255,0.82)' },
+  'nav-glass-major': { top: 'rgba(244,251,250,0.84)', bottom: 'rgba(221,239,236,0.70)', edge: 'rgba(255,255,255,0.80)' },
+  'nav-glass-poi': { top: 'rgba(239,249,248,0.80)', bottom: 'rgba(211,235,232,0.66)', edge: 'rgba(255,255,255,0.78)' }
+});
 const NATIVE_LABEL_LAYER_IDS = [
   'nav-label-region', 'nav-label-governorate', 'nav-label-city', 'nav-label-town',
   'nav-label-locality', 'nav-label-natural', 'nav-label-road',
@@ -91,6 +97,10 @@ function baseStyle(boundary, mask) {
     'nav-label-poi': {
       type: 'geojson', data: assetUrl('labels-poi.geojson'), promoteId: 'id',
       cluster: false, tolerance: 0, buffer: 256, maxzoom: 20
+    },
+    'nav-label-detail': {
+      type: 'geojson', data: assetUrl('labels-detail.geojson'), promoteId: 'id',
+      cluster: false, tolerance: 0, buffer: 192, maxzoom: 18
     },
     'nav-custom-label-source': {
       type: 'geojson', data: emptyFeatureCollection(), promoteId: 'id',
@@ -173,10 +183,11 @@ function baseStyle(boundary, mask) {
       minzoom: 11.8,
       maxzoom: 21,
       layout: nativeLabelLayout({
-        size: ['interpolate', ['linear'], ['zoom'], 11.8, 9.4, 17, 11.2, 20.5, 12.6],
-        padding: 5, maxWidth: 10, overlap: false
+        size: ['interpolate', ['linear'], ['zoom'], 11.8, 14, 17, 17, 20.5, 19],
+        glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9],
+        padding: 3, maxWidth: 14, overlap: false
       }),
-      paint: nativeLabelPaint({ color: '#ffffff', halo: 1.65 })
+      paint: nativeLabelPaint({ color: '#102b2a' })
     },
     {
       id: 'nav-route-casing',
@@ -248,7 +259,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R9',
+    name: 'Qalla Wanan NAV KURD R10 Glass 69000',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -343,17 +354,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.0, size: ['interpolate', ['linear'], ['zoom'], 5.0, 23, 7.8, 29], color: '#ffe6a3', halo: 1.55, padding: 4, maxWidth: 16, overlap: true },
-  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.4, size: ['interpolate', ['linear'], ['zoom'], 5.5, 16, 9.8, 21], color: '#fff1c4', halo: 1.45, padding: 4, maxWidth: 14, overlap: false },
-  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.0, size: ['interpolate', ['linear'], ['zoom'], 5.9, 15.5, 10, 19, 16.5, 22], color: '#ffffff', halo: 1.5, padding: 4, maxWidth: 13, overlap: true },
-  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.0, size: ['interpolate', ['linear'], ['zoom'], 7.2, 12.5, 13, 16, 19, 18], color: '#ffffff', halo: 1.35, padding: 3, maxWidth: 13, overlap: false },
-  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 11.5, 15, 14.5, 20, 16.5], color: '#f6f8fb', halo: 1.25, padding: 3, maxWidth: 13, overlap: false },
-  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 11.2, 15, 14, 20, 16], color: '#d6f8e5', halo: 1.2, padding: 3, maxWidth: 13, overlap: false },
-  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 11.5, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.5, 10.8, 17, 13.5, 20, 15], color: '#ffe4aa', halo: 1.15, padding: 2, maxWidth: 15, overlap: false },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.2, 11.5, 15, 14.5, 20, 16.5], color: '#ffffff', halo: 1.3, padding: 3, maxWidth: 13, overlap: false },
-  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 11.2, 16, 14, 20, 16], color: '#ffffff', halo: 1.25, padding: 3, maxWidth: 13, overlap: false },
-  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 12.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.6, 10.8, 18, 13.5, 20.5, 15], color: '#ffffff', halo: 1.2, padding: 2.5, maxWidth: 12, overlap: false },
-  { id: 'nav-label-poi-detail', source: 'nav-label-poi', tier: 'poi_detail', minzoom: 14.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 14.8, 10.4, 19, 12.8, 20.5, 14.2], color: '#ffffff', halo: 1.15, padding: 2, maxWidth: 12, overlap: false }
+  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.4, size: ['interpolate', ['linear'], ['zoom'], 5.0, 27, 8.2, 35], color: '#26362f', glass: 'nav-glass-warm', boxPadding: [8, 13, 8, 13], padding: 5, maxWidth: 18, overlap: true },
+  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.5, 19, 10.2, 26], color: '#26362f', glass: 'nav-glass-warm', boxPadding: [7, 11, 7, 11], padding: 4, maxWidth: 16, overlap: false },
+  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.4, size: ['interpolate', ['linear'], ['zoom'], 5.9, 18.5, 10, 22, 17, 26], color: '#17312d', glass: 'nav-glass-warm', boxPadding: [7, 11, 7, 11], padding: 4, maxWidth: 15, overlap: false },
+  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.0, size: ['interpolate', ['linear'], ['zoom'], 7.2, 15.5, 13, 19, 19, 22], color: '#12302d', glass: 'nav-glass-major', boxPadding: [6, 10, 6, 10], padding: 3, maxWidth: 15, overlap: false },
+  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 14, 15, 17.5, 20, 20], color: '#102b2a', glass: 'nav-glass-major', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
+  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 13.8, 15, 17, 20, 19.5], color: '#12362d', glass: 'nav-glass-major', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
+  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 10.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10, 13.2, 17, 16, 20, 18], color: '#3b2b13', glass: 'nav-glass-warm', boxPadding: [4, 8, 4, 8], padding: 2, maxWidth: 17, overlap: false },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.2, 14.5, 15, 17.5, 20, 20], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
+  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 14, 16, 17, 20, 19], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
+  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 12.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.6, 13.5, 18, 16.2, 20.5, 18], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [4, 8, 4, 8], padding: 2.5, maxWidth: 14, overlap: false },
+  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 14.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 14.6, 13, 19, 15.5, 20.5, 17.2], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [4, 8, 4, 8], padding: 2, maxWidth: 14, overlap: false }
 ];
 
 function nativeLabelLayout(definition) {
@@ -362,6 +373,17 @@ function nativeLabelLayout(definition) {
     'symbol-z-order': 'source',
     'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
     'symbol-avoid-edges': true,
+    'icon-image': definition.glass || 'nav-glass-poi',
+    'icon-size': 1,
+    'icon-anchor': 'center',
+    'icon-text-fit': 'both',
+    'icon-text-fit-padding': definition.boxPadding || [4, 8, 4, 8],
+    'icon-padding': 2,
+    'icon-allow-overlap': Boolean(definition.overlap),
+    'icon-ignore-placement': false,
+    'icon-optional': false,
+    'icon-rotation-alignment': 'viewport',
+    'icon-pitch-alignment': 'viewport',
     'text-field': ['coalesce', ['get', 'display_name'], ['get', 'name']],
     'text-font': LABEL_FONT_STACK,
     'text-size': definition.size,
@@ -369,7 +391,7 @@ function nativeLabelLayout(definition) {
     'text-justify': 'center',
     'text-offset': [0, 0],
     'text-max-width': definition.maxWidth,
-    'text-line-height': 1.12,
+    'text-line-height': 1.14,
     'text-letter-spacing': 0,
     'text-padding': definition.padding,
     'text-allow-overlap': Boolean(definition.overlap),
@@ -383,16 +405,76 @@ function nativeLabelLayout(definition) {
 
 function nativeLabelPaint(definition) {
   return {
+    'icon-opacity': 1,
     'text-color': definition.color,
     'text-opacity': 1,
-    'text-halo-color': 'rgba(1,6,18,0.86)',
-    'text-halo-width': definition.halo,
-    'text-halo-blur': 0.28
+    'text-halo-color': 'rgba(0,0,0,0)',
+    'text-halo-width': 0,
+    'text-halo-blur': 0
   };
 }
 
+function roundedRectPath(context, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height / 2);
+  context.beginPath();
+  context.moveTo(x + r, y);
+  context.arcTo(x + width, y, x + width, y + height, r);
+  context.arcTo(x + width, y + height, x, y + height, r);
+  context.arcTo(x, y + height, x, y, r);
+  context.arcTo(x, y, x + width, y, r);
+  context.closePath();
+}
+
+function createGlassLabelImage(style) {
+  const width = 96;
+  const height = 48;
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d', { alpha: true });
+  if (!context) throw new Error('Canvas 2D is unavailable for native glass label images');
+  context.clearRect(0, 0, width, height);
+  const gradient = context.createLinearGradient(0, 3, 0, height - 3);
+  gradient.addColorStop(0, style.top);
+  gradient.addColorStop(1, style.bottom);
+  roundedRectPath(context, 2, 2, width - 4, height - 4, 15);
+  context.fillStyle = gradient;
+  context.fill();
+  context.lineWidth = 1.5;
+  context.strokeStyle = style.edge;
+  context.stroke();
+  roundedRectPath(context, 4, 4, width - 8, 18, 12);
+  context.fillStyle = 'rgba(255,255,255,0.15)';
+  context.fill();
+  return context.getImageData(0, 0, width, height);
+}
+
+function ensureGlassLabelImage(id) {
+  if (!map || map.hasImage(id) || !GLASS_IMAGE_IDS.has(id)) return;
+  const image = createGlassLabelImage(GLASS_IMAGE_STYLES[id]);
+  map.addImage(id, image, {
+    pixelRatio: 2,
+    stretchX: [[28, 68]],
+    stretchY: [[18, 30]],
+    content: [22, 11, 74, 37]
+  });
+}
+
+function installGlassLabelImages() {
+  if (!map) return;
+  for (const id of GLASS_IMAGE_IDS) ensureGlassLabelImage(id);
+}
+
+function installGlassImageHandler() {
+  if (!map) return;
+  map.on('styleimagemissing', (event) => {
+    if (GLASS_IMAGE_IDS.has(event.id)) ensureGlassLabelImage(event.id);
+  });
+}
+
+
 function installNativeLabelLayers() {
-  const requiredSources = ['nav-label-major', 'nav-label-poi', 'nav-custom-label-source'];
+  const requiredSources = ['nav-label-major', 'nav-label-poi', 'nav-label-detail', 'nav-custom-label-source'];
   const requiredLayers = [...nativeLabelDefinitions.map((definition) => definition.id), 'nav-label-custom'];
   const missingSources = requiredSources.filter((id) => !map?.getSource(id));
   const missingLayers = requiredLayers.filter((id) => !map?.getLayer(id));
@@ -510,21 +592,22 @@ async function ensureProjectFont() {
 }
 
 async function verifyNativeLabelVisibility() {
-  const majorLayerIds = nativeLabelDefinitions
-    .filter((definition) => definition.source === 'nav-label-major')
-    .map((definition) => definition.id)
-    .filter((id) => map?.getLayer(id));
-  const poiLayerIds = nativeLabelDefinitions
-    .filter((definition) => definition.source === 'nav-label-poi')
-    .map((definition) => definition.id)
-    .filter((id) => map?.getLayer(id));
-  if (!majorLayerIds.length || !poiLayerIds.length) throw new Error('native label layers are unavailable');
-  const [majorLoaded, poiLoaded] = await Promise.all([
-    waitForSourceLoaded('nav-label-major', 30000),
-    waitForSourceLoaded('nav-label-poi', 30000)
+  const layerIdsBySource = Object.fromEntries(
+    ['nav-label-major', 'nav-label-poi', 'nav-label-detail'].map((source) => [
+      source,
+      nativeLabelDefinitions.filter((definition) => definition.source === source).map((definition) => definition.id).filter((id) => map?.getLayer(id))
+    ])
+  );
+  if (Object.values(layerIdsBySource).some((ids) => !ids.length)) throw new Error('native label layers are unavailable');
+  const [majorLoaded, poiLoaded, detailLoaded] = await Promise.all([
+    waitForSourceLoaded('nav-label-major', 75000),
+    waitForSourceLoaded('nav-label-poi', 75000),
+    waitForSourceLoaded('nav-label-detail', 75000)
   ]);
-  await waitForMapIdle(5000);
-  let rendered = map.queryRenderedFeatures(undefined, { layers: [...majorLayerIds, ...poiLayerIds] });
+  installGlassLabelImages();
+  await waitForMapIdle(6500);
+  const allLayerIds = Object.values(layerIdsBySource).flat();
+  let rendered = map.queryRenderedFeatures(undefined, { layers: allLayerIds });
   if (!rendered.length) {
     labelFontFallbackActive = true;
     for (const id of NATIVE_LABEL_LAYER_IDS) {
@@ -532,18 +615,20 @@ async function verifyNativeLabelVisibility() {
     }
     map.triggerRepaint();
     await waitForMapIdle(3500);
-    rendered = map.queryRenderedFeatures(undefined, { layers: [...majorLayerIds, ...poiLayerIds] });
+    rendered = map.queryRenderedFeatures(undefined, { layers: allLayerIds });
   }
   const majorSourceFeatures = map.querySourceFeatures('nav-label-major').length;
   const poiSourceFeatures = map.querySourceFeatures('nav-label-poi').length;
-  if (!rendered.length) throw new Error(`native labels failed: major=${majorSourceFeatures} poi=${poiSourceFeatures}`);
+  const detailSourceFeatures = map.querySourceFeatures('nav-label-detail').length;
+  if (!rendered.length) throw new Error(`native labels failed: major=${majorSourceFeatures} poi=${poiSourceFeatures} detail=${detailSourceFeatures}`);
   return {
-    majorLoaded, poiLoaded,
-    source: majorSourceFeatures + poiSourceFeatures,
+    majorLoaded, poiLoaded, detailLoaded,
+    source: majorSourceFeatures + poiSourceFeatures + detailSourceFeatures,
     rendered: rendered.length,
     fallback: labelFontFallbackActive
   };
 }
+
 
 async function ensureRtlSupport() {
   if (!window.maplibregl?.setRTLTextPlugin) throw new Error('MapLibre RTL API is unavailable');
@@ -1009,6 +1094,8 @@ async function createMap() {
     preserveDrawingBuffer: false,
     maxBounds: [[bbox[0] - 1.25, bbox[1] - 1], [bbox[2] + 1.25, bbox[3] + 1]]
   });
+  installGlassImageHandler();
+  map.once('styledata', installGlassLabelImages);
 
   await new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('map load timeout')), 30000);
@@ -1019,7 +1106,8 @@ async function createMap() {
     map.on('error', (event) => console.warn('[NAV map resource]', event.error || event));
   });
 
-  setLoadingProgress(52, 'ناوی شار و ناوچە سەرەکییەکان ئامادە دەبن…');
+  setLoadingProgress(52, 'بۆکسە گلاسییەکان و ناوی شار و ناوچەکان ئامادە دەبن…');
+  installGlassLabelImages();
   installNativeLabelLayers();
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
   map.on('zoom', updateGpsAccuracyPaint);
@@ -1034,14 +1122,15 @@ async function createMap() {
 
   const labelHealth = await verifyNativeLabelVisibility();
   if (labelHealth.fallback) console.warn('[NAV font] embedded font unavailable to WebGL text renderer; safe local fallback enabled');
-  setLoadingProgress(76, 'هەموو ناوی گوند، شوێن، دوکان و ڕێگا پشکنین دەکرێن…');
-  const [majorReady, poiReady] = await Promise.all([
-    waitForSourceLoaded('nav-label-major', 30000),
-    waitForSourceLoaded('nav-label-poi', 30000)
+  setLoadingProgress(76, 'هەموو 69,000 ناوی گوند، شوێن، دوکان و ڕێگا پشکنین دەکرێن…');
+  const [majorReady, poiReady, detailReady] = await Promise.all([
+    waitForSourceLoaded('nav-label-major', 75000),
+    waitForSourceLoaded('nav-label-poi', 75000),
+    waitForSourceLoaded('nav-label-detail', 75000)
   ]);
-  if (!majorReady || !poiReady) console.warn('[NAV labels] full source load timed out', { majorReady, poiReady });
+  if (!majorReady || !poiReady || !detailReady) console.warn('[NAV labels] full source load timed out', { majorReady, poiReady, detailReady });
 
-  setLoadingProgress(94, 'کۆتا پشکنینی tile، ناوەکان و ماسک…');
+  setLoadingProgress(94, 'کۆتا پشکنینی 69,000 ناو، tile و ماسک…');
   await waitForMapIdle(6500);
   setLoadingProgress(100, 'نەخشە ئامادەیە');
   window.setTimeout(hideMapLoading, 140);

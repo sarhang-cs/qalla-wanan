@@ -1,22 +1,87 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r9-full-native-labels",
-  "checks": [
-    "data integrity",
-    "native source/layer contract",
-    "JavaScript syntax",
-    "production build"
+  "release": "2026-07-22-qalla-wanan-r10-glass-69000",
+  "package_version": "1.7.0",
+  "generated_at_utc": "2026-07-22T20:36:50.035821+00:00",
+  "checks": {
+    "data_integrity": "passed",
+    "exact_source_records": 69000,
+    "exact_native_render_records": 69000,
+    "baseline_records_preserved": 47040,
+    "source_backed_records_added": 21960,
+    "source_linked_records": 69000,
+    "fake_or_placeholder_records_added": 0,
+    "coordinate_mismatch": 0,
+    "outside_canonical_boundary": 0,
+    "duplicate_source_ids": 0,
+    "duplicate_render_ids": 0,
+    "malformed_names": 0,
+    "runtime_contract": "passed",
+    "javascript_syntax": "passed",
+    "production_build": "passed",
+    "installer_shell_syntax": "passed"
+  },
+  "renderer": {
+    "labels": "MapLibre native WebGL symbol layers",
+    "background": "native nine-slice translucent glass image fitted with icon-text-fit",
+    "black_text_halo": false,
+    "dom_marker_labels": false,
+    "canvas_label_overlay": false,
+    "viewport_source_mutation": false,
+    "coordinate_mutation": 0,
+    "label_sources": [
+      "nav-label-major",
+      "nav-label-poi",
+      "nav-label-detail"
+    ],
+    "gps": "native MapLibre GeoJSON circle layers",
+    "route": "native MapLibre GeoJSON line layers"
+  },
+  "data_sources": {
+    "preserved_baseline": "Verified 47,040-record Qalla Wanan/NAV KURD baseline",
+    "additions": [
+      "OpenStreetMap/Geofabrik Iraq 2026-07-13",
+      "GeoNames IQ + alternateNamesV2 2026-07-13"
+    ],
+    "invented_translations": false,
+    "manual_fake_coordinates": false
+  },
+  "files": {
+    "labels_major": {
+      "bytes": 9408361,
+      "sha256": "133c9d555ad2fe71fc7addd4c23e7bc49835aec9475969cecc62dcb2ef757897"
+    },
+    "labels_poi": {
+      "bytes": 3631918,
+      "sha256": "34e3643646ab7ddb5a1af4384820173de52d4aa86e330acc814ee971c8d06f21"
+    },
+    "labels_detail": {
+      "bytes": 9615663,
+      "sha256": "c099e3bd97aad609c99056f2b4a19d3d23445830e445c5d490766b34ac625d77"
+    },
+    "labels_native": {
+      "bytes": 36081448,
+      "sha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44"
+    },
+    "search_catalog": {
+      "bytes": 10586420,
+      "sha256": "626662d7cca1d44af1dc73d64a2e7663202afe7dfd0ad608417c265d2422156e"
+    },
+    "full_69000": {
+      "bytes": 36081448,
+      "sha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44"
+    },
+    "font": {
+      "bytes": 52256,
+      "sha256": "213fb41f5b169c6593efc000273f32fc598aa4260152cf9e6b5d2d58c956c20c"
+    }
+  },
+  "variables_required": [
+    "VITE_MAPTILER_KEY",
+    "VITE_SUPABASE_URL",
+    "VITE_SUPABASE_PUBLISHABLE_KEY"
   ],
-  "label_renderer": "MapLibre WebGL symbol layers",
-  "label_transport": "full immutable major + POI GeoJSON sources",
-  "runtime_label_bytes": 15208652,
-  "source_records": 47040,
-  "render_records": 46827,
-  "coordinate_mutation": 0,
-  "outside_canonical_boundary": 0,
-  "notes": [
-    "Search catalog loads after map readiness",
-    "No viewport setData or label shard replacement",
-    "No DOM/canvas label overlay"
-  ]
+  "new_sql_required": false,
+  "authorized_repository": "https://github.com/sarhang-cs/qalla-wanan",
+  "visual_test_note": "Static/runtime/data/build contracts passed. Final visual behavior must be confirmed on the deployed mobile browser because the execution sandbox could not complete a full networked headless-map render."
 }
