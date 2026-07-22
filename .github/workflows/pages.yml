@@ -43,7 +43,7 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ""
           VITE_ROUTING_BASE_URL: https://router.project-osrm.org
           VITE_MYSQL_API_BASE_URL: ""
-          VITE_MAP_DATA_VERSION: 2026-07-22-qalla-wanan-r8-native-label-recovery
+          VITE_MAP_DATA_VERSION: 2026-07-22-qalla-wanan-r9-full-native-labels
 
       - name: Disable Jekyll
         run: touch dist/.nojekyll

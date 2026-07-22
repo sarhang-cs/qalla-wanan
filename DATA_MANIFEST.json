@@ -1,17 +1,18 @@
 {
-  "release": "2026-07-22-qalla-wanan-r8-native-label-recovery",
-  "sourceRecords": 47040,
-  "renderRecords": 46827,
-  "coreRecords": 227,
-  "shardRecords": 46600,
-  "shardFiles": 160,
-  "gridOrigin": [
-    41,
-    33
-  ],
-  "gridSize": 0.25,
-  "catalogFile": "labels.compact.json",
-  "coreFile": "labels-core.geojson",
-  "shardIndexFile": "label-shards-index.json",
-  "fullSourceDirectory": "full-source/"
+  "release": "2026-07-22-qalla-wanan-r9-full-native-labels",
+  "architecture": "immutable MapLibre GeoJSON sources in initial style",
+  "source_records": 47040,
+  "render_records": 46827,
+  "major_records": 13927,
+  "poi_records": 32900,
+  "visual_duplicates_suppressed": 213,
+  "coordinate_mutation": 0,
+  "outside_canonical_boundary": 0,
+  "runtime_assets": {
+    "labels-major.geojson": 4344455,
+    "labels-poi.geojson": 10864197,
+    "labels.compact.json": 6985357
+  },
+  "unused_progressive_shards_removed": true,
+  "all_source_records_preserved_in_search_catalog": true
 }

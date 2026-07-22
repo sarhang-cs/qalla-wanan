@@ -1,43 +1,22 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r8-native-label-recovery",
-  "version": "1.5.0",
-  "root_causes_fixed": [
-    "The prior deployment still referenced runtime-config.js and nav-map.js with the stale r6 cache token, allowing the browser and GitHub Pages CDN to reuse incompatible JavaScript with newer label assets.",
-    "Native label sources and symbol layers were registered after the map load event; a failed font or source readiness path could leave the satellite and mask visible while every label layer remained absent.",
-    "The visible label stack used an alias that did not exactly match the embedded font family, with no verified runtime fallback when WebGL text rendering returned zero labels."
+  "release": "2026-07-22-qalla-wanan-r9-full-native-labels",
+  "checks": [
+    "data integrity",
+    "native source/layer contract",
+    "JavaScript syntax",
+    "production build"
   ],
-  "fixes": {
-    "cache_busting": "All CSS, runtime-config and JavaScript references use r8; GitHub Actions builds with the R8 map data version.",
-    "renderer": "MapLibre native WebGL symbol layers defined in the initial style; no DOM or canvas label overlay.",
-    "font": "Exact embedded FontFace family UniQAIDAR Hewal 031 with native local-font fallback and runtime rendered-label health check.",
-    "source_order": "Core, viewport and custom label sources exist before the initial style is committed.",
-    "layer_order": "Label layers render above the mask and boundary and below route/GPS layers.",
-    "major_label_visibility": "Region, governorate and city layers remain visible while lower tiers use collision management.",
-    "progressive_loading": "227 core labels load first; 46,600 detail labels are loaded by viewport from 160 geographic shards; search remains nonblocking."
-  },
-  "data_integrity": {
-    "source_records": 47040,
-    "render_records": 46827,
-    "visual_duplicates_suppressed": 213,
-    "all_source_records_preserved_in_search": true,
-    "outside_canonical_boundary": 0,
-    "render_outside_canonical_boundary": 0,
-    "coordinate_mismatch": 0,
-    "duplicate_source_ids": 0,
-    "duplicate_render_ids": 0,
-    "malformed_names": 0,
-    "progressive_core_records": 227,
-    "progressive_shard_records": 46600,
-    "progressive_shard_files": 160,
-    "full_source_bytes": 63742324
-  },
-  "verification": {
-    "npm_run_check": "passed",
-    "npm_run_build": "passed",
-    "javascript_syntax": "passed",
-    "runtime_contract": "R8-NATIVE-LABEL-RECOVERY passed",
-    "mobile_visual_verification": "required after GitHub Pages deployment; not claimed as completed in this container"
-  },
-  "target_repository": "https://github.com/sarhang-cs/qalla-wanan.git"
+  "label_renderer": "MapLibre WebGL symbol layers",
+  "label_transport": "full immutable major + POI GeoJSON sources",
+  "runtime_label_bytes": 15208652,
+  "source_records": 47040,
+  "render_records": 46827,
+  "coordinate_mutation": 0,
+  "outside_canonical_boundary": 0,
+  "notes": [
+    "Search catalog loads after map readiness",
+    "No viewport setData or label shard replacement",
+    "No DOM/canvas label overlay"
+  ]
 }

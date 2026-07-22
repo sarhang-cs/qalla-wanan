@@ -5,17 +5,17 @@ REPO_URL="https://github.com/sarhang-cs/qalla-wanan.git"
 TARGET="$HOME/QALLA-WANAN-NAV-KURD-MAP-R1"
 SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$HOME/QALLA-WANAN-backup-before-R8-$STAMP"
-GIT_RESTORE="$HOME/.qalla-r8-git-restore"
+BACKUP="$HOME/QALLA-WANAN-backup-before-R9-$STAMP"
+GIT_RESTORE="$HOME/.qalla-r9-git-restore"
 
 printf '\n=============================================\n'
-printf ' QALLA WANAN R8 — NATIVE LABEL RECOVERY\n'
+printf ' QALLA WANAN R9 — FULL NATIVE LABELS\n'
 printf '=============================================\n'
 
 pkg install -y git nodejs >/dev/null
 
 if [ ! -f "$SOURCE/package.json" ] || [ ! -f "$SOURCE/src/nav-map.js" ]; then
-  echo "❌ پەکەجی R8 ناتەواوە."
+  echo "❌ پەکەجی R9 ناتەواوە."
   exit 1
 fi
 
@@ -37,7 +37,7 @@ fi
 
 ENV_KEEP=""
 if [ -f "$TARGET/.env.local" ]; then
-  ENV_KEEP="$HOME/.qalla-r8-env-local-$STAMP"
+  ENV_KEEP="$HOME/.qalla-r9-env-local-$STAMP"
   cp -f "$TARGET/.env.local" "$ENV_KEEP"
 fi
 
@@ -62,31 +62,31 @@ npm run check
 npm run build
 
 test -s public/fonts/UniQAIDAR_Hewal_031.ttf
-test -s public/data/nav/labels-core.geojson
-test -s public/data/nav/label-shards-index.json
-test -d public/data/nav/label-shards
+test -s public/data/nav/labels-major.geojson
+test -s public/data/nav/labels-poi.geojson
 test -s public/data/nav/labels.compact.json
 grep -q 'ensureProjectFont' src/nav-map.js
 grep -q 'verifyNativeLabelVisibility' src/nav-map.js
-grep -q "'nav-label-core':" src/nav-map.js
+grep -q "'nav-label-major':" src/nav-map.js
+grep -q "'nav-label-poi':" src/nav-map.js
 grep -q 'nativeLabelDefinitions.map' src/nav-map.js
 
 # Confirm the full deployment artifact contains labels and font.
-test -s dist/data/nav/labels-core.geojson
-test -s dist/data/nav/label-shards-index.json
+test -s dist/data/nav/labels-major.geojson
+test -s dist/data/nav/labels-poi.geojson
 test -s dist/fonts/UniQAIDAR_Hewal_031.ttf
 
 echo "📤 Push بۆ تەنها sarhang-cs/qalla-wanan..."
 git add -A
 if ! git diff --cached --quiet; then
-  git commit -m "R8: restore native labels in initial style and harden web font rendering"
+  git commit -m "R9: use complete immutable native label sources with stable zoom styling"
 else
   echo "ℹ️ هیچ گۆڕانکارییەکی نوێ بۆ Commit نییە."
 fi
 git push -u origin main
 
 printf '\n=============================================\n'
-printf '✅ R8 Push کرا\n'
+printf '✅ R9 Push کرا\n'
 printf '✅ Repo: https://github.com/sarhang-cs/qalla-wanan\n'
 printf '✅ Backup: %s\n' "$BACKUP"
 printf '=============================================\n'

@@ -11,8 +11,6 @@ const mask = JSON.parse(fs.readFileSync(`${root}/outside-mask.geojson`, 'utf8'))
 const provenance = JSON.parse(fs.readFileSync(`${root}/provenance-audit.json`, 'utf8'));
 const nativeAudit = JSON.parse(fs.readFileSync(`${root}/native-label-audit.json`, 'utf8'));
 const renderAudit = JSON.parse(fs.readFileSync(`${root}/render-data-audit.json`, 'utf8'));
-const core = JSON.parse(fs.readFileSync(`${root}/labels-core.geojson`, 'utf8'));
-const shardIndex = JSON.parse(fs.readFileSync(`${root}/label-shards-index.json`, 'utf8'));
 
 function pointInRing(point, ring) {
   const [x, y] = point;
@@ -86,20 +84,6 @@ if (renderFeatures.length !== renderAudit.renderRecords) throw new Error('combin
 if (labels.items.length !== renderAudit.sourceRecords) throw new Error('render audit source count mismatch');
 if (renderFeatures.length + renderAudit.visualDuplicatesSuppressed !== labels.items.length) throw new Error('render suppression arithmetic mismatch');
 
-const progressiveFeatures = [...(core.features || [])];
-for (const [key, meta] of Object.entries(shardIndex.shards || {})) {
-  const file = `${root}/label-shards/${meta.file}`;
-  if (!fs.existsSync(file)) throw new Error(`missing label shard: ${key}`);
-  const collection = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (!Array.isArray(collection.features) || collection.features.length !== meta.count) throw new Error(`label shard count mismatch: ${key}`);
-  progressiveFeatures.push(...collection.features);
-}
-if (core.features.length !== shardIndex.coreCount) throw new Error('core label count mismatch');
-if (progressiveFeatures.length !== renderFeatures.length) throw new Error(`progressive/render count mismatch: ${progressiveFeatures.length}/${renderFeatures.length}`);
-const progressiveIds = new Set(progressiveFeatures.map((feature) => String(feature.properties?.id || feature.id || '')));
-if (progressiveIds.size !== renderIds.size) throw new Error('progressive label duplicate or missing ids');
-for (const id of renderIds) if (!progressiveIds.has(id)) throw new Error(`progressive label missing render id: ${id}`);
-
 const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 if (sha(`${root}/labels-major.geojson`) !== renderAudit.majorSha256) throw new Error('major labels SHA-256 mismatch');
 if (sha(`${root}/labels-poi.geojson`) !== renderAudit.poiSha256) throw new Error('POI labels SHA-256 mismatch');
@@ -125,7 +109,7 @@ for (const [relative, minimum] of Object.entries(requiredLargeAssets)) {
 
 console.log(JSON.stringify({
   ok: true,
-  release: '2026-07-22-qalla-wanan-r8-native-label-recovery',
+  release: '2026-07-22-qalla-wanan-r9-full-native-labels',
   sourceRecords: labels.items.length,
   renderRecords: renderFeatures.length,
   visualDuplicatesSuppressed: renderAudit.visualDuplicatesSuppressed,
@@ -137,9 +121,6 @@ console.log(JSON.stringify({
   duplicateRenderIds: renderFeatures.length - renderIds.size,
   malformedNames,
   splitRenderBytes: fs.statSync(`${root}/labels-major.geojson`).size + fs.statSync(`${root}/labels-poi.geojson`).size,
-  progressiveCoreRecords: core.features.length,
-  progressiveShardRecords: shardIndex.count,
-  progressiveShardFiles: Object.keys(shardIndex.shards || {}).length,
   fullSourceBytes,
   sourceLinked: provenance.exactIdMatches
 }, null, 2));

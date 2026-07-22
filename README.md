@@ -1,7 +1,3 @@
-# Qalla Wanan — NAV KURD Map R6
+# Qalla Wanan — NAV KURD R9 Full Native Labels
 
-Production source for the Qalla Wanan satellite map integration.
-
-R6 uses MapLibre GL JS native WebGL layers, eagerly loaded RTL shaping, fixed geographic coordinates, collision-aware labels, deterministic loading, Esri z17 raster overzoom, native GPS/route layers, and optional Supabase/PostGIS support.
-
-See `README_CKB.md` for the complete Sorani Kurdish setup and audit notes.
+Stable MapLibre native-label integration using immutable full major and POI GeoJSON sources in the initial map style. No DOM/canvas label overlays and no viewport label-source replacement.

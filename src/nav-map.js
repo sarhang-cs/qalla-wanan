@@ -2,11 +2,9 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r8-native-label-recovery').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r9-full-native-labels').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
-const SHARD_INDEX_URL = 'label-shards-index.json';
-const SHARD_DIR = 'label-shards';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');
 const EARTH_RADIUS_M = 6371008.8;
@@ -41,12 +39,6 @@ let pendingCustomItems = [];
 let catalogPromise = null;
 let loaderHidden = false;
 let labelFontFallbackActive = false;
-let shardIndex = null;
-let shardIndexPromise = null;
-let shardCache = new Map();
-let shardRequestToken = 0;
-let shardRefreshTimer = 0;
-const MAX_SHARD_CACHE = 96;
 
 const q = (selector) => document.querySelector(selector);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -92,13 +84,13 @@ function baseStyle(boundary, mask) {
     } : {}),
     'nav-outside': { type: 'geojson', data: mask },
     'nav-boundary': { type: 'geojson', data: boundary },
-    'nav-label-core': {
-      type: 'geojson', data: assetUrl('labels-core.geojson'), promoteId: 'id',
-      cluster: false, tolerance: 0, buffer: 192, maxzoom: 18
+    'nav-label-major': {
+      type: 'geojson', data: assetUrl('labels-major.geojson'), promoteId: 'id',
+      cluster: false, tolerance: 0, buffer: 256, maxzoom: 20
     },
-    'nav-label-view': {
-      type: 'geojson', data: emptyFeatureCollection(), promoteId: 'id',
-      cluster: false, tolerance: 0, buffer: 192, maxzoom: 18
+    'nav-label-poi': {
+      type: 'geojson', data: assetUrl('labels-poi.geojson'), promoteId: 'id',
+      cluster: false, tolerance: 0, buffer: 256, maxzoom: 20
     },
     'nav-custom-label-source': {
       type: 'geojson', data: emptyFeatureCollection(), promoteId: 'id',
@@ -256,7 +248,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R8',
+    name: 'Qalla Wanan NAV KURD R9',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -351,17 +343,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-core', tier: 'region', minzoom: 5.0, maxzoom: 8.2, size: ['interpolate', ['linear'], ['zoom'], 5.0, 18, 8.0, 22], color: '#ffe39a', halo: 2.2, padding: 4, maxWidth: 12, overlap: true },
-  { id: 'nav-label-governorate', source: 'nav-label-core', tier: 'governorate', minzoom: 5.7, maxzoom: 10.0, size: ['interpolate', ['linear'], ['zoom'], 5.7, 12.5, 9.8, 16.5], color: '#fff0be', halo: 2.0, padding: 5, maxWidth: 11, overlap: true },
-  { id: 'nav-label-city', source: 'nav-label-core', tier: 'city', minzoom: 6.2, maxzoom: 16.0, size: ['interpolate', ['linear'], ['zoom'], 6.2, 12, 10, 15, 15.5, 17.5], color: '#ffffff', halo: 2.0, padding: 6, maxWidth: 10, overlap: true },
-  { id: 'nav-label-town', source: 'nav-label-core', tier: 'town', minzoom: 7.8, maxzoom: 18.5, size: ['interpolate', ['linear'], ['zoom'], 7.8, 10.5, 13, 12.8, 18, 14.2], color: '#ffffff', halo: 1.8, padding: 6, maxWidth: 10, overlap: false },
-  { id: 'nav-label-locality', source: 'nav-label-view', tier: 'locality', minzoom: 9.5, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.5, 9.4, 15, 11.2, 20, 12.7], color: '#f4f7fb', halo: 1.6, padding: 5, maxWidth: 10, overlap: false },
-  { id: 'nav-label-natural', source: 'nav-label-view', tier: 'natural', minzoom: 10.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.2, 9.2, 15, 11, 20, 12.3], color: '#c8f5dc', halo: 1.55, padding: 5, maxWidth: 10, overlap: false },
-  { id: 'nav-label-road', source: 'nav-label-view', tier: 'road', minzoom: 12.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.2, 8.7, 17, 10.6, 20, 11.7], color: '#ffe0a1', halo: 1.5, padding: 4, maxWidth: 11, overlap: false },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-view', tier: 'poi_landmark', minzoom: 9.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.8, 9.3, 15, 11.2, 20, 12.7], color: '#ffffff', halo: 1.65, padding: 5, maxWidth: 10, overlap: false },
-  { id: 'nav-label-poi-regional', source: 'nav-label-view', tier: 'poi_regional', minzoom: 11.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.2, 9, 16, 10.9, 20, 12.2], color: '#ffffff', halo: 1.55, padding: 5, maxWidth: 10, overlap: false },
-  { id: 'nav-label-poi-local', source: 'nav-label-view', tier: 'poi_local', minzoom: 13.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.2, 8.6, 18, 10.5, 20.5, 11.7], color: '#ffffff', halo: 1.5, padding: 4, maxWidth: 9, overlap: false },
-  { id: 'nav-label-poi-detail', source: 'nav-label-view', tier: 'poi_detail', minzoom: 15.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.8, 8.3, 19, 10.1, 20.5, 11.1], color: '#ffffff', halo: 1.4, padding: 3, maxWidth: 9, overlap: false }
+  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.0, size: ['interpolate', ['linear'], ['zoom'], 5.0, 23, 7.8, 29], color: '#ffe6a3', halo: 1.55, padding: 4, maxWidth: 16, overlap: true },
+  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.4, size: ['interpolate', ['linear'], ['zoom'], 5.5, 16, 9.8, 21], color: '#fff1c4', halo: 1.45, padding: 4, maxWidth: 14, overlap: false },
+  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.0, size: ['interpolate', ['linear'], ['zoom'], 5.9, 15.5, 10, 19, 16.5, 22], color: '#ffffff', halo: 1.5, padding: 4, maxWidth: 13, overlap: true },
+  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.0, size: ['interpolate', ['linear'], ['zoom'], 7.2, 12.5, 13, 16, 19, 18], color: '#ffffff', halo: 1.35, padding: 3, maxWidth: 13, overlap: false },
+  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 11.5, 15, 14.5, 20, 16.5], color: '#f6f8fb', halo: 1.25, padding: 3, maxWidth: 13, overlap: false },
+  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 11.2, 15, 14, 20, 16], color: '#d6f8e5', halo: 1.2, padding: 3, maxWidth: 13, overlap: false },
+  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 11.5, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.5, 10.8, 17, 13.5, 20, 15], color: '#ffe4aa', halo: 1.15, padding: 2, maxWidth: 15, overlap: false },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.2, 11.5, 15, 14.5, 20, 16.5], color: '#ffffff', halo: 1.3, padding: 3, maxWidth: 13, overlap: false },
+  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 11.2, 16, 14, 20, 16], color: '#ffffff', halo: 1.25, padding: 3, maxWidth: 13, overlap: false },
+  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 12.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.6, 10.8, 18, 13.5, 20.5, 15], color: '#ffffff', halo: 1.2, padding: 2.5, maxWidth: 12, overlap: false },
+  { id: 'nav-label-poi-detail', source: 'nav-label-poi', tier: 'poi_detail', minzoom: 14.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 14.8, 10.4, 19, 12.8, 20.5, 14.2], color: '#ffffff', halo: 1.15, padding: 2, maxWidth: 12, overlap: false }
 ];
 
 function nativeLabelLayout(definition) {
@@ -369,7 +361,7 @@ function nativeLabelLayout(definition) {
     'symbol-placement': 'point',
     'symbol-z-order': 'source',
     'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
-    'symbol-avoid-edges': false,
+    'symbol-avoid-edges': true,
     'text-field': ['coalesce', ['get', 'display_name'], ['get', 'name']],
     'text-font': LABEL_FONT_STACK,
     'text-size': definition.size,
@@ -377,8 +369,8 @@ function nativeLabelLayout(definition) {
     'text-justify': 'center',
     'text-offset': [0, 0],
     'text-max-width': definition.maxWidth,
-    'text-line-height': 1.15,
-        'text-letter-spacing': 0,
+    'text-line-height': 1.12,
+    'text-letter-spacing': 0,
     'text-padding': definition.padding,
     'text-allow-overlap': Boolean(definition.overlap),
     'text-ignore-placement': false,
@@ -393,14 +385,14 @@ function nativeLabelPaint(definition) {
   return {
     'text-color': definition.color,
     'text-opacity': 1,
-    'text-halo-color': 'rgba(1,6,18,0.96)',
+    'text-halo-color': 'rgba(1,6,18,0.86)',
     'text-halo-width': definition.halo,
-    'text-halo-blur': 0.18
+    'text-halo-blur': 0.28
   };
 }
 
 function installNativeLabelLayers() {
-  const requiredSources = ['nav-label-core', 'nav-label-view', 'nav-custom-label-source'];
+  const requiredSources = ['nav-label-major', 'nav-label-poi', 'nav-custom-label-source'];
   const requiredLayers = [...nativeLabelDefinitions.map((definition) => definition.id), 'nav-label-custom'];
   const missingSources = requiredSources.filter((id) => !map?.getSource(id));
   const missingLayers = requiredLayers.filter((id) => !map?.getLayer(id));
@@ -415,106 +407,6 @@ function withTimeout(promise, timeout, fallback = null) {
     Promise.resolve(promise),
     new Promise((resolve) => window.setTimeout(() => resolve(fallback), timeout))
   ]);
-}
-
-async function loadShardIndex() {
-  if (shardIndex) return shardIndex;
-  if (!shardIndexPromise) {
-    shardIndexPromise = fetch(assetUrl(SHARD_INDEX_URL), { cache: 'force-cache' })
-      .then((response) => {
-        if (!response.ok) throw new Error(`shard index HTTP ${response.status}`);
-        return response.json();
-      })
-      .then((value) => {
-        shardIndex = value;
-        return value;
-      })
-      .catch((error) => {
-        console.warn('[NAV shard index]', error);
-        shardIndexPromise = null;
-        return null;
-      });
-  }
-  return shardIndexPromise;
-}
-
-function visibleShardKeys(index) {
-  if (!map || !index || map.getZoom() < 8.2) return [];
-  const bounds = map.getBounds();
-  const paddingLng = Math.max(0.18, (bounds.getEast() - bounds.getWest()) * 0.18);
-  const paddingLat = Math.max(0.14, (bounds.getNorth() - bounds.getSouth()) * 0.18);
-  const west = bounds.getWest() - paddingLng;
-  const east = bounds.getEast() + paddingLng;
-  const south = bounds.getSouth() - paddingLat;
-  const north = bounds.getNorth() + paddingLat;
-  const [originLng, originLat] = index.gridOrigin;
-  const size = Number(index.gridSize) || 0.25;
-  const minX = Math.floor((west - originLng) / size);
-  const maxX = Math.floor((east - originLng) / size);
-  const minY = Math.floor((south - originLat) / size);
-  const maxY = Math.floor((north - originLat) / size);
-  const keys = [];
-  for (let x = minX; x <= maxX; x += 1) {
-    for (let y = minY; y <= maxY; y += 1) {
-      const key = `${x}_${y}`;
-      if (index.shards?.[key]) keys.push(key);
-    }
-  }
-  return keys;
-}
-
-function touchShardCache(key, features) {
-  shardCache.delete(key);
-  shardCache.set(key, features);
-  while (shardCache.size > MAX_SHARD_CACHE) {
-    const oldest = shardCache.keys().next().value;
-    shardCache.delete(oldest);
-  }
-}
-
-async function fetchShard(index, key) {
-  if (shardCache.has(key)) {
-    const features = shardCache.get(key);
-    touchShardCache(key, features);
-    return features;
-  }
-  const file = index.shards?.[key]?.file;
-  if (!file) return [];
-  const response = await fetch(assetUrl(`${SHARD_DIR}/${file}`), { cache: 'force-cache' });
-  if (!response.ok) throw new Error(`label shard ${key} HTTP ${response.status}`);
-  const value = await response.json();
-  const features = Array.isArray(value.features) ? value.features : [];
-  touchShardCache(key, features);
-  return features;
-}
-
-async function refreshViewportLabels({ force = false } = {}) {
-  const source = map?.getSource('nav-label-view');
-  if (!source) return { count: 0 };
-  const index = await loadShardIndex();
-  if (!index) return { count: 0, error: true };
-  const keys = visibleShardKeys(index);
-  if (!keys.length) {
-    source.setData(emptyFeatureCollection());
-    return { count: 0 };
-  }
-  const token = ++shardRequestToken;
-  const settled = await Promise.allSettled(keys.map((key) => fetchShard(index, key)));
-  if (token !== shardRequestToken && !force) return { count: 0, stale: true };
-  const features = [];
-  for (const result of settled) {
-    if (result.status === 'fulfilled') features.push(...result.value);
-    else console.warn('[NAV label shard]', result.reason);
-  }
-  source.setData({ type: 'FeatureCollection', features });
-  return { count: features.length, shards: keys.length };
-}
-
-function scheduleViewportLabels() {
-  window.clearTimeout(shardRefreshTimer);
-  shardRefreshTimer = window.setTimeout(() => {
-    refreshViewportLabels().catch((error) => console.warn('[NAV viewport labels]', error));
-  }, 120);
 }
 
 function compactItemToFeature(item) {
@@ -618,31 +510,39 @@ async function ensureProjectFont() {
 }
 
 async function verifyNativeLabelVisibility() {
-  const coreLayerIds = nativeLabelDefinitions
-    .filter((definition) => definition.source === 'nav-label-core')
+  const majorLayerIds = nativeLabelDefinitions
+    .filter((definition) => definition.source === 'nav-label-major')
     .map((definition) => definition.id)
     .filter((id) => map?.getLayer(id));
-  if (!coreLayerIds.length) throw new Error('core label layers are unavailable');
-  await waitForSourceLoaded('nav-label-core', 12000);
-  await waitForMapIdle(3500);
-  const expectedResponse = await fetch(assetUrl('labels-core.geojson'), { cache: 'force-cache' });
-  const expectedCollection = expectedResponse.ok ? await expectedResponse.json() : emptyFeatureCollection();
-  const expectedCount = Array.isArray(expectedCollection.features) ? expectedCollection.features.length : 0;
-  const sourceFeatures = map.querySourceFeatures('nav-label-core');
-  let rendered = map.queryRenderedFeatures(undefined, { layers: coreLayerIds });
-  if (expectedCount && !rendered.length) {
+  const poiLayerIds = nativeLabelDefinitions
+    .filter((definition) => definition.source === 'nav-label-poi')
+    .map((definition) => definition.id)
+    .filter((id) => map?.getLayer(id));
+  if (!majorLayerIds.length || !poiLayerIds.length) throw new Error('native label layers are unavailable');
+  const [majorLoaded, poiLoaded] = await Promise.all([
+    waitForSourceLoaded('nav-label-major', 30000),
+    waitForSourceLoaded('nav-label-poi', 30000)
+  ]);
+  await waitForMapIdle(5000);
+  let rendered = map.queryRenderedFeatures(undefined, { layers: [...majorLayerIds, ...poiLayerIds] });
+  if (!rendered.length) {
     labelFontFallbackActive = true;
     for (const id of NATIVE_LABEL_LAYER_IDS) {
       if (map.getLayer(id)) map.setLayoutProperty(id, 'text-font', SAFE_LABEL_FONT_STACK);
     }
     map.triggerRepaint();
-    await waitForMapIdle(3000);
-    rendered = map.queryRenderedFeatures(undefined, { layers: coreLayerIds });
+    await waitForMapIdle(3500);
+    rendered = map.queryRenderedFeatures(undefined, { layers: [...majorLayerIds, ...poiLayerIds] });
   }
-  if (expectedCount && !rendered.length) {
-    throw new Error(`native labels failed: expected=${expectedCount} sourceTiles=${sourceFeatures.length}`);
-  }
-  return { expected: expectedCount, source: sourceFeatures.length, rendered: rendered.length, fallback: labelFontFallbackActive };
+  const majorSourceFeatures = map.querySourceFeatures('nav-label-major').length;
+  const poiSourceFeatures = map.querySourceFeatures('nav-label-poi').length;
+  if (!rendered.length) throw new Error(`native labels failed: major=${majorSourceFeatures} poi=${poiSourceFeatures}`);
+  return {
+    majorLoaded, poiLoaded,
+    source: majorSourceFeatures + poiSourceFeatures,
+    rendered: rendered.length,
+    fallback: labelFontFallbackActive
+  };
 }
 
 async function ensureRtlSupport() {
@@ -1123,8 +1023,6 @@ async function createMap() {
   installNativeLabelLayers();
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
   map.on('zoom', updateGpsAccuracyPaint);
-  map.on('moveend', scheduleViewportLabels);
-  map.on('zoomend', scheduleViewportLabels);
   map.on('click', (event) => {
     const label = nativeLabelAtPoint(event.point);
     if (label) {
@@ -1136,10 +1034,14 @@ async function createMap() {
 
   const labelHealth = await verifyNativeLabelVisibility();
   if (labelHealth.fallback) console.warn('[NAV font] embedded font unavailable to WebGL text renderer; safe local fallback enabled');
-  setLoadingProgress(76, 'ناوە وردەکان بەپێی شوێنی بینین بار دەبن…');
-  await withTimeout(refreshViewportLabels({ force: true }), 7000, { count: 0, timeout: true });
+  setLoadingProgress(76, 'هەموو ناوی گوند، شوێن، دوکان و ڕێگا پشکنین دەکرێن…');
+  const [majorReady, poiReady] = await Promise.all([
+    waitForSourceLoaded('nav-label-major', 30000),
+    waitForSourceLoaded('nav-label-poi', 30000)
+  ]);
+  if (!majorReady || !poiReady) console.warn('[NAV labels] full source load timed out', { majorReady, poiReady });
 
-  setLoadingProgress(94, 'کۆتا پشکنینی tile و ماسک…');
+  setLoadingProgress(94, 'کۆتا پشکنینی tile، ناوەکان و ماسک…');
   await waitForMapIdle(6500);
   setLoadingProgress(100, 'نەخشە ئامادەیە');
   window.setTimeout(hideMapLoading, 140);
