@@ -1,8 +1,8 @@
 {
   "ok": true,
-  "release": "2026-07-22-qalla-wanan-r10-glass-69000",
-  "package_version": "1.7.0",
-  "generated_at_utc": "2026-07-22T20:36:50.035821+00:00",
+  "release": "2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps",
+  "package_version": "1.8.0",
+  "generated_at_utc": "2026-07-22T21:03:57.572815+00:00",
   "checks": {
     "data_integrity": "passed",
     "exact_source_records": 69000,
@@ -23,8 +23,11 @@
   },
   "renderer": {
     "labels": "MapLibre native WebGL symbol layers",
-    "background": "native nine-slice translucent glass image fitted with icon-text-fit",
+    "background": "compact dark translucent NAV KURD capsule fitted with icon-text-fit",
+    "text_color": "#f8fbff",
     "black_text_halo": false,
+    "fixed_point_anchor": true,
+    "variable_anchor": false,
     "dom_marker_labels": false,
     "canvas_label_overlay": false,
     "viewport_source_mutation": false,
@@ -34,8 +37,16 @@
       "nav-label-poi",
       "nav-label-detail"
     ],
+    "basemap": "satellite only (MapTiler primary when configured, Esri fallback)",
+    "terrain_3d": false,
     "gps": "native MapLibre GeoJSON circle layers",
     "route": "native MapLibre GeoJSON line layers"
+  },
+  "visual_spec": {
+    "reference": "user-provided NAV KURD dark label capsule screenshot",
+    "capsule": "dark navy translucent rounded capsule with subtle cool edge and minimal padding",
+    "text": "white, centered, larger Kurdish text, no black outline",
+    "density": "zoom-tiered categories; all records remain available without displaying every record at every zoom"
   },
   "data_sources": {
     "preserved_baseline": "Verified 47,040-record Qalla Wanan/NAV KURD baseline",
@@ -70,12 +81,9 @@
     "full_69000": {
       "bytes": 36081448,
       "sha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44"
-    },
-    "font": {
-      "bytes": 52256,
-      "sha256": "213fb41f5b169c6593efc000273f32fc598aa4260152cf9e6b5d2d58c956c20c"
     }
   },
+  "font_handling": "Installer preserves the Kurdish font already present in the user project; the package does not redistribute a font file.",
   "variables_required": [
     "VITE_MAPTILER_KEY",
     "VITE_SUPABASE_URL",
@@ -83,5 +91,5 @@
   ],
   "new_sql_required": false,
   "authorized_repository": "https://github.com/sarhang-cs/qalla-wanan",
-  "visual_test_note": "Static/runtime/data/build contracts passed. Final visual behavior must be confirmed on the deployed mobile browser because the execution sandbox could not complete a full networked headless-map render."
+  "visual_test_note": "Static runtime/data/build contracts passed. Final visual confirmation remains on the deployed mobile browser."
 }

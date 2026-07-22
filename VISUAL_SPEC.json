@@ -1,0 +1,33 @@
+{
+  "release": "2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps",
+  "reference_image": "255722.jpg",
+  "label_background": {
+    "mode": "native nine-slice image + icon-text-fit",
+    "shape": "compact rounded capsule",
+    "palette": [
+      "rgba(15,24,48,0.95)",
+      "rgba(5,10,25,0.91)"
+    ],
+    "edge": "rgba(180,199,239,0.24)",
+    "padding": "2-3 px vertical / 5-8 px horizontal by tier"
+  },
+  "label_text": {
+    "color": "#f8fbff",
+    "halo_width": 0,
+    "fixed_anchor": "center",
+    "writing_mode": "horizontal",
+    "font": "existing project Kurdish font with safe fallback"
+  },
+  "map": {
+    "basemap": "satellite only",
+    "gps": true,
+    "route": true,
+    "terrain_3d": false
+  },
+  "data": {
+    "source_records": 69000,
+    "render_records": 69000,
+    "coordinate_mutation": 0,
+    "outside_boundary": 0
+  }
+}

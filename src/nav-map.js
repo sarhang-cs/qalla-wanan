@@ -2,7 +2,7 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r10-glass-69000').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
@@ -12,11 +12,20 @@ const LABEL_FONT_FAMILY = 'UniQAIDAR Hewal 031';
 const LABEL_FONT_URL = new URL('../fonts/UniQAIDAR_Hewal_031.ttf', import.meta.url).href;
 const LABEL_FONT_STACK = [LABEL_FONT_FAMILY, 'Qalla Hewal', 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Arial', 'sans-serif'];
 const SAFE_LABEL_FONT_STACK = ['Noto Sans Arabic', 'Noto Naskh Arabic', 'Arial', 'sans-serif'];
-const GLASS_IMAGE_IDS = new Set(['nav-glass-warm', 'nav-glass-major', 'nav-glass-poi']);
-const GLASS_IMAGE_STYLES = Object.freeze({
-  'nav-glass-warm': { top: 'rgba(255,250,232,0.86)', bottom: 'rgba(245,232,194,0.72)', edge: 'rgba(255,255,255,0.82)' },
-  'nav-glass-major': { top: 'rgba(244,251,250,0.84)', bottom: 'rgba(221,239,236,0.70)', edge: 'rgba(255,255,255,0.80)' },
-  'nav-glass-poi': { top: 'rgba(239,249,248,0.80)', bottom: 'rgba(211,235,232,0.66)', edge: 'rgba(255,255,255,0.78)' }
+const CAPSULE_IMAGE_IDS = new Set(['nav-capsule-major', 'nav-capsule-place', 'nav-capsule-poi']);
+const CAPSULE_IMAGE_STYLES = Object.freeze({
+  'nav-capsule-major': {
+    top: 'rgba(15,24,48,0.95)', bottom: 'rgba(5,10,25,0.91)',
+    edge: 'rgba(180,199,239,0.24)', highlight: 'rgba(255,255,255,0.070)'
+  },
+  'nav-capsule-place': {
+    top: 'rgba(12,20,42,0.92)', bottom: 'rgba(4,9,23,0.87)',
+    edge: 'rgba(167,188,231,0.20)', highlight: 'rgba(255,255,255,0.055)'
+  },
+  'nav-capsule-poi': {
+    top: 'rgba(9,16,34,0.89)', bottom: 'rgba(3,8,21,0.84)',
+    edge: 'rgba(153,177,224,0.17)', highlight: 'rgba(255,255,255,0.045)'
+  }
 });
 const NATIVE_LABEL_LAYER_IDS = [
   'nav-label-region', 'nav-label-governorate', 'nav-label-city', 'nav-label-town',
@@ -34,7 +43,6 @@ let searchTimer = 0;
 let selectedDestination = null;
 let currentPosition = null;
 let gpsWatchId = null;
-let terrainEnabled = false;
 let routeBusy = false;
 let routeLastAt = 0;
 let routeLastOrigin = null;
@@ -111,13 +119,6 @@ function baseStyle(boundary, mask) {
     'nav-gps': { type: 'geojson', data: emptyFeatureCollection() }
   };
 
-  if (MAPTILER_KEY) {
-    sources.terrain = {
-      type: 'raster-dem',
-      url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${encodeURIComponent(MAPTILER_KEY)}`,
-      tileSize: 256
-    };
-  }
 
   const layers = [
     { id: 'nav-background', type: 'background', paint: { 'background-color': '#050a12' } },
@@ -184,10 +185,10 @@ function baseStyle(boundary, mask) {
       maxzoom: 21,
       layout: nativeLabelLayout({
         size: ['interpolate', ['linear'], ['zoom'], 11.8, 14, 17, 17, 20.5, 19],
-        glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9],
-        padding: 3, maxWidth: 14, overlap: false
+        capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6],
+        padding: 2, maxWidth: 20, overlap: false, opacity: 0.92
       }),
-      paint: nativeLabelPaint({ color: '#102b2a' })
+      paint: nativeLabelPaint({ opacity: 0.92 })
     },
     {
       id: 'nav-route-casing',
@@ -259,7 +260,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R10 Glass 69000',
+    name: 'Qalla Wanan NAV KURD R11 Satellite GPS Capsules 69000',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -354,17 +355,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.4, size: ['interpolate', ['linear'], ['zoom'], 5.0, 27, 8.2, 35], color: '#26362f', glass: 'nav-glass-warm', boxPadding: [8, 13, 8, 13], padding: 5, maxWidth: 18, overlap: true },
-  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.5, 19, 10.2, 26], color: '#26362f', glass: 'nav-glass-warm', boxPadding: [7, 11, 7, 11], padding: 4, maxWidth: 16, overlap: false },
-  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.4, size: ['interpolate', ['linear'], ['zoom'], 5.9, 18.5, 10, 22, 17, 26], color: '#17312d', glass: 'nav-glass-warm', boxPadding: [7, 11, 7, 11], padding: 4, maxWidth: 15, overlap: false },
-  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.0, size: ['interpolate', ['linear'], ['zoom'], 7.2, 15.5, 13, 19, 19, 22], color: '#12302d', glass: 'nav-glass-major', boxPadding: [6, 10, 6, 10], padding: 3, maxWidth: 15, overlap: false },
-  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 14, 15, 17.5, 20, 20], color: '#102b2a', glass: 'nav-glass-major', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
-  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 13.8, 15, 17, 20, 19.5], color: '#12362d', glass: 'nav-glass-major', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
-  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 10.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10, 13.2, 17, 16, 20, 18], color: '#3b2b13', glass: 'nav-glass-warm', boxPadding: [4, 8, 4, 8], padding: 2, maxWidth: 17, overlap: false },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.2, 14.5, 15, 17.5, 20, 20], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
-  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 14, 16, 17, 20, 19], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [5, 9, 5, 9], padding: 3, maxWidth: 15, overlap: false },
-  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 12.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.6, 13.5, 18, 16.2, 20.5, 18], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [4, 8, 4, 8], padding: 2.5, maxWidth: 14, overlap: false },
-  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 14.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 14.6, 13, 19, 15.5, 20.5, 17.2], color: '#102b2a', glass: 'nav-glass-poi', boxPadding: [4, 8, 4, 8], padding: 2, maxWidth: 14, overlap: false }
+  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.5, size: ['interpolate', ['linear'], ['zoom'], 5.0, 21, 8.2, 27], capsule: 'nav-capsule-major', boxPadding: [3, 8, 3, 8], padding: 3, maxWidth: 24, overlap: true, opacity: 0.97 },
+  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.5, 16.5, 10.2, 20.5], capsule: 'nav-capsule-major', boxPadding: [3, 7, 3, 7], padding: 2.5, maxWidth: 22, overlap: false, opacity: 0.96 },
+  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 17.5, size: ['interpolate', ['linear'], ['zoom'], 5.9, 16, 10, 18, 17, 20], capsule: 'nav-capsule-major', boxPadding: [3, 7, 3, 7], padding: 2.5, maxWidth: 22, overlap: false, opacity: 0.96 },
+  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.2, maxzoom: 20.2, size: ['interpolate', ['linear'], ['zoom'], 7.2, 14.5, 13, 16.5, 19, 18], capsule: 'nav-capsule-place', boxPadding: [2.5, 6.5, 2.5, 6.5], padding: 2.2, maxWidth: 21, overlap: false, opacity: 0.94 },
+  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 8.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 8.7, 13, 15, 14.5, 20, 16], capsule: 'nav-capsule-place', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.93 },
+  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 9.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.3, 12.8, 15, 14.3, 20, 15.8], capsule: 'nav-capsule-place', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.92 },
+  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 12, 17, 13.2, 20, 14.2], capsule: 'nav-capsule-place', boxPadding: [2, 5.5, 2, 5.5], padding: 1.8, maxWidth: 24, overlap: false, opacity: 0.91 },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 9.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 9.8, 13, 15, 14.5, 20, 16], capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.92 },
+  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 11.3, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.3, 12.5, 16, 14, 20, 15.5], capsule: 'nav-capsule-poi', boxPadding: [2.5, 6, 2.5, 6], padding: 2, maxWidth: 20, overlap: false, opacity: 0.91 },
+  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 13.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.2, 12, 18, 13.5, 20.5, 14.7], capsule: 'nav-capsule-poi', boxPadding: [2, 5.5, 2, 5.5], padding: 1.8, maxWidth: 19, overlap: false, opacity: 0.90 },
+  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 15.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.0, 11.5, 19, 12.8, 20.5, 13.8], capsule: 'nav-capsule-poi', boxPadding: [2, 5, 2, 5], padding: 1.6, maxWidth: 18, overlap: false, opacity: 0.88 }
 ];
 
 function nativeLabelLayout(definition) {
@@ -373,12 +374,12 @@ function nativeLabelLayout(definition) {
     'symbol-z-order': 'source',
     'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
     'symbol-avoid-edges': true,
-    'icon-image': definition.glass || 'nav-glass-poi',
+    'icon-image': definition.capsule || 'nav-capsule-poi',
     'icon-size': 1,
     'icon-anchor': 'center',
     'icon-text-fit': 'both',
     'icon-text-fit-padding': definition.boxPadding || [4, 8, 4, 8],
-    'icon-padding': 2,
+    'icon-padding': 1,
     'icon-allow-overlap': Boolean(definition.overlap),
     'icon-ignore-placement': false,
     'icon-optional': false,
@@ -391,7 +392,8 @@ function nativeLabelLayout(definition) {
     'text-justify': 'center',
     'text-offset': [0, 0],
     'text-max-width': definition.maxWidth,
-    'text-line-height': 1.14,
+    'text-line-height': 1.05,
+    'text-writing-mode': ['horizontal'],
     'text-letter-spacing': 0,
     'text-padding': definition.padding,
     'text-allow-overlap': Boolean(definition.overlap),
@@ -405,8 +407,8 @@ function nativeLabelLayout(definition) {
 
 function nativeLabelPaint(definition) {
   return {
-    'icon-opacity': 1,
-    'text-color': definition.color,
+    'icon-opacity': definition.opacity ?? 0.92,
+    'text-color': '#f8fbff',
     'text-opacity': 1,
     'text-halo-color': 'rgba(0,0,0,0)',
     'text-halo-width': 0,
@@ -425,50 +427,60 @@ function roundedRectPath(context, x, y, width, height, radius) {
   context.closePath();
 }
 
-function createGlassLabelImage(style) {
-  const width = 96;
-  const height = 48;
+function createCapsuleLabelImage(style) {
+  const width = 80;
+  const height = 36;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d', { alpha: true });
-  if (!context) throw new Error('Canvas 2D is unavailable for native glass label images');
+  if (!context) throw new Error('Canvas 2D is unavailable for native capsule label images');
   context.clearRect(0, 0, width, height);
+
   const gradient = context.createLinearGradient(0, 3, 0, height - 3);
   gradient.addColorStop(0, style.top);
   gradient.addColorStop(1, style.bottom);
-  roundedRectPath(context, 2, 2, width - 4, height - 4, 15);
+
+  context.save();
+  context.shadowColor = 'rgba(0,0,0,0.28)';
+  context.shadowBlur = 5;
+  context.shadowOffsetY = 2;
+  roundedRectPath(context, 3, 4, width - 6, height - 8, 11);
   context.fillStyle = gradient;
   context.fill();
-  context.lineWidth = 1.5;
+  context.restore();
+
+  roundedRectPath(context, 3, 3, width - 6, height - 8, 11);
+  context.lineWidth = 1;
   context.strokeStyle = style.edge;
   context.stroke();
-  roundedRectPath(context, 4, 4, width - 8, 18, 12);
-  context.fillStyle = 'rgba(255,255,255,0.15)';
+
+  roundedRectPath(context, 6, 5, width - 12, 8, 6);
+  context.fillStyle = style.highlight;
   context.fill();
   return context.getImageData(0, 0, width, height);
 }
 
-function ensureGlassLabelImage(id) {
-  if (!map || map.hasImage(id) || !GLASS_IMAGE_IDS.has(id)) return;
-  const image = createGlassLabelImage(GLASS_IMAGE_STYLES[id]);
+function ensureCapsuleLabelImage(id) {
+  if (!map || map.hasImage(id) || !CAPSULE_IMAGE_IDS.has(id)) return;
+  const image = createCapsuleLabelImage(CAPSULE_IMAGE_STYLES[id]);
   map.addImage(id, image, {
     pixelRatio: 2,
-    stretchX: [[28, 68]],
-    stretchY: [[18, 30]],
-    content: [22, 11, 74, 37]
+    stretchX: [[30, 50]],
+    stretchY: [[14, 22]],
+    content: [16, 7, 64, 29]
   });
 }
 
-function installGlassLabelImages() {
+function installCapsuleLabelImages() {
   if (!map) return;
-  for (const id of GLASS_IMAGE_IDS) ensureGlassLabelImage(id);
+  for (const id of CAPSULE_IMAGE_IDS) ensureCapsuleLabelImage(id);
 }
 
-function installGlassImageHandler() {
+function installCapsuleImageHandler() {
   if (!map) return;
   map.on('styleimagemissing', (event) => {
-    if (GLASS_IMAGE_IDS.has(event.id)) ensureGlassLabelImage(event.id);
+    if (CAPSULE_IMAGE_IDS.has(event.id)) ensureCapsuleLabelImage(event.id);
   });
 }
 
@@ -604,7 +616,7 @@ async function verifyNativeLabelVisibility() {
     waitForSourceLoaded('nav-label-poi', 75000),
     waitForSourceLoaded('nav-label-detail', 75000)
   ]);
-  installGlassLabelImages();
+  installCapsuleLabelImages();
   await waitForMapIdle(6500);
   const allLayerIds = Object.values(layerIdsBySource).flat();
   let rendered = map.queryRenderedFeatures(undefined, { layers: allLayerIds });
@@ -723,7 +735,6 @@ function installMapUi() {
   input.placeholder = 'گەڕان بۆ شار، گوند، دوکان یان شوێن...';
   input.autocomplete = 'off';
   input.setAttribute('aria-label', 'گەڕان لە نەخشەی کوردستان');
-  q('#btn-layers').title = '٣D / دوو ڕەهەندی';
   q('#btn-locate').title = 'GPS و شوێنی من';
   q('#map-card').style.display = 'none';
   document.addEventListener('click', (event) => {
@@ -1005,24 +1016,6 @@ async function routeToSelected(options = {}) {
   }
 }
 
-async function toggle3D() {
-  if (!map) return;
-  if (!MAPTILER_KEY || !map.getSource('terrain')) {
-    toast('بۆ ٣D، VITE_MAPTILER_KEY لە GitHub Actions زیاد بکە');
-    return;
-  }
-  terrainEnabled = !terrainEnabled;
-  if (terrainEnabled) {
-    map.setTerrain({ source: 'terrain', exaggeration: 1.35 });
-    map.easeTo({ pitch: 58, bearing: -10, duration: 850 });
-  } else {
-    map.setTerrain(null);
-    map.easeTo({ pitch: 0, bearing: 0, duration: 700 });
-  }
-  q('#btn-layers').classList.toggle('nav-3d-on', terrainEnabled);
-  toast(terrainEnabled ? 'دیمەنی ٣D چالاک کرا' : 'دیمەنی دوو ڕەهەندی چالاک کرا');
-}
-
 async function loadDeferredCatalog() {
   try {
     const labelsResponse = await fetch(assetUrl('labels.compact.json'), { cache: 'force-cache' });
@@ -1094,8 +1087,8 @@ async function createMap() {
     preserveDrawingBuffer: false,
     maxBounds: [[bbox[0] - 1.25, bbox[1] - 1], [bbox[2] + 1.25, bbox[3] + 1]]
   });
-  installGlassImageHandler();
-  map.once('styledata', installGlassLabelImages);
+  installCapsuleImageHandler();
+  map.once('styledata', installCapsuleLabelImages);
 
   await new Promise((resolve, reject) => {
     const timer = window.setTimeout(() => reject(new Error('map load timeout')), 30000);
@@ -1106,8 +1099,8 @@ async function createMap() {
     map.on('error', (event) => console.warn('[NAV map resource]', event.error || event));
   });
 
-  setLoadingProgress(52, 'بۆکسە گلاسییەکان و ناوی شار و ناوچەکان ئامادە دەبن…');
-  installGlassLabelImages();
+  setLoadingProgress(52, 'قالبی ناوەکانی NAV KURD و ناوی شار و ناوچەکان ئامادە دەبن…');
+  installCapsuleLabelImages();
   installNativeLabelLayers();
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
   map.on('zoom', updateGpsAccuracyPaint);
@@ -1165,6 +1158,5 @@ window.navKurdMapSearch = (value) => {
   clearTimeout(searchTimer);
   searchTimer = window.setTimeout(() => searchItems(value), 90);
 };
-window.navKurdToggle3D = () => init().then(toggle3D);
 window.navKurdLocate = () => init().then(() => startGps({ center: true }));
 window.navKurdZoom = (direction) => init().then(() => map.easeTo({ zoom: map.getZoom() + direction, duration: 280 }));

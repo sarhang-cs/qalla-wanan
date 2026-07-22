@@ -42,7 +42,6 @@
 .nav-route-btn{padding:0 13px;background:#1b5c44;color:#fff;font-size:11px}
 .nav-route-close{width:34px;background:rgba(255,255,255,.1);color:#fff;font-size:17px}
 
-#btn-layers.nav-3d-on{background:#1b5c44;color:#fff;box-shadow:0 0 0 3px rgba(76,199,154,.22),var(--shadow)}
 #nav-data-state{position:absolute;z-index:24;right:50%;transform:translateX(50%);bottom:calc(var(--taskbar-h) + var(--safe-b) + 12px);max-width:75%;padding:6px 11px;border-radius:999px;background:rgba(6,14,11,.78);color:#fff;font-size:9.5px;box-shadow:0 8px 24px rgba(0,0,0,.24);pointer-events:none;opacity:0;transition:opacity .25s}
 #nav-data-state.show{opacity:1}
 
@@ -83,3 +82,8 @@
   margin-top:12px;padding:9px 16px;border:0;border-radius:999px;
   background:#f5b366;color:#0b241b;font:700 12px var(--app-font,inherit)
 }
+
+
+/* R11 NAV KURD compact capsule labels: the actual capsules are native MapLibre images. */
+#map-side{gap:10px}
+#btn-locate{background:rgba(247,250,252,.96);color:#0b1824}

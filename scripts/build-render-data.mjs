@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const base = 'public/data/nav';
-const release = '2026-07-22-qalla-wanan-r10-glass-69000';
+const release = '2026-07-22-qalla-wanan-r11-nav-capsule-satellite-gps';
 const source = JSON.parse(fs.readFileSync(`${base}/labels-native.geojson`, 'utf8'));
 const keepProperties = ['id', 'name', 'kind', 'tier', 'priority', 'context', 'category'];
 const major = [];
@@ -35,7 +35,7 @@ const poiMeta = write('labels-poi.geojson', poi);
 const detailMeta = write('labels-detail.geojson', detail);
 const renderRecords = major.length + poi.length + detail.length;
 if (renderRecords !== 69_000 || renderRecords !== source.features.length) {
-  throw new Error(`R10 render count mismatch: source=${source.features.length} render=${renderRecords}`);
+  throw new Error(`R11 render count mismatch: source=${source.features.length} render=${renderRecords}`);
 }
 
 const audit = {

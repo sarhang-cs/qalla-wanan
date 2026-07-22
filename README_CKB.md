@@ -1,4 +1,4 @@
-# Qalla Wanan — NAV KURD R10 Glass 69,000
+# Qalla Wanan — NAV KURD R11 Glass 69,000
 
 ئەم وەشانە **69,000 تۆماری سەرچاوەپشتڕاستکراو** لە ناو نەخشەکەدا هەیە:
 
@@ -24,8 +24,16 @@
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-هیچ Variable یان SQL ـی نوێ بۆ R10 پێویست نییە.
+هیچ Variable یان SQL ـی نوێ بۆ R11 پێویست نییە.
 
 ## دامەزراندن لە Termux
 
-`TERMUX_INSTALL_R10_AND_PUSH.sh` جێبەجێ بکە. سکریپتەکە `.git` و `.env.local` دەپارێزێت و تەنها بۆ `sarhang-cs/qalla-wanan` push دەکات.
+`TERMUX_INSTALL_R11_AND_PUSH.sh` جێبەجێ بکە. سکریپتەکە `.git` و `.env.local` دەپارێزێت و تەنها بۆ `sarhang-cs/qalla-wanan` push دەکات.
+
+
+## R11 NAV KURD capsule map
+- Compact dark translucent capsules matching the supplied NAV KURD reference.
+- White Kurdish labels with no black text border.
+- Fixed native MapLibre coordinates; no DOM/canvas label overlay.
+- Satellite-only basemap; GPS and route remain native.
+- All 69,000 source-linked records remain in native map sources and search.
