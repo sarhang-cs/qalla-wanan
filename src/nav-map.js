@@ -27,10 +27,7 @@ const toast = (msg) => {
 };
 const escapeHtml = (value) => String(value).replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
-function satelliteSource() {
-  if (MAPTILER_KEY) {
-    return { type: 'raster', url: `https://api.maptiler.com/tiles/satellite-v4/tiles.json?key=${encodeURIComponent(MAPTILER_KEY)}`, tileSize: 256 };
-  }
+function esriSatelliteSource() {
   return {
     type: 'raster',
     tiles: [
@@ -43,19 +40,41 @@ function satelliteSource() {
 }
 
 function baseStyle() {
-  const sources = { satellite: satelliteSource() };
+  // Keep a permanent satellite layer below MapTiler. If a protected MapTiler
+  // key is missing, mistyped, origin-restricted, or temporarily unavailable,
+  // the map never falls back to a blank/black canvas.
+  const sources = { 'satellite-fallback': esriSatelliteSource() };
+  const layers = [{
+    id: 'satellite-fallback',
+    type: 'raster',
+    source: 'satellite-fallback',
+    minzoom: 0,
+    maxzoom: 24,
+    paint: { 'raster-fade-duration': 0 }
+  }];
+
   if (MAPTILER_KEY) {
+    sources['satellite-maptiler'] = {
+      type: 'raster',
+      url: `https://api.maptiler.com/tiles/satellite-v4/tiles.json?key=${encodeURIComponent(MAPTILER_KEY)}`,
+      tileSize: 256
+    };
     sources.terrain = {
       type: 'raster-dem',
       url: `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${encodeURIComponent(MAPTILER_KEY)}`,
       tileSize: 256
     };
+    layers.push({
+      id: 'satellite-maptiler',
+      type: 'raster',
+      source: 'satellite-maptiler',
+      minzoom: 0,
+      maxzoom: 24,
+      paint: { 'raster-fade-duration': 0 }
+    });
   }
-  return {
-    version: 8,
-    sources,
-    layers: [{ id: 'satellite', type: 'raster', source: 'satellite', minzoom: 0, maxzoom: 24 }]
-  };
+
+  return { version: 8, sources, layers };
 }
 
 function addRuntimeLayers(boundary, mask) {
@@ -179,12 +198,23 @@ class DomLabelManager {
         }
       }
     }
-    out.sort((a, b) => {
+    // At regional zoom, do not render a city label together with a
+    // governorate label carrying the same Kurdish name (for example هەولێر
+    // or کەرکووک). The city remains available in search and reappears when
+    // the user zooms closer.
+    const governorateNames = zoom < 8.2
+      ? new Set(out.filter((item) => item[4] === 'governorate').map((item) => normalizeText(item[1])))
+      : null;
+    const visible = governorateNames
+      ? out.filter((item) => !(item[4] === 'city' && governorateNames.has(normalizeText(item[1]))))
+      : out;
+
+    visible.sort((a, b) => {
       const selected = Number(b[0] === this.selectedId) - Number(a[0] === this.selectedId);
       if (selected) return selected;
       return (b[6] - a[6]) || (a[5] - b[5]) || a[1].localeCompare(b[1], 'ku');
     });
-    return out;
+    return visible;
   }
 
   refresh() {
