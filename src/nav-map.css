@@ -14,18 +14,7 @@
 .maplibregl-ctrl-attrib{font-size:8px!important;background:rgba(4,9,18,.62)!important;color:#dbe5f2!important;border-radius:8px!important;direction:ltr}
 .maplibregl-ctrl-attrib a{color:#f4f7fb!important}
 
-.nav-map-label{position:relative;display:block;max-width:230px;color:#fff;white-space:nowrap;text-align:center;direction:rtl;unicode-bidi:plaintext;line-height:1.12;font-weight:760;letter-spacing:0;text-shadow:0 1px 2px #000,0 0 3px #000,0 0 7px rgba(0,0,0,.98);cursor:pointer;user-select:none;-webkit-user-select:none;transform:translateZ(0);will-change:transform}
-.nav-map-label:hover,.nav-map-label.is-selected{color:#ffe39a;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
-.nav-map-label--region{font-size:20px;font-weight:900;color:#ffe39a;text-shadow:0 2px 3px #000,0 0 10px #000}
-.nav-map-label--governorate{font-size:16px;font-weight:900;color:#fff2c7}
-.nav-map-label--city{font-size:15px;font-weight:900;color:#fff}
-.nav-map-label--town{font-size:14px;font-weight:850}
-.nav-map-label--village{font-size:12px;font-weight:800}
-.nav-map-label--hamlet,.nav-map-label--suburb,.nav-map-label--neighbourhood,.nav-map-label--locality{font-size:11px;font-weight:760;color:#f1f5fb}
-.nav-map-label--natural{font-size:11px;font-style:normal;color:#c8f5dc}
-.nav-map-label--road{font-size:10px;color:#ffe0a1;font-weight:730}
-.nav-map-label--poi,.nav-map-label--custom{font-size:10.5px;color:#fff;font-weight:760}
-
+.nav-label-canvas{position:absolute;inset:0;z-index:5;display:block;width:100%;height:100%;pointer-events:none;contain:strict}
 #nav-map-results{position:absolute;z-index:31;top:calc(env(safe-area-inset-top) + 70px);right:58px;left:58px;max-height:min(44dvh,330px);overflow:auto;background:rgba(8,19,15,.94);border:1px solid rgba(255,255,255,.14);border-radius:18px;box-shadow:0 16px 38px rgba(0,0,0,.38);backdrop-filter:blur(16px);display:none}
 #nav-map-results.show{display:block}
 .nav-search-item{width:100%;display:flex;align-items:center;gap:10px;padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.09);text-align:right;color:#fff;background:transparent}
@@ -45,12 +34,10 @@
 .nav-route-btn{padding:0 13px;background:#1b5c44;color:#fff;font-size:11px}
 .nav-route-close{width:34px;background:rgba(255,255,255,.1);color:#fff;font-size:17px}
 
-.nav-gps-dot{width:18px;height:18px;border-radius:50%;background:#2e7cf6;border:3px solid #fff;box-shadow:0 0 0 7px rgba(46,124,246,.23),0 3px 12px rgba(0,0,0,.45)}
 #btn-layers.nav-3d-on{background:#1b5c44;color:#fff;box-shadow:0 0 0 3px rgba(76,199,154,.22),var(--shadow)}
 #nav-data-state{position:absolute;z-index:24;right:50%;transform:translateX(50%);bottom:calc(var(--taskbar-h) + var(--safe-b) + 12px);max-width:75%;padding:6px 11px;border-radius:999px;background:rgba(6,14,11,.78);color:#fff;font-size:9.5px;box-shadow:0 8px 24px rgba(0,0,0,.24);pointer-events:none;opacity:0;transition:opacity .25s}
 #nav-data-state.show{opacity:1}
 
 @media(max-width:420px){
   #nav-map-results{right:16px;left:16px;top:calc(env(safe-area-inset-top) + 69px)}
-  .nav-map-label--region{font-size:18px}.nav-map-label--governorate{font-size:15px}
 }

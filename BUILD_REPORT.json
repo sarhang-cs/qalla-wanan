@@ -1,20 +1,21 @@
 {
   "ok": true,
-  "release": "R2-FIX",
-  "builtAt": "2026-07-22T14:02:22.665Z",
+  "release": "R4-GEO-STABILITY",
+  "builtAt": "2026-07-22T15:15:27.914118Z",
+  "mapDataVersion": "2026-07-22-qalla-wanan-r4-geo-stability",
   "placeCount": 47040,
   "counts": {
     "region": 1,
     "governorate": 8,
-    "locality": 233,
+    "city": 11,
     "town": 215,
     "village": 6433,
     "hamlet": 14,
     "suburb": 43,
-    "city": 11,
-    "poi": 33067,
+    "locality": 233,
     "natural": 5210,
-    "road": 1805
+    "road": 1805,
+    "poi": 33067
   },
   "bbox": [
     41.285803,
@@ -22,11 +23,38 @@
     46.34873,
     37.377264
   ],
-  "fixes": [
-    "GitHub Pages relative paths",
-    "map labels refresh after style load",
-    "onboarding third-button mobile layout",
-    "Supabase publishable-key REST headers",
-    "GitHub Actions repository variables"
-  ]
+  "dataAudit": {
+    "canonicalSourceRecords": 47041,
+    "exactIdMatches": 47040,
+    "exactNameMatches": 47040,
+    "coordinatesAtFullSourcePrecision": 47040,
+    "outsideCanonicalBoundary": 0,
+    "duplicateDisplayIds": 0,
+    "mergedDuplicateSourceRecords": [
+      {
+        "kept_id": "osm-way-787134307-hotel",
+        "merged_source_id": "osm-node-7358798548-motel",
+        "name": "هۆتێلی سێوەر",
+        "reason": "same named physical venue represented by an OSM building and an OSM node at sub-meter separation"
+      }
+    ]
+  },
+  "rootFixes": [
+    "Replaced DOM place markers with one canvas label renderer anchored to immutable source coordinates",
+    "Boundary-clipped the complete text rectangle using screen-to-geographic unprojection",
+    "Replaced DOM GPS marker with native MapLibre GeoJSON layers and adaptive fix filtering",
+    "Validated and stabilized native route geometry with request cancellation and controlled rerouting",
+    "Rebuilt all display coordinates at full canonical source precision",
+    "Embedded the requested UniQAIDAR Hewal font in source and production build",
+    "Added data and runtime contract checks that reject regression to movable DOM markers"
+  ],
+  "videoReviewed": {
+    "file": "255578.mp4",
+    "durationSeconds": 16.069356,
+    "observed": [
+      "label visibility and placement changed discontinuously during zoom",
+      "DOM text could render beyond the canonical boundary mask",
+      "label recreation made source-anchored features look geographically displaced"
+    ]
+  }
 }

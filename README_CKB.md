@@ -1,174 +1,135 @@
-# R2 Fix
+# QALLA WANAN + NAV KURD MAP — R4 GEO STABILITY
 
-- ناوی 47,040 شوێن لە GitHub Pages چاک کرا.
-- دوگمەی پەڕەی سێیەمی دەستپێک لە مۆبایل چاک کرا.
-- ڕێڕەوی فایلەکان بۆ GitHub Pages، Hostinger و localhost گشتی کرا.
-- Publishable key ـی نوێی Supabase بە هێدەری دروست پشتیوانی دەکرێت.
+ئەم وەشانە چارەسەری پاشکۆ نییە. سیستەمی نیشاندانی ناو، GPS و هێڵی ڕێگا لە بنەڕەتەوە گۆڕدراوە بۆ ئەوەی هەموو شتێک بە **longitude/latitude ـی ڕاستەقینە** گرێدراو بێت و لەگەڵ Zoom، Pan، Pitch و 3D نەجوڵێتە شوێنێکی هەڵە.
 
-# QALLA WANAN + NAV KURD MAP — R1
+## هۆکاری ڕاستەقینەی کێشەکە
 
-ئەم پڕۆژەیە `index (87).html` ـەکە وەک بنەمای UI پاراستووە و **تەنها تابی نەخشە**ی بە داتای NAV KURD گۆڕیوە.
+لە وەشانی پێشوو:
 
-## چی تێدایە؟
+- ناوی شوێنەکان بە DOM Marker دروست دەکران، نەک بە توێژی native/canvas ـی گرێدراو بە projection ـی نەخشە.
+- لە هەر گۆڕانی Zoom ـدا ناوەکان لادەبران و دووبارە دروست دەکران؛ collision selection ـەکە وای دەکرد ناوەکان وەک ئەوەی شوێنیان گۆڕابێت دەربکەون.
+- DOM Marker لە سەر canvas ـی نەخشە بوو، بۆیە mask و سنووری کوردستان نەتوانی دەقەکە clip بکات و بەشێکی ناو دەچووە دەرەوەی سنوور.
+- GPS marker ـیش DOM ـی بوو و raw location fix ـەکان بەبێ فلتەری پێویست وەردەگیران، کە jitter و jump ـی دروست دەکرد.
 
-- ٤٧٬٠٤٠ ناوی شوێن لە داتای NAV KURD:
-  - هەرێم و پارێزگا
-  - شار و شارۆچکە
-  - ٦٬٤٣٣ گوند
-  - دوکان، قوتابخانە، نەخۆشخانە، مزگەوت، ڕێستورانت و POI ـەکان
-  - شوێنە سروشتییەکان و ناوی ڕێگاکان
-- هیچ cluster، خاڵی مۆر، بازنە، کارت یان ئایکۆنی شوێن نییە؛ تەنها ناوەکان دەردەکەون.
-- نەخشە تەنها Satellite ـە.
-- سنووری کوردستان و ناوچە جێناکۆکە هەڵبژێردراوەکان لە داتای NAV KURD پارێزراون؛ دەرەوەی سنوور تاریکە.
-- ئەم سنوورە تەنها سنووری کارپێکردنی داتای ئەپە؛ بڕوانامەی یاسایی، سیاسی یان کاداستر نییە.
-- Search، GPS، route line و 3D terrain هەن.
-- Supabase و SQL ـی تازە ئامادەیە.
-- Adapter ـی MySQL/Hostinger لە پێشوە دانراوە بۆ گواستنەوەی دواتر.
+## چارەسەری بنەڕەتی R4
 
-## ١) فۆنت دابنێ
+### ١. ناوی شوێنەکان
 
-فایلی فۆنتی خۆت لە Download هەیە. لە Termux:
+- DOM Marker بە تەواوی لابراوە.
+- هەموو ناوەکان لە `CanvasLabelLayer` ـدا لەسەر projection ـی MapLibre دەنووسرێن.
+- هیچ کۆدێک longitude یان latitude ـی شوێن لە کاتی Zoom، collision، 3D یان render ناگۆڕێت.
+- هەر ناوێک لە هەر frame ـێکدا لە هەمان coordinate ـی سەرچاوە project دەکرێت.
+- چوار گۆشە و ناوەڕاستی bounding box ـی هەر دەقێک بە `unproject` دەگوازرێتەوە بۆ coordinates؛ ئەگەر یەک بەشی دەقەکە لە دەرەوەی سنووری canonical بێت، ناوەکە نانوسرێت.
+- collision تەنها دیاری دەکات کام ناو لەو zoom ـەدا ببینرێت؛ شوێنی geographic ـی هیچ ناوێک ناگۆڕێت.
+- Search و کلیککردن لەسەر ناوەکان پارێزراوە.
 
-```bash
-termux-setup-storage
-cd /path/to/qalla_wanan_nav_map_r1
-bash scripts/install-font.sh "/sdcard/Download/UniQAIDAR_Hewal 031.ttf"
-```
+### ٢. GPS
 
-فۆنت دەچێتە:
+- GPS marker ـی DOM لابراوە و بە GeoJSON source + MapLibre circle layers جێگیر کراوە.
+- accuracy circle، halo، ring و dot هەموویان لە هەمان geographic point ـدا native render دەکرێن.
+- jump ـی نامومکین ڕەت دەکرێتەوە.
+- fix ـی زۆر لاواز ناتوانێت fix ـی باش تێکبدات.
+- لە کاتی وەستاندا jitter ـی بچووک قوفڵ دەکرێت.
+- smoothing بە accuracy و کاتی نێوان update ـەکان دەگۆڕێت، نەک بە ژمارەیەکی ساختە و جێگیر.
+
+### ٣. هێڵی ڕێگا
+
+- هێڵەکە native GeoJSON line layer ـە و بە پیکسڵ یان DOM ناچسپێنرێت.
+- geometry ـی OSRM پێش نیشاندان validate دەکرێت.
+- دەستپێک و کۆتایی route لەگەڵ GPS و destination بەراورد دەکرێن.
+- request ـە کۆنەکان abort دەکرێن تا route ـەکان تێکەڵ نەبن.
+- reroute تەنها دوای جوڵەی واتادار و ماوەی دیاریکراو ئەنجام دەدرێت.
+- لە silent reroute ـدا viewport ناجوڵێت و route ـی پێشوو لە هەڵەی کاتیی network ـدا ناسڕێتەوە.
+
+## Audit ـی داتا
+
+- ژمارەی entity ـی نیشاندراو: **٤٧٬٠٤٠**
+- هەموو ٤٧٬٠٤٠ entity ـەکە بە stable source ID لە canonical NAV KURD source ـەکانەوە بەستراون.
+- exact ID match: **٤٧٬٠٤٠**
+- exact name match: **٤٧٬٠٤٠**
+- coordinate ـەکان بە full source precision دووبارە دروستکراون؛ rounding ـی شەش خانەی پێشوو لابراوە.
+- entity لە دەرەوەی canonical boundary: **٠**
+- duplicate display ID: **٠**
+- یەک OSM node و building کە هەمان هۆتێلیان بە دوو feature نیشان دابوو، بە دڵنیایی لە یەک شوێنی sub-meter ـدا merge کراون؛ شوێنێک نەسڕاوەتەوە، تەنها duplicate ـی ساختە نیشان نادرێت.
+
+سەرچاوە audit کراوەکان:
+
+- `iraq-260713.osm.pbf`
+- `iraq-260713-free.gpkg.zip`
+- `IQ.zip`
+- `alternateNamesV2.zip`
+- canonical NAV KURD GeoJSON layers
+
+وردەکاری و SHA-256 ـی سەرچاوەکان لە:
 
 ```text
-public/fonts/UniQAIDAR_Hewal_031.ttf
+public/data/nav/provenance-audit.json
 ```
 
-## ٢) تاقیکردنەوە لە Termux
+## پشکنینە خۆکارەکان
 
-```bash
-pkg update -y
-pkg install -y nodejs git
-cd /path/to/qalla_wanan_nav_map_r1
-cp .env.example .env.local
-npm install
-npm run check
-npm run dev
-```
+`npm run check` ئەمانە بە زۆرەملێ پشکنین دەکات:
 
-دواتر لە browser ـی مۆبایلەکەت بکەرەوە:
+- هەموو item ـەکان coordinate ـی دروستیان هەبێت.
+- هیچ item ـێک لە دەرەوەی سنوور نەبێت.
+- ID دووبارە نەبێت.
+- audit metadata لەگەڵ data یەکسان بێت.
+- DOM MapLibre Marker لە runtime نەبێت.
+- Canvas label projection و boundary clipping هەبێت.
+- GPS و route بە native GeoJSON layers بن.
+- فۆنتی `UniQAIDAR_Hewal_031.ttf` بە ڕاستی لە source و build ـدا هەبێت.
+
+## Variable ـەکان
+
+هیچ Variable ـی نوێ بۆ R4 پێویست نییە. هەمان سێ دانە بەسن:
 
 ```text
-http://127.0.0.1:5173
+VITE_MAPTILER_KEY
+VITE_SUPABASE_URL
+VITE_SUPABASE_PUBLISHABLE_KEY
 ```
 
-## ٣) Variable ـە پێویستەکان
+Variable ـە بنەڕەتییەکان لە workflow ـدا دانراون:
 
-لە `.env.local` بۆ local و لە Vercel → Settings → Environment Variables بۆ production:
-
-```env
-VITE_MAPTILER_KEY=YOUR_PUBLIC_MAPTILER_KEY
+```text
 VITE_BACKEND_MODE=supabase
-VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 VITE_ROUTING_BASE_URL=https://router.project-osrm.org
-VITE_MYSQL_API_BASE_URL=
-VITE_MAP_DATA_VERSION=2026-07-22-qalla-wanan-nav-map-r2
+VITE_MAP_DATA_VERSION=2026-07-22-qalla-wanan-r4-geo-stability
 ```
 
-### تێبینی گرنگ
+`service_role`، database password یان secret key نابێت لە frontend/GitHub Pages دابنرێت.
 
-- `VITE_MAPTILER_KEY` بۆ Satellite ـی MapTiler و 3D terrain پێویستە. ئەگەر دانەنرێت، Satellite ـی Esri fallback کار دەکات، بەڵام 3D ناچالاک دەبێت. لە MapTiler key settings ـدا دۆمەینی Vercel/Hostinger ـەکەت سنووردار بکە.
-- هیچ `service_role` ی Supabase لە Vercel یان browser مەخە. تەنها Publishable/Anon key.
-- بۆ production باشترە routing endpoint ـی تایبەتی خۆت دابنێیت؛ endpoint ـی OSRM لێرە بۆ تاقیکردنەوەی یەکەمە.
+## دامەزراندن و Push لە Termux
 
-## ٤) Supabase ـی تازە
+ZIP ـی R4 لە Downloads دابنێ و سکریپتی `TERMUX_INSTALL_R4_AND_PUSH.sh` جێبەجێ بکە. سکریپتەکە:
 
-1. پڕۆژەی تازە دروست بکە.
-2. SQL Editor بکەرەوە.
-3. ناوەڕۆکی ئەم فایلە جێبەجێ بکە:
-
-```text
-supabase/migrations/001_initial_schema.sql
-```
-
-4. URL و Publishable key بخەرە Vercel.
-5. دوای یەکەم sign-in، لە کۆتایی SQL ـەکە فرمانی admin هەیە؛ email ـی خۆت تێدا دابنێ.
-
-Table ـە سەرەکییەکان:
-
-- `profiles`
-- `places`
-- `favorites`
-
-`places.status` ئەمانە وەردەگرێت:
-
-```text
-pending | published | rejected | archived
-```
-
-تابی نەخشە تەنها ئەو شوێنانە دەخوێنێتەوە کە `status = published` ـیانە.
-
-## ٥) Upload بۆ GitHub ـی qalla-wanan
-
-لە ناو فۆڵدەری پڕۆژە:
-
-```bash
-bash TERMUX_PUSH_QALLA_WANAN.sh "$PWD"
-```
-
-سکریپتەکە build/check دەکات و پاشان بۆ ئەم repo ـە push دەکات:
+- پڕۆژەی ئێستا backup دەکات.
+- تەواوی source ـی R4 جێگای source ـی کۆن دەگرێتەوە؛ patch ـی کۆتایی فایل نییە.
+- `.git` و `.env.local` پارێزراو دەهێڵێتەوە.
+- check و build دەکات.
+- دڵنیادەبێتەوە origin تەنها ئەمەیە:
 
 ```text
 https://github.com/sarhang-cs/qalla-wanan.git
 ```
 
-GitHub لە تۆ username/password یان Personal Access Token داوا دەکات؛ token لە هیچ فایلێکی پڕۆژەدا مەنووسە.
+- پاشان commit و push دەکات و GitHub Pages workflow خۆکارانە deploy دەکات.
 
-## ٦) Vercel
-
-- Add New Project
-- repo ـی `sarhang-cs/qalla-wanan` هەڵبژێرە
-- Framework Preset: `Other`
-- Build command: `npm run build`
-- Output directory: `dist`
-- Variable ـەکانی سەرەوە زیاد بکە
-- Deploy
-
-هەر گۆڕانێک لە Environment Variables دوای redeploy دەچێتە کار.
-
-## ٧) گواستنەوەی دواتر بۆ Hostinger/MySQL
-
-ئامادەکراوەکان:
+## ساختاری گرنگ
 
 ```text
-mysql/001_initial_schema_mysql.sql
-hostinger-api/config.example.php
-hostinger-api/places.php
-```
-
-ڕێکخستن:
-
-1. SQL ـی MySQL جێبەجێ بکە.
-2. `hostinger-api/config.example.php` کۆپی بکە بۆ `config.php` و DB credentials تێدا دابنێ.
-3. فۆڵدەری API بخەرە hosting.
-4. پێش build کردنی frontend لە Hostinger، لە `.env.local` بنووسە:
-
-```env
-VITE_BACKEND_MODE=mysql
-VITE_MYSQL_API_BASE_URL=https://YOUR-DOMAIN.COM/api
-```
-
-Browser نابێت ڕاستەوخۆ بە MySQL پەیوەندی بکات؛ `places.php` وەک API ـی نێوانیان کار دەکات.
-
-## ساختاری سەرەکی
-
-```text
-index.html
 src/nav-map.js
 src/nav-map.css
-src/backend.js
+public/fonts/UniQAIDAR_Hewal_031.ttf
 public/data/nav/labels.compact.json
 public/data/nav/boundary.geojson
 public/data/nav/outside-mask.geojson
-supabase/migrations/001_initial_schema.sql
-mysql/001_initial_schema_mysql.sql
-hostinger-api/
+public/data/nav/provenance-audit.json
+scripts/check-data.mjs
+scripts/check-runtime-contract.mjs
+TERMUX_INSTALL_R4_AND_PUSH.sh
 ```
+
+## سنووری دڵنیایی
+
+ئەم وەشانە هیچ ناو یان coordinate ـێکی نوێ لە خۆیەوە دروست ناکات. هەر شتێک لە data ـدا هەیە بە سەرچاوەی canonical بەستراوە. «تەواوی هەموو شوێنەکانی جیهانی ڕاستەقینە» بە هیچ dataset ـێک ناتوانرێت بە ڕاستی گەرەنتی بکرێت؛ بەڵام هیچ entity ـێک لە ٤٧٬٠٤٠ رکۆردی سەرچاوەی ئەم build ـە لەبیرنەکراوە و هیچ fake record ـێک زیاد نەکراوە.

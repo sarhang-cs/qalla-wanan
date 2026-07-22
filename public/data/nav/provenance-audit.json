@@ -1,0 +1,41 @@
+{
+  "ok": true,
+  "release": "2026-07-22-qalla-wanan-r4-geo-stability",
+  "displayRecords": 47040,
+  "canonicalSourceRecords": 47041,
+  "mergedDuplicateSourceRecords": [
+    {
+      "kept_id": "osm-way-787134307-hotel",
+      "merged_source_id": "osm-node-7358798548-motel",
+      "name": "هۆتێلی سێوەر",
+      "reason": "same named physical venue represented by an OSM building and an OSM node at sub-meter separation"
+    }
+  ],
+  "exactIdMatches": 47040,
+  "exactNameMatches": 47040,
+  "coordinatesReplacedWithFullPrecision": 47040,
+  "outsideCanonicalBoundary": 0,
+  "duplicateDisplayIds": 0,
+  "sourceFiles": {
+    "kri-labels.geojson": "1650e0a3644c21124373a754fbb63d775c1cbb6c00e13c63e32337ee5edcaf90",
+    "kri-localities-render-ku.geojson": "357aaee048862b385eba716456fe3dfaf9daf82d0772fc72aaf60643bd62ebfb",
+    "kri-pois-render.geojson": "fc5b31290baa058469ffe1446ae45836d8012a3f1c0feaed0d9cef88e80ed451",
+    "kri-natural-features.geojson": "7fae384a1446719bcc1a2848063f88303348f305d91df198b61a130014b9fd2c",
+    "kri-road-labels.geojson": "42f1692c0a2f5f72b202466150464fe3698ccbc9a384dc3423b5ea03284fdf8b"
+  },
+  "rawInputs": {
+    "iraq-260713.osm.pbf": "a8e16e22e48e597a32f9d10c144658eaa28110e7109fb824580f90a645fe96cf",
+    "iraq-260713-free.gpkg.zip": "d0c0f6c83a461eecd37c343117bb20cf2df8e67bbb6b83db092cdef37b470979",
+    "IQ.zip": "9c44c7341adc523eaab6e75a979ecdd2ce9c09af8bd1e7d40f5382dee26ea273",
+    "alternateNamesV2.zip": "7b4894b44ac4cd8eaad8396e25d2e8497d65deaa3aa6127fd9e966133fea69e6"
+  },
+  "rawInputDates": {
+    "OpenStreetMap_Geofabrik": "2026-07-13",
+    "GeoNames": "2026-07-13"
+  },
+  "notes": [
+    "Every displayed record is linked by stable source id to a canonical NAV KURD source feature.",
+    "The render runtime never changes longitude or latitude during zoom, pan, collision handling, GPS updates, or 3D mode.",
+    "One duplicate OSM node/building representation of the same hotel is merged into one display entity to prevent a fake duplicate label."
+  ]
+}
