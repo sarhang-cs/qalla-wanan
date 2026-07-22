@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#14392C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>گوندەکانی کوردستان · NAV KURD</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+<link rel="stylesheet" href="/src/nav-map.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+@font-face{font-family:"Qalla Hewal";src:url("/fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");font-style:normal;font-weight:100 900;font-display:swap}
+:root{--app-font:"Qalla Hewal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+html,body,button,input,textarea,select,#app,.leaflet-container{font-family:var(--app-font)!important}
+
+:root{
+  --green:#1B5C44;
+  --green-deep:#14392C;
+  --green-soft:#E7F0EB;
+  --green-line:#CFE0D7;
+  --cream:#F8F6F1;
+  --card:#FFFFFF;
+  --ink:#1D2823;
+  --ink-2:#5B6B63;
+  --ink-3:#93A29A;
+  --line:#ECEAE3;
+  --heart:#E25555;
+  --shadow:0 10px 30px rgba(20,57,44,.10);
+  --shadow-lg:0 18px 44px rgba(20,57,44,.18);
+  --r-lg:22px; --r-md:16px; --r-sm:12px;
+  --taskbar-h:72px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+body.dark{
+  --green:#4CC79A;
+  --green-deep:#0C231B;
+  --green-soft:#173A2E;
+  --green-line:#1E4A3A;
+  --cream:#0F1D17;
+  --card:#15271F;
+  --ink:#EAF3EE;
+  --ink-2:#9DB5A9;
+  --ink-3:#6B8378;
+  --line:#1D3328;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --shadow-lg:0 18px 44px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:var(--app-font);
+  background:var(--cream); color:var(--ink);
+  overflow:hidden; direction:rtl;
+  transition:background .35s,color .35s;
+}
+button{font-family:inherit;border:0;background:none;cursor:pointer;color:inherit}
+input{font-family:inherit}
+#app{max-width:480px;margin:0 auto;height:100dvh;position:relative;overflow:hidden;background:var(--cream);transition:background .35s}
+
+/* ---------- views ---------- */
+.view{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--cream)}
+.view.active{display:flex}
+.scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:calc(var(--taskbar-h) + var(--safe-b) + 30px)}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ---------- onboarding (٣ پەڕە) ---------- */
+#view-splash{z-index:60;background:var(--green-deep)}
+.ob-slides{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none}
+.ob-slides::-webkit-scrollbar{display:none}
+.ob-slide{position:relative;flex:0 0 100%;scroll-snap-align:center;overflow:hidden}
+.ob-img{position:absolute;inset:0}
+.ob-img svg{width:100%;height:100%;display:block}
+.ob-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,30,22,.42) 0%,rgba(11,30,22,0) 30%,rgba(11,30,22,.34) 100%)}
+.ob-card{position:absolute;right:20px;left:20px;bottom:calc(var(--safe-b) + 24px);background:var(--card);border-radius:28px;box-shadow:0 26px 60px rgba(8,24,17,.35);padding:26px 24px 96px;animation:cardup .7s cubic-bezier(.2,.9,.3,1) both;transition:background .35s}
+.ob-kicker{display:inline-block;background:var(--green-soft);color:var(--green);font-size:11px;font-weight:800;padding:7px 14px;border-radius:99px;letter-spacing:.2px}
+.ob-card h1{font-family:var(--app-font);font-weight:700;font-size:24px;color:var(--ink);margin-top:14px}
+.ob-card p{font-size:13.5px;line-height:2.05;color:var(--ink-2);margin-top:9px;max-width:300px}
+@keyframes cardup{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+.ob-top{position:absolute;z-index:5;top:max(env(safe-area-inset-top),16px);right:18px;left:18px;display:flex;align-items:center;justify-content:space-between}
+.ob-skip,.ob-lang{height:38px;padding:0 16px;border-radius:999px;background:rgba(11,30,22,.4);backdrop-filter:blur(10px);color:#fff;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:7px}
+.ob-ctl{position:absolute;z-index:6;right:44px;left:38px;bottom:calc(var(--safe-b) + 48px);display:flex;align-items:center;justify-content:space-between}
+.ob-dots{display:flex;gap:7px}
+.ob-dots span{width:8px;height:8px;border-radius:99px;background:var(--green-line);transition:all .4s cubic-bezier(.2,.9,.3,1)}
+.ob-dots span.on{width:30px;background:var(--green)}
+.ob-next-wrap{position:relative;width:70px;height:70px;display:grid;place-items:center}
+.ob-ring-svg{position:absolute;inset:0;width:70px;height:70px;transition:opacity .3s}
+#ob-ring-bar{transition:stroke-dashoffset .55s cubic-bezier(.2,.9,.3,1)}
+.btn-next{position:relative;height:56px;width:56px;border-radius:999px;background:linear-gradient(155deg,var(--green),var(--green-deep));color:#fff;display:flex;align-items:center;justify-content:center;gap:0;box-shadow:0 12px 26px rgba(20,57,44,.4);transition:width .5s cubic-bezier(.25,1.2,.4,1),transform .15s;overflow:hidden;white-space:nowrap}
+.btn-next svg{width:22px;height:22px;flex:0 0 auto}
+.btn-next .bn-label{max-width:0;opacity:0;font-size:14.5px;font-weight:800;transition:max-width .5s cubic-bezier(.25,1.2,.4,1),opacity .3s,margin .5s}
+.btn-next:active{transform:scale(.94)}
+.ob-next-wrap.last .ob-ring-svg{opacity:0}
+.ob-next-wrap.last .btn-next{width:172px;background:linear-gradient(155deg,#F5B366,#E08A2E);color:#241503;box-shadow:0 14px 30px rgba(240,162,75,.4)}
+.ob-next-wrap.last .bn-label{max-width:120px;opacity:1;margin-left:8px}
+body.dark .ob-card{box-shadow:0 26px 60px rgba(0,0,0,.55)}
+body.dark .btn-next{color:#08211A}
+
+/* ---------- top bars ---------- */
+.topbar{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 14px) 18px 12px}
+.topbar .title{flex:1;text-align:center;font-family:var(--app-font);font-weight:700;font-size:18px}
+.icon-btn{width:42px;height:42px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);display:grid;place-items:center;color:var(--ink);flex:0 0 auto;transition:transform .15s}
+.icon-btn:active{transform:scale(.92)}
+.icon-btn svg{width:20px;height:20px}
+.icon-btn.plain{background:none;box-shadow:none}
+
+/* ---------- home ---------- */
+.home-head{padding:calc(env(safe-area-inset-top) + 18px) 20px 4px;display:flex;align-items:center;gap:12px}
+.home-head .hi small{display:block;font-size:12.5px;color:var(--ink-2)}
+.home-head .hi b{font-family:var(--app-font);font-size:19px}
+.home-head .spacer{flex:1}
+.search-wrap{padding:14px 20px 4px;display:flex;gap:10px}
+.search-box{flex:1;height:50px;border-radius:999px;background:var(--card);box-shadow:var(--shadow);display:flex;align-items:center;padding:0 18px;gap:10px}
+.search-box svg{width:19px;height:19px;color:var(--ink-3);flex:0 0 auto}
+.search-box input{flex:1;border:0;outline:0;background:none;font-size:14.5px;color:var(--ink)}
+.search-box input::placeholder{color:var(--ink-3)}
+.filter-btn{width:50px;height:50px;border-radius:50%;background:var(--green-deep);color:#fff;box-shadow:var(--shadow);display:grid;place-items:center}
+.filter-btn svg{width:20px;height:20px}
+.chips{display:flex;gap:9px;overflow-x:auto;padding:14px 20px 6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;height:38px;padding:0 18px;border-radius:999px;background:var(--card);border:1.5px solid var(--line);font-size:13.5px;font-weight:600;color:var(--ink-2);display:flex;align-items:center;transition:all .2s}
+.chip.on{background:var(--green-deep);border-color:var(--green-deep);color:#fff}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;padding:18px 20px 12px}
+.section-head h3{font-family:var(--app-font);font-size:16.5px}
+.section-head button{font-size:13px;font-weight:600;color:var(--green)}
+.hcards{display:flex;gap:14px;overflow-x:auto;padding:2px 20px 10px;scrollbar-width:none}
+.hcards::-webkit-scrollbar{display:none}
+.vcard{flex:0 0 236px;border-radius:var(--r-lg);background:var(--card);box-shadow:var(--shadow);overflow:hidden;position:relative}
+.vcard .ph{height:140px;position:relative}
+.vcard .ph svg{width:100%;height:100%;display:block}
+.vcard .fav{position:absolute;top:10px;left:10px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;color:var(--ink-3)}
+.vcard .fav.on{color:var(--heart)}
+.vcard .fav svg{width:18px;height:18px}
+.vcard .meta{padding:12px 14px 14px}
+.vcard .meta b{font-size:15px;display:block}
+.vcard .meta small{display:flex;align-items:center;gap:5px;color:var(--ink-2);font-size:12px;margin-top:5px}
+.vcard .meta small svg{width:13px;height:13px;color:var(--green)}
+.vcard .dist{position:absolute;top:112px;right:12px;background:var(--green-deep);color:#fff;font-size:11.5px;font-weight:700;padding:5px 11px;border-radius:999px}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:4px 20px 8px}
+.qcell{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:16px 8px 13px;display:flex;flex-direction:column;align-items:center;gap:9px;transition:transform .15s}
+.qcell:active{transform:scale(.95)}
+.qcell .qi{width:44px;height:44px;border-radius:14px;background:var(--green-soft);display:grid;place-items:center;color:var(--green)}
+.qcell .qi svg{width:22px;height:22px}
+.qcell span{font-size:12px;font-weight:600;color:var(--ink-2);text-align:center;line-height:1.5}
+.rowlist{padding:2px 20px;display:flex;flex-direction:column;gap:12px}
+.rowcard{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:11px;display:flex;align-items:center;gap:12px}
+.rowcard .thumb{width:76px;height:64px;border-radius:12px;overflow:hidden;flex:0 0 auto}
+.rowcard .thumb svg{width:100%;height:100%;display:block}
+.rowcard .info{flex:1;min-width:0}
+.rowcard .info b{font-size:14.5px;display:block}
+.rowcard .info small{color:var(--ink-2);font-size:12px;display:block;margin-top:3px}
+.rowcard .info .d{color:var(--green);font-weight:700;font-size:11.5px;margin-top:4px;display:inline-block}
+.rowcard .hbtn{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;color:var(--ink-3)}
+.rowcard .hbtn.on{color:var(--heart)}
+.rowcard .hbtn svg{width:19px;height:19px}
+
+/* ---------- map view ---------- */
+#view-map{background:#DCE7DE}
+#map-top{position:absolute;top:0;right:0;left:0;z-index:20;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;pointer-events:none}
+#map-top>*{pointer-events:auto}
+.map-search-row{display:flex;gap:10px;align-items:center}
+#map-side{position:absolute;z-index:20;left:16px;top:170px;display:flex;flex-direction:column;gap:12px}
+#leafmap{position:absolute;inset:0;z-index:1}
+.zoomctl{position:absolute;z-index:20;left:16px;bottom:calc(var(--taskbar-h) + var(--safe-b) + 178px);display:flex;flex-direction:column;gap:10px}
+#map-card{position:absolute;z-index:22;right:16px;left:16px;bottom:calc(var(--taskbar-h) + var(--safe-b) + 20px);background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:12px;display:none;align-items:center;gap:12px;animation:rise .35s cubic-bezier(.2,.9,.3,1)}
+#map-card.show{display:flex}
+#map-card .thumb{width:86px;height:74px;border-radius:14px;overflow:hidden;flex:0 0 auto}
+#map-card .thumb svg{width:100%;height:100%;display:block}
+#map-card .inf{flex:1;min-width:0}
+#map-card .inf b{font-size:15.5px;display:block}
+#map-card .inf small{display:block;color:var(--ink-2);font-size:12px;margin-top:4px;line-height:1.7}
+#map-card .go{width:38px;height:38px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
+#map-card .go svg{width:18px;height:18px;transform:scaleX(-1)}
+.leaflet-container{font-family:var(--app-font);background:#C9D8CC}
+.vpin{position:relative}
+.vpin .pin{width:34px;height:34px;border-radius:50% 50% 50% 4px;transform:rotate(45deg);background:var(--green-deep);border:3px solid #fff;box-shadow:0 6px 14px rgba(0,0,0,.35);display:grid;place-items:center;transition:transform .2s}
+.vpin .pin svg{width:15px;height:15px;transform:rotate(-45deg);color:#fff}
+.vpin.sel .pin{background:#E8A33D;transform:rotate(45deg) scale(1.18)}
+
+/* ---------- detail ---------- */
+#det-hero{position:relative;height:340px;flex:0 0 auto}
+#det-hero .slides{position:absolute;inset:0;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;direction:ltr}
+#det-hero .slides::-webkit-scrollbar{display:none}
+#det-hero .slide{flex:0 0 100%;scroll-snap-align:center}
+#det-hero .slide svg{width:100%;height:100%;display:block}
+#det-hero .grad{position:absolute;top:0;right:0;left:0;height:110px;background:linear-gradient(180deg,rgba(10,30,22,.55),transparent);pointer-events:none}
+#det-hero .bar{position:absolute;top:0;right:0;left:0;display:flex;align-items:center;padding:calc(env(safe-area-inset-top) + 12px) 16px 0;gap:10px}
+#det-hero .bar .t{flex:1;text-align:center;color:#fff;font-family:var(--app-font);font-weight:700;font-size:17px;text-shadow:0 2px 8px rgba(0,0,0,.4)}
+#det-hero .bar .icon-btn{background:rgba(255,255,255,.22);backdrop-filter:blur(8px);color:#fff;box-shadow:none}
+#det-hero .bar .icon-btn.on{color:#FF8B8B}
+#det-hero .count{position:absolute;bottom:34px;left:16px;background:rgba(10,30,22,.6);backdrop-filter:blur(6px);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:999px;direction:ltr}
+#det-sheet{position:relative;margin-top:-24px;background:var(--cream);border-radius:26px 26px 0 0;flex:1;display:flex;flex-direction:column;min-height:0;transition:background .35s}
+.tabs{display:flex;gap:4px;padding:10px 14px 0;border-bottom:1.5px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:1;min-width:64px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px 11px;color:var(--ink-3);font-size:12px;font-weight:600;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;transition:color .2s}
+.tab svg{width:20px;height:20px}
+.tab.on{color:var(--green);border-bottom-color:var(--green)}
+.det-pane{display:none;padding:18px 20px 8px}
+.det-pane.on{display:block}
+.det-pane h4{font-family:var(--app-font);font-size:16px;margin-bottom:10px}
+.det-pane p.desc{font-size:13.5px;line-height:2.1;color:var(--ink-2)}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.stat{background:var(--card);border-radius:var(--r-md);box-shadow:var(--shadow);padding:14px;display:flex;align-items:center;gap:12px}
+.stat .si{width:42px;height:42px;border-radius:13px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;flex:0 0 auto}
+.stat .si svg{width:20px;height:20px}
+.stat .sv{min-width:0}
+.stat .sv small{display:block;font-size:11px;color:var(--ink-2)}
+.stat .sv b{font-size:16.5px;display:flex;align-items:baseline;gap:4px}
+.stat .sv b i{font-style:normal;font-size:11px;color:var(--ink-3);font-weight:600}
+.gal{columns:2;column-gap:10px;padding:0}
+.gal .g{break-inside:avoid;margin-bottom:10px;border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.gal .g svg{width:100%;display:block}
+.empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:44px 20px;color:var(--ink-3);text-align:center}
+.empty svg{width:52px;height:52px}
+.empty b{color:var(--ink-2);font-size:14.5px}
+.empty small{font-size:12.5px;line-height:1.9}
+#det-cta{position:absolute;right:18px;left:18px;bottom:calc(var(--safe-b) + 18px);z-index:8}
+.btn-primary{width:100%;height:56px;border-radius:999px;background:var(--green-deep);color:#fff;font-size:15.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:var(--shadow-lg);transition:transform .15s}
+body.dark .btn-primary{background:var(--green)}
+body.dark .btn-primary{color:#08211A}
+.btn-primary:active{transform:scale(.97)}
+.btn-primary svg{width:19px;height:19px}
+#pane-overview{padding-bottom:96px}
+.minimap{height:230px;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow)}
+.det-chips{display:flex;gap:10px;overflow-x:auto;margin-top:16px;scrollbar-width:none;padding-bottom:4px}
+.det-chips::-webkit-scrollbar{display:none}
+.det-chip{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:var(--card);box-shadow:var(--shadow);border-radius:999px;height:44px;padding:0 16px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.det-chip svg{width:17px;height:17px;color:var(--green)}
+
+/* ---------- directions ---------- */
+#dirmap{position:absolute;inset:0;z-index:1}
+#dir-top{position:absolute;z-index:20;top:0;right:0;left:0;display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top) + 12px) 16px 0}
+#dir-top .t{flex:1;text-align:center;font-family:var(--app-font);font-weight:700;font-size:16.5px;color:var(--ink)}
+#dir-card{position:absolute;z-index:20;right:16px;left:16px;bottom:calc(var(--safe-b) + 18px);background:var(--card);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);padding:18px}
+#dir-card .nums{display:flex;align-items:baseline;justify-content:space-between}
+#dir-card .nums .n{display:flex;align-items:baseline;gap:6px}
+#dir-card .nums b{font-size:30px;font-family:var(--app-font)}
+#dir-card .nums span{font-size:12.5px;color:var(--ink-2);font-weight:600}
+#dir-card .mode{font-size:12px;color:var(--ink-3);margin-top:6px}
+#dir-card .btn-primary{margin-top:14px;height:52px}
+
+/* ---------- sidebar ---------- */
+#drawer-veil{position:absolute;inset:0;background:rgba(8,20,15,.45);z-index:48;opacity:0;pointer-events:none;transition:opacity .3s}
+#drawer-veil.show{opacity:1;pointer-events:auto}
+#drawer{position:absolute;top:0;bottom:0;right:0;width:82%;max-width:330px;background:var(--green-deep);color:#F2F7F4;z-index:50;transform:translateX(102%);transition:transform .34s cubic-bezier(.2,.9,.3,1);display:flex;flex-direction:column;border-radius:0 0 0 28px;box-shadow:-14px 0 40px rgba(0,0,0,.3)}
+#drawer.show{transform:translateX(0)}
+.dr-head{display:flex;align-items:center;gap:13px;padding:calc(env(safe-area-inset-top) + 26px) 22px 22px;border-bottom:1px solid rgba(255,255,255,.12)}
+.dr-head .av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.15);display:grid;place-items:center}
+.dr-head .av svg{width:26px;height:26px;color:rgba(255,255,255,.85)}
+.dr-head b{display:block;font-size:15.5px}
+.dr-head small{display:block;font-size:12px;color:rgba(255,255,255,.6);margin-top:3px}
+.dr-body{flex:1;overflow-y:auto;padding:12px 12px}
+.dr-item{display:flex;align-items:center;gap:14px;width:100%;padding:14px 12px;border-radius:14px;color:rgba(255,255,255,.88);font-size:14.5px;font-weight:500;transition:background .2s;text-align:right}
+.dr-item svg{width:21px;height:21px;flex:0 0 auto;color:rgba(255,255,255,.75)}
+.dr-item:active,.dr-item.on{background:rgba(255,255,255,.12)}
+.dr-sep{height:1px;background:rgba(255,255,255,.1);margin:10px 12px}
+.dr-foot{padding:14px 20px calc(var(--safe-b) + 22px);display:flex;flex-direction:column;gap:14px}
+.dr-toggle{display:flex;align-items:center;justify-content:space-between}
+.dr-toggle span{font-size:14px;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:10px}
+.dr-toggle span svg{width:19px;height:19px}
+.switch{width:52px;height:29px;border-radius:999px;background:rgba(255,255,255,.2);position:relative;transition:background .25s}
+.switch::after{content:"";position:absolute;top:3.5px;right:4px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .25s}
+.switch.on{background:#4CC79A}
+.switch.on::after{transform:translateX(-23px)}
+.dr-lang{height:46px;border-radius:999px;background:rgba(255,255,255,.13);color:#fff;font-size:13.5px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:9px}
+.dr-lang svg{width:18px;height:18px}
+
+/* ---------- taskbar ---------- */
+#taskbar{position:absolute;z-index:40;right:0;left:0;bottom:0;height:calc(var(--taskbar-h) + var(--safe-b));background:#0D2820;border-radius:24px 24px 0 0;overflow:hidden;box-shadow:0 -12px 32px rgba(13,40,32,.22),inset 0 1px 0 rgba(255,255,255,.1);transition:transform .3s,opacity .3s}
+#taskbar.hide{transform:translateY(130%);opacity:0;pointer-events:none}
+.tb-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.tb-row{position:absolute;right:0;left:0;top:0;height:var(--taskbar-h);display:flex;align-items:stretch;padding:0 4px}
+.tb-item{position:relative;flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding-top:3px;color:rgba(255,255,255,.62);transition:color .3s}
+.tb-item svg{width:22px;height:22px;flex:0 0 auto;transition:transform .3s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))}
+.tb-item span{font-size:10px;font-weight:700;white-space:nowrap;letter-spacing:.1px;transition:color .3s;text-shadow:0 1px 4px rgba(0,0,0,.45)}
+.tb-item i{position:absolute;bottom:7px;width:0;height:3px;border-radius:99px;background:#F0A24B;transition:width .4s cubic-bezier(.3,1.4,.5,1);box-shadow:0 0 10px rgba(240,162,75,.7)}
+.tb-item.on{color:#FFFFFF}
+.tb-item.on svg{color:#F5B366;animation:tb-pop .55s cubic-bezier(.3,1.7,.4,1)}
+.tb-item.on i{width:24px}
+.tb-item:active svg{transform:scale(.85)}
+@keyframes tb-pop{0%{transform:scale(.6) rotate(-14deg)}60%{transform:scale(1.22) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+body.dark #taskbar{box-shadow:0 -10px 30px rgba(0,0,0,.55)}
+
+/* toast */
+#toast{position:absolute;z-index:70;right:24px;left:24px;bottom:calc(var(--taskbar-h) + var(--safe-b) + 30px);background:var(--green-deep);color:#fff;font-size:13.5px;font-weight:600;padding:14px 20px;border-radius:16px;box-shadow:var(--shadow-lg);text-align:center;opacity:0;transform:translateY(14px);pointer-events:none;transition:all .3s}
+body.dark #toast{background:var(--green);color:#08211A}
+#toast.show{opacity:1;transform:translateY(0)}
+
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ======== ONBOARDING (٣ پەڕە) ======== -->
+  <section class="view active" id="view-splash">
+    <div class="ob-slides" id="ob-slides">
+
+      <div class="ob-slide">
+        <div class="ob-img" id="ob-bg1"></div>
+        <div class="ob-shade"></div>
+        <div class="ob-card">
+          <span class="ob-kicker">١ / ٣ · دەستپێک</span>
+          <h1>گوندەکانی کوردستان</h1>
+          <p>ناسنامەی هەموو گوندەکانی کوردستان لە یەک شوێندا — ناو، وێنە، مێژوو و زانیارییە تەواوەکان</p>
+        </div>
+      </div>
+
+      <div class="ob-slide">
+        <div class="ob-img" id="ob-bg2"></div>
+        <div class="ob-shade"></div>
+        <div class="ob-card">
+          <span class="ob-kicker">٢ / ٣ · نەخشە</span>
+          <h1>نەخشەی ساتەلایت</h1>
+          <p>هەموو گوندەکان لەسەر نەخشەی ساتەلایت — کلیک لە هەر پینێک بکە بۆ کردنەوەی زانیاری گوندەکە</p>
+        </div>
+      </div>
+
+      <div class="ob-slide">
+        <div class="ob-img" id="ob-bg3"></div>
+        <div class="ob-shade"></div>
+        <div class="ob-card">
+          <span class="ob-kicker">٣ / ٣ · ئامادەیت؟</span>
+          <h1>وێنە و ڕێنمایی</h1>
+          <p>گەلەری وێنەکان و ڕێنمایی گەیشتن بۆ هەر گوندێک — ئێستا دەستپێ بکە</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="ob-top">
+      <button class="ob-skip" id="ob-skip">پەڕاندن</button>
+      <button class="ob-lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.6 3.5 14.4 0 18M12 3c-3.5 3.6-3.5 14.4 0 18"/></svg>
+        کوردی
+      </button>
+    </div>
+    <div class="ob-ctl">
+      <div class="ob-dots" id="ob-dots"><span class="on"></span><span></span><span></span></div>
+      <div class="ob-next-wrap">
+        <svg class="ob-ring-svg" viewBox="0 0 70 70">
+          <circle cx="35" cy="35" r="31" fill="none" stroke="rgba(20,57,44,.14)" stroke-width="3"/>
+          <circle id="ob-ring-bar" cx="35" cy="35" r="31" fill="none" stroke="#F0A24B" stroke-width="3" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="129.9" transform="rotate(-90 35 35)"/>
+        </svg>
+        <button class="btn-next" id="btn-next" aria-label="دواتر">
+          <span class="bn-label">دەستپێ بکە</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== HOME ======== -->
+  <section class="view" id="view-home">
+    <div class="home-head">
+      <button class="icon-btn" data-open-drawer>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+      </button>
+      <div class="hi"><small>بەخێربێیتەوە 👋</small><b>گوندەکانی کوردستان</b></div>
+      <div class="spacer"></div>
+      <button class="icon-btn" id="btn-notif">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+      </button>
+    </div>
+    <div class="search-wrap">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="home-search" type="text" placeholder="گەڕان بۆ گوند...">
+      </div>
+      <button class="filter-btn" data-go="map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+      </button>
+    </div>
+    <div class="chips" id="home-chips"></div>
+    <div class="scroll">
+      <div class="section-head"><h3>گوندە ناوازەکان</h3><button data-go="map">هەموو ببینە</button></div>
+      <div class="hcards" id="home-featured"></div>
+      <div class="section-head"><h3>خزمەتگوزارییەکان</h3></div>
+      <div class="qgrid">
+        <button class="qcell" data-toast="وێنەی پانۆرامای ٣٦٠° بەم زووانە"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="9" ry="4.5"/><path d="M12 7.5v9"/></svg></div><span>دنیای وێنەی پانۆراما</span></button>
+        <button class="qcell" data-toast="شوێنە گەشتیارییەکان بەم زووانە"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 19L10 6l4 7 2.5-4L21 19Z"/><path d="M3 19h18" stroke-linecap="round"/></svg></div><span>شوێنە گەشتیارییەکان</span></button>
+        <button class="qcell" data-toast="شوێنە مێژووییەکان بەم زووانە"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M5 21V10m14 11V10M3 10h18L12 4Z M9 21v-7m6 7v-7"/></svg></div><span>شوێنە مێژووییەکان</span></button>
+        <button class="qcell" data-toast="بەشی زیاتر لە گوند بەم زووانە"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21v-8l4-3v11M9 21V8l6-4v17M15 21v-9l4 3v6"/></svg></div><span>زیاتر لە گوند</span></button>
+        <button class="qcell" data-toast="زیادکردنی وێنە دوای چوونەژوورەوە دەکرێت"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.4"/><path d="M8 6l1.5-2.5h5L16 6"/></svg></div><span>زیادکردنی وێنە</span></button>
+      </div>
+      <div class="section-head"><h3>هەموو گوندەکان</h3></div>
+      <div class="rowlist" id="home-list"></div>
+    </div>
+  </section>
+
+  <!-- ======== MAP ======== -->
+  <section class="view" id="view-map">
+    <div id="leafmap"></div>
+    <div id="map-top">
+      <div class="map-search-row">
+        <button class="icon-btn" data-open-drawer>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+        </button>
+        <div class="search-box" style="box-shadow:var(--shadow-lg)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input id="map-search" type="text" placeholder="گەڕان بۆ گوند...">
+        </div>
+        <button class="icon-btn" id="btn-notif2" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+        </button>
+      </div>
+      <div class="chips" id="map-chips" style="display:none"></div>
+    </div>
+    <div id="map-side">
+      <button class="icon-btn" id="btn-layers" title="گۆڕینی نەخشە">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5Z"/><path d="M3 13l9 5 9-5"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-locate" title="شوێنی من">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8"/><path d="M12 1.5V4M12 20v2.5M1.5 12H4M20 12h2.5"/></svg>
+      </button>
+    </div>
+    <div class="zoomctl">
+      <button class="icon-btn" id="zoom-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+      <button class="icon-btn" id="zoom-out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 12h14"/></svg></button>
+    </div>
+    <div id="map-card"></div>
+  </section>
+
+  <!-- ======== FAVORITES ======== -->
+  <section class="view" id="view-fav">
+    <div class="topbar">
+      <button class="icon-btn" data-go="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="title">دڵخوازەکان</div>
+      <button class="icon-btn plain" style="visibility:hidden"></button>
+    </div>
+    <div class="scroll"><div class="rowlist" id="fav-list" style="padding-top:8px"></div></div>
+  </section>
+
+  <!-- ======== SEARCH ======== -->
+  <section class="view" id="view-search">
+    <div class="topbar">
+      <button class="icon-btn" data-go="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="title">گەڕان</div>
+      <button class="icon-btn plain" style="visibility:hidden"></button>
+    </div>
+    <div class="search-wrap" style="padding-top:4px">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input id="search-input" type="text" placeholder="ناوی گوند، قەزا یان پارێزگا...">
+      </div>
+    </div>
+    <div class="chips" id="search-chips"></div>
+    <div class="scroll"><div class="rowlist" id="search-list" style="padding-top:8px"></div></div>
+  </section>
+
+  <!-- ======== PROFILE ======== -->
+  <section class="view" id="view-profile">
+    <div class="topbar">
+      <button class="icon-btn" data-go="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="title">پرۆفایل</div>
+      <button class="icon-btn plain" style="visibility:hidden"></button>
+    </div>
+    <div class="scroll" style="padding:8px 20px calc(var(--taskbar-h) + var(--safe-b) + 28px)">
+      <div class="rowcard" style="padding:18px 16px;margin-bottom:14px">
+        <div style="width:58px;height:58px;border-radius:50%;background:var(--green-soft);display:grid;place-items:center;color:var(--green);flex:0 0 auto">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.4-3.8 4.4-5.5 8-5.5s6.6 1.7 8 5.5"/></svg>
+        </div>
+        <div class="info"><b>کاربەری میوان</b><small>بۆ هەڵگرتنی دڵخوازەکان و زیادکردنی وێنە بچۆرە ژوورەوە</small></div>
+      </div>
+      <div class="stat-grid" style="margin-top:2px">
+        <div class="stat"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 21h18M5 21v-8l4-3v11M9 21V8l6-4v17M15 21v-9l4 3v6"/></svg></div><div class="sv"><small>گوندی تۆمارکراو</small><b id="stat-count">٠</b></div></div>
+        <div class="stat"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg></div><div class="sv"><small>دڵخوازەکانم</small><b id="stat-fav">٠</b></div></div>
+      </div>
+      <div style="height:14px"></div>
+      <div class="rowlist" style="padding:0">
+        <button class="rowcard" data-toast="سەفەرەکانم بەم زووانە"><div class="info" style="display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.9" width="21" height="21" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19c4-1 5-4 5-7a3 3 0 116 0c0 4 2 6 5 7"/><circle cx="12" cy="9" r="0.5"/></svg><b style="font-size:14px">سەفەرەکانم</b></div><span style="color:var(--ink-3)">‹</span></button>
+        <button class="rowcard" data-toast="زیارتکراوەکان بەم زووانە"><div class="info" style="display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.9" width="21" height="21" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 5-5.5"/></svg><b style="font-size:14px">زیارتکردنەکان</b></div><span style="color:var(--ink-3)">‹</span></button>
+        <button class="rowcard" data-toast="هەواڵەکان بەم زووانە"><div class="info" style="display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.9" width="21" height="21" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><b style="font-size:14px">هەواڵ و ڕووداوەکان</b></div><span style="color:var(--ink-3)">‹</span></button>
+        <button class="rowcard" data-toast="گوندەکانی کوردستان — وەشانی ١.٠"><div class="info" style="display:flex;align-items:center;gap:12px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.9" width="21" height="21" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg><b style="font-size:14px">دەربارەی ئەپ</b></div><span style="color:var(--ink-3)">‹</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== DETAIL ======== -->
+  <section class="view" id="view-detail">
+    <div id="det-hero">
+      <div class="slides" id="det-slides"></div>
+      <div class="grad"></div>
+      <div class="bar">
+        <button class="icon-btn" id="det-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+        </button>
+        <div class="t" id="det-title"></div>
+        <button class="icon-btn" id="det-fav">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg>
+        </button>
+      </div>
+      <div class="count" id="det-count">1/6</div>
+    </div>
+    <div id="det-sheet">
+      <div class="tabs" id="det-tabs">
+        <button class="tab on" data-pane="overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 20Z"/><path d="M9.5 21v-6h5v6"/></svg>گشتی</button>
+        <button class="tab" data-pane="photos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><circle cx="9" cy="10" r="1.8"/><path d="M4.5 17.5l4.5-4 3 2.6 3.8-3.6 3.7 3.5"/></svg>وێنە</button>
+        <button class="tab" data-pane="video"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="3.5"/><path d="M10.5 9.5l4.5 2.5-4.5 2.5Z"/></svg>ڤیدیۆ</button>
+        <button class="tab" data-pane="mapv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M9 4L3.5 6v14L9 18l6 2 5.5-2V4L15 6Z"/><path d="M9 4v14M15 6v14"/></svg>نەخشە</button>
+        <button class="tab" data-pane="more"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg>زیاتر</button>
+      </div>
+      <div class="scroll" style="padding-bottom:calc(var(--safe-b) + 96px)">
+        <div class="det-pane on" id="pane-overview">
+          <h4>زانیاری گشتی</h4>
+          <p class="desc" id="det-desc"></p>
+          <div class="stat-grid" id="det-stats"></div>
+          <div class="det-chips">
+            <button class="det-chip" data-toast="وێنەی ٣٦٠° بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><ellipse cx="12" cy="12" rx="9" ry="4.5"/><path d="M12 7.5v9" stroke-linecap="round"/></svg>وێنەی ٣٦٠°</button>
+            <button class="det-chip" data-toast="شوێنە گەشتیارییەکانی گوند بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 19L10 6l4 7 2.5-4L21 19Z"/></svg>گەشتیاری</button>
+            <button class="det-chip" data-toast="شوێنە مێژووییەکانی گوند بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21h16M5 21V10m14 11V10M3 10h18L12 4Z"/></svg>مێژوویی</button>
+            <button class="det-chip" data-toast="زیادکردنی وێنە دوای چوونەژوورەوە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><circle cx="12" cy="13" r="3.4"/></svg>زیادکردنی وێنە</button>
+          </div>
+        </div>
+        <div class="det-pane" id="pane-photos"><div class="gal" id="det-gal"></div></div>
+        <div class="det-pane" id="pane-video">
+          <div class="empty">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="3.5"/><path d="M10.5 9.5l4.5 2.5-4.5 2.5Z"/></svg>
+            <b>هێشتا ڤیدیۆ نییە</b><small>ڤیدیۆکانی ئەم گوندە بەم زووانە<br>زیاد دەکرێن</small>
+          </div>
+        </div>
+        <div class="det-pane" id="pane-mapv"><div class="minimap" id="det-minimap"></div></div>
+        <div class="det-pane" id="pane-more">
+          <div class="rowlist" style="padding:0">
+            <div class="rowcard"><div class="info"><small style="margin:0 0 4px">پارێزگا</small><b id="more-parezga" style="font-size:14px"></b></div></div>
+            <div class="rowcard"><div class="info"><small style="margin:0 0 4px">قەزا / ناحیە</small><b id="more-qaza" style="font-size:14px"></b></div></div>
+            <div class="rowcard"><div class="info"><small style="margin:0 0 4px">پانکە و درێژکە (GPS)</small><b id="more-gps" style="font-size:14px;direction:ltr;text-align:left"></b></div></div>
+            <div class="rowcard"><div class="info"><small style="margin:0 0 4px">ژمارەی خانوو (نزیکەیی)</small><b id="more-homes" style="font-size:14px"></b></div></div>
+          </div>
+        </div>
+      </div>
+      <div id="det-cta">
+        <button class="btn-primary" id="btn-directions">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l4.5 9.5L12 9l-4.5 2.5Z" fill="currentColor" stroke="none" transform="rotate(30 12 12)"/><circle cx="12" cy="12" r="9.2"/></svg>
+          ڕێنمایی بۆ گوند
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== DIRECTIONS ======== -->
+  <section class="view" id="view-dir">
+    <div id="dirmap"></div>
+    <div id="dir-top">
+      <button class="icon-btn" id="dir-back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+      </button>
+      <div class="t" id="dir-title"></div>
+      <button class="icon-btn plain" style="visibility:hidden"></button>
+    </div>
+    <div id="dir-card">
+      <div class="nums">
+        <div class="n"><b id="dir-km">٤٥</b><span>کم</span></div>
+        <div class="n"><b id="dir-min">٥٥</b><span>خولەک</span></div>
+      </div>
+      <div class="mode">بە شێوازی ئۆتۆمبێل · نزیکترین ڕێگا</div>
+      <button class="btn-primary" id="btn-start-nav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/></svg>
+        دەستپێکردنی ڕێگاکان
+      </button>
+    </div>
+  </section>
+
+  <!-- ======== DRAWER ======== -->
+  <div id="drawer-veil"></div>
+  <aside id="drawer">
+    <div class="dr-head">
+      <div class="av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.4-3.8 4.4-5.5 8-5.5s6.6 1.7 8 5.5"/></svg></div>
+      <div><b>کاربەری میوان</b><small>بەخێربێیتەوە</small></div>
+    </div>
+    <nav class="dr-body">
+      <button class="dr-item" data-go="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 20Z"/></svg>لاپەڕەی سەرەکی</button>
+      <button class="dr-item" data-go="map"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M3 21h18M5 21v-8l4-3v11M9 21V8l6-4v17M15 21v-9l4 3v6"/></svg>گوندەکان</button>
+      <button class="dr-item" data-go="fav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg>دڵخوازەکان</button>
+      <button class="dr-item" data-toast="سەفەرەکانم بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19c4-1 5-4 5-7a3 3 0 116 0c0 4 2 6 5 7"/></svg>سەفەرەکانم</button>
+      <button class="dr-item" data-toast="زیارتکردنەکان بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8.5 12.5l2.5 2.5 5-5.5" stroke-linecap="round"/></svg>زیارتکردنەکان</button>
+      <button class="dr-item" data-toast="هەواڵەکان بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>هەواڵ و ڕووداوەکان</button>
+      <div class="dr-sep"></div>
+      <button class="dr-item" data-toast="گوندەکانی کوردستان — وەشانی ١.٠"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.5"/></svg>دەربارەی ئەپ</button>
+      <button class="dr-item" data-toast="ڕێنمایی بەکارهێنان بەم زووانە"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 114 2c-.8.6-1.5 1-1.5 2M12 17v.5"/></svg>ڕێنمایی</button>
+    </nav>
+    <div class="dr-foot">
+      <div class="dr-toggle">
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M20 13.5A8.5 8.5 0 1110.5 4 6.8 6.8 0 0020 13.5Z" stroke-linejoin="round"/></svg>شێوەی تاریک</span>
+        <button class="switch" id="dark-switch" aria-label="شێوەی تاریک"></button>
+      </div>
+      <button class="dr-lang">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.5 3.6 3.5 14.4 0 18M12 3c-3.5 3.6-3.5 14.4 0 18"/></svg>
+        کوردی
+      </button>
+    </div>
+  </aside>
+
+  <!-- ======== TASKBAR ======== -->
+  <nav id="taskbar" class="hide">
+    <svg class="tb-bg" viewBox="0 0 800 160" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="tb-base" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#1E5C46"/>
+          <stop offset="0.55" stop-color="#153F30"/>
+          <stop offset="1" stop-color="#0D2820"/>
+        </linearGradient>
+        <linearGradient id="tb-glow" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#F0A24B" stop-opacity="0.14"/>
+          <stop offset="1" stop-color="#F0A24B" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <rect width="800" height="160" fill="url(#tb-base)"/>
+      <rect width="800" height="46" fill="url(#tb-glow)"/>
+      <path d="M0,84 L90,46 L170,84 L268,40 L360,86 L455,44 L545,86 L640,48 L724,84 L800,52 L800,160 L0,160 Z" fill="#FFFFFF" opacity="0.05"/>
+      <path d="M0,112 L110,78 L215,114 L330,76 L445,116 L560,80 L670,114 L800,84 L800,160 L0,160 Z" fill="#FFFFFF" opacity="0.045"/>
+      <path d="M0,138 L135,112 L270,140 L410,110 L550,140 L685,114 L800,136 L800,160 L0,160 Z" fill="#000000" opacity="0.18"/>
+    </svg>
+    <div class="tb-row">
+      <button class="tb-item on" data-go="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 014 20Z"/><path d="M9.5 21v-6h5v6"/></svg>
+        <span>ماڵەوە</span><i></i>
+      </button>
+      <button class="tb-item" data-go="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <span>گەڕان</span><i></i>
+      </button>
+      <button class="tb-item" data-go="map">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M9 4L3.5 6v14L9 18l6 2 5.5-2V4L15 6Z"/><path d="M9 4v14M15 6v14"/></svg>
+        <span>نەخشە</span><i></i>
+      </button>
+      <button class="tb-item" data-go="fav">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg>
+        <span>دڵخوازەکان</span><i></i>
+      </button>
+      <button class="tb-item" data-go="profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.4-3.8 4.4-5.5 8-5.5s6.6 1.7 8 5.5"/></svg>
+        <span>پرۆفایل</span><i></i>
+      </button>
+    </div>
+  </nav>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+"use strict";
+/* ================= داتای گوندەکان (نموونە — دواتر داتای ڕاستەقینە دادەنرێت) ================= */
+const DEFAULT_VILLAGES = [
+  {id:"birmam", name:"گوندی بیرمام", parezga:"هەولێر", qaza:"قەزای شەملاوە", dist:45, time:55, pop:2350, alt:1250, temp:18, homes:310, lat:36.352, lng:44.205, hue:150,
+   desc:"گوندی بیرمام، یەکێکە لە گوندە جوانەکانی قەزای شەملاوە، لە دامەزراندنی سروشتی خۆش و تاوانبار و مێژووی پێشەکەوتوو بەردەوامە. گوندەکە بە باخ و کانیاوە سازگارەکانی ناسراوە و لە وەرزی بەهاردا ڕووکارێکی سەوز و دڵگیری هەیە."},
+  {id:"zebar", name:"گوندی زیبار", parezga:"هەولێر", qaza:"قەزای سۆران", dist:78, time:95, pop:1680, alt:980, temp:16, homes:220, lat:36.712, lng:44.402, hue:120,
+   desc:"گوندی زیبار لە ناوچەی سۆران هەڵکەوتووە و بە چیا بەرزەکانی دەوروبەری و ڕووباری سازگاری ناسراوە. دانیشتوانەکەی زۆربەیان خەریکی کشتوکاڵ و ئاژەڵدارین."},
+  {id:"qalat", name:"گوندی قەڵات", parezga:"سلێمانی", qaza:"قەزای جوانرۆ", dist:120, time:150, pop:940, alt:1420, temp:14, homes:130, lat:35.482, lng:45.881, hue:95,
+   desc:"گوندی قەڵات لەسەر بەرزاییەکانی سنووری قەزای جوانرۆ هەڵکەوتووە. ناوەکەی لە قەڵا کۆنەکەوە وەرگیراوە کە شوێنەوارەکەی هەتا ئێستا دیارە."},
+  {id:"banabar", name:"گوندی بنەبار", parezga:"هەولێر", qaza:"قەزای ڕواندز", dist:95, time:115, pop:1210, alt:1100, temp:15, homes:170, lat:36.611, lng:44.541, hue:165,
+   desc:"گوندی بنەبار لە نزیک گەلی عەلی بەگ هەڵکەوتووە و بە تاڤگە و دیمەنە سروشتییەکانی ناوچەکە ناسراوە کە ساڵانە ژمارەیەکی زۆر گەشتیار سەردانی دەکەن."},
+  {id:"hajiomaran", name:"گوندی حاجی ئۆمەران", parezga:"هەولێر", qaza:"قەزای چۆمان", dist:60, time:80, pop:3400, alt:1780, temp:11, homes:460, lat:36.648, lng:44.898, hue:200,
+   desc:"حاجی ئۆمەران لە بەرزترین ناوچەکانی هەرێمە و لە وەرزی زستاندا بەفرێکی زۆری لێدەبارێت. سنوورەکەی گرنگییەکی بازرگانی هەیە و سروشتەکەی لە هاویندا فێنک و دڵگیرە."},
+  {id:"ahmadawa", name:"گوندی ئەحمەدئاوا", parezga:"هەڵەبجە", qaza:"ناحیەی خورماڵ", dist:255, time:210, pop:1850, alt:820, temp:19, homes:250, lat:35.317, lng:46.049, hue:80,
+   desc:"ئەحمەدئاوا بە تاڤگە بەناوبانگەکەی و باخە هەنارەکانی ناسراوە. لە دامێنی چیای هەورامان هەڵکەوتووە و یەکێکە لە شوێنە گەشتیارییە سەرەکییەکانی پارێزگای هەڵەبجە."},
+  {id:"sartka", name:"گوندی سەرتکە", parezga:"سلێمانی", qaza:"قەزای شارباژێڕ", dist:160, time:170, pop:760, alt:1350, temp:13, homes:105, lat:35.905, lng:45.598, hue:135,
+   desc:"گوندی سەرتکە لە ناوچەی شارباژێڕ هەڵکەوتووە و بە دارستانە بەڕووەکانی و کانیاوە ساردەکانی ناسراوە."},
+  {id:"kani", name:"گوندی کانی ماران", parezga:"گەرمیان", qaza:"قەزای کەلار", dist:150, time:130, pop:1120, alt:340, temp:24, homes:160, lat:34.671, lng:45.372, hue:60,
+   desc:"کانی ماران لە ناوچەی گەرمیان هەڵکەوتووە و بە زەوییە کشتوکاڵییە بەرفراوانەکانی و مێژووی کۆنی ناسراوە. دانیشتوانەکەی بە مێهرەبانی و میوانداری بەناوبانگن."},
+  {id:"barzan", name:"گوندی بارزان", parezga:"دهۆک", qaza:"قەزای مێرگەسۆر", dist:110, time:135, pop:2900, alt:900, temp:17, homes:390, lat:36.897, lng:44.055, hue:175,
+   desc:"بارزان گوندێکی مێژووییە و ناوبانگێکی گەورەی هەیە لە مێژووی کوردستاندا. لە کەناری ڕووباری زێی گەورە هەڵکەوتووە و سروشتێکی دەوڵەمەندی هەیە."},
+  {id:"enishke", name:"گوندی ئێنشکێ", parezga:"دهۆک", qaza:"قەزای ئامێدی", dist:150, time:160, pop:1540, alt:1150, temp:15, homes:205, lat:37.093, lng:43.488, hue:110,
+   desc:"ئێنشکێ لە ناوچەی ئامێدی هەڵکەوتووە و بە باخە سێو و گوێزەکانی ناسراوە. لە وەرزی پایزدا ڕەنگە جوانەکانی دارستانەکانی دیمەنێکی ناوازە دروست دەکەن."},
+  {id:"zawita", name:"گوندی زاویتە", parezga:"دهۆک", qaza:"قەزای دهۆک", dist:160, time:150, pop:2100, alt:870, temp:16, homes:280, lat:36.902, lng:43.148, hue:145,
+   desc:"زاویتە بە دارستانە سنەوبەرەکانی ناسراوە و یەکێکە لە شوێنە گەشتیارییە دێرینەکانی پارێزگای دهۆک. گەلییەکەی شوێنێکی گونجاوە بۆ پشوودان."},
+  {id:"sargalu", name:"گوندی سەرگەڵوو", parezga:"سلێمانی", qaza:"قەزای دوکان", dist:190, time:180, pop:880, alt:1280, temp:13, homes:120, lat:35.996, lng:45.135, hue:100,
+   desc:"سەرگەڵوو گوندێکی چیاییە لە ناوچەی دوکان و ڕۆڵێکی مێژوویی گرنگی هەبووە. سروشتەکەی سەخت و جوانە و بە کانیاوە زۆرەکانی ناسراوە."}
+];
+/* داتا لە پانێڵی بەڕێوەبردنەوە بار دەبێت ئەگەر هەبێت (admin.html) */
+let VILLAGES = DEFAULT_VILLAGES;
+try{
+  const stored = JSON.parse(localStorage.getItem("gk_villages_v1") || "null");
+  if(Array.isArray(stored) && stored.length) VILLAGES = stored;
+}catch(e){}
+const PAREZGAS = ["هەموو","هەولێر","سلێمانی","دهۆک","هەڵەبجە","گەرمیان","کەرکوک"].filter(p => p === "هەموو" || VILLAGES.some(v => v.parezga === p));
+const ERBIL = {lat:36.191, lng:44.009};
+
+/* ================= یارمەتیدەرەکان ================= */
+const KD = "٠١٢٣٤٥٦٧٨٩";
+const kn = n => String(n).replace(/\d/g, d => KD[+d]);
+const knc = n => kn(Number(n).toLocaleString("en-US"));
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+let favs = new Set();
+try { favs = new Set(JSON.parse(localStorage.getItem("gk_favs") || "[]")); } catch(e) {}
+function saveFavs(){ try{ localStorage.setItem("gk_favs", JSON.stringify([...favs])); }catch(e){} }
+
+let state = { view:"splash", parezga:"هەموو", village:null, dark:false };
+try { state.dark = localStorage.getItem("gk_dark") === "1"; } catch(e) {}
+
+/* ================= وێنەی جێگرەوە (SVG) ================= */
+function scene(hue, seed, w, h){
+  w = w || 480; h = h || 340;
+  const r = mulberry(seed);
+  const sky1 = `hsl(${hue+45},45%,86%)`, sky2 = `hsl(${hue+30},40%,74%)`;
+  const m1 = `hsl(${hue},30%,52%)`, m2 = `hsl(${hue},34%,42%)`, m3 = `hsl(${hue},38%,30%)`;
+  const gnd = `hsl(${hue-8},36%,38%)`;
+  let mtn = (col, base, amp, step) => {
+    let d = `M0 ${h}`; let y = base;
+    for(let x=0; x<=w; x+=step){ y = base - amp*(0.4+r()) ; d += ` L${x} ${y.toFixed(0)}`; }
+    return `<path d="${d} L${w} ${h} Z" fill="${col}"/>`;
+  };
+  let houses = "";
+  const n = 4 + Math.floor(r()*4);
+  for(let i=0;i<n;i++){
+    const hx = 20 + r()*(w-70), hy = h*0.66 + r()*h*0.22, hw = 26+r()*20, hh = hw*0.62;
+    houses += `<g><path d="M${hx} ${hy} h${hw} v-${hh} h-${hw} Z" fill="hsl(${hue+20},22%,88%)"/><path d="M${hx-3} ${hy-hh} h${hw+6} l-${hw/2+3} -${hh*0.55} Z" fill="hsl(${hue-30},40%,34%)"/><rect x="${hx+hw*0.38}" y="${hy-hh*0.5}" width="${hw*0.24}" height="${hh*0.5}" fill="hsl(${hue},25%,45%)"/></g>`;
+  }
+  let trees = "";
+  const tn = 5 + Math.floor(r()*5);
+  for(let i=0;i<tn;i++){
+    const tx = 10 + r()*(w-20), ty = h*0.72 + r()*h*0.24, s = 8+r()*9;
+    trees += `<g><rect x="${tx-1.5}" y="${ty-s*0.6}" width="3" height="${s*0.6}" fill="hsl(${hue-40},35%,28%)"/><circle cx="${tx}" cy="${ty-s}" r="${s*0.75}" fill="hsl(${hue-5},42%,33%)"/></g>`;
+  }
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="sk${seed}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sky1}"/><stop offset="1" stop-color="${sky2}"/></linearGradient></defs>
+    <rect width="${w}" height="${h}" fill="url(#sk${seed})"/>
+    <circle cx="${w*0.78}" cy="${h*0.18}" r="${h*0.07}" fill="hsl(45,90%,88%)" opacity="0.9"/>
+    ${mtn(m1, h*0.52, h*0.2, w/5)}
+    ${mtn(m2, h*0.66, h*0.16, w/6)}
+    ${mtn(m3, h*0.8, h*0.12, w/7)}
+    <rect y="${h*0.82}" width="${w}" height="${h*0.18}" fill="${gnd}"/>
+    ${trees}${houses}
+  </svg>`;
+}
+function mulberry(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; } }
+const heartSVG = fill => `<svg viewBox="0 0 24 24" fill="${fill?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg>`;
+/* وێنەی گوند: ئەگەر وێنەی باربوو هەبێت (لە پانێڵەوە) پیشانی بدە، ئەگینا SVG ی جێگرەوە */
+function vphoto(v, i, w, h){
+  const ph = v.photos || [];
+  if(ph.length){
+    return `<img src="${ph[i % ph.length]}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block">`;
+  }
+  return scene((v.hue||140) + i*12, i*13 + v.id.length, w, h);
+}
+
+/* ================= گۆڕینی دیمەن ================= */
+function go(view){
+  state.view = view;
+  $$(".view").forEach(v => v.classList.remove("active"));
+  const el = $("#view-" + view);
+  if(el) el.classList.add("active");
+  const tb = $("#taskbar");
+  const tabViews = ["home","search","map","fav","profile"];
+  tb.classList.toggle("hide", !tabViews.includes(view));
+  $$("#taskbar .tb-item").forEach(b => b.classList.toggle("on", b.dataset.go === view));
+  if(view === "map"){
+    initMap();
+    setTimeout(()=> {
+      if(window.navKurdMapResize) window.navKurdMapResize();
+      else if(leafMap) leafMap.invalidateSize();
+    }, 80);
+  }
+  if(view === "fav") renderFavs();
+  if(view === "search") renderSearch();
+  if(view === "profile") renderProfileStats();
+  closeDrawer();
+}
+
+/* ================= تۆست ================= */
+let toastT;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(()=> t.classList.remove("show"), 2400);
+}
+
+/* ================= دڵخواز ================= */
+function toggleFav(id){
+  if(favs.has(id)){ favs.delete(id); toast("لە دڵخوازەکان لابرا"); }
+  else { favs.add(id); toast("زیادکرا بۆ دڵخوازەکان ❤️"); }
+  saveFavs();
+  renderHome();
+  if(state.view === "fav") renderFavs();
+  if(state.village && state.village.id === id) syncDetFav();
+}
+
+/* ================= ماڵەوە ================= */
+function chipRow(el, onPick){
+  el.innerHTML = "";
+  PAREZGAS.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "chip" + (state.parezga === p ? " on" : "");
+    b.textContent = p;
+    b.onclick = () => { state.parezga = p; onPick(); };
+    el.appendChild(b);
+  });
+}
+function filtered(q){
+  q = (q||"").trim();
+  return VILLAGES.filter(v =>
+    (state.parezga === "هەموو" || v.parezga === state.parezga) &&
+    (!q || v.name.includes(q) || v.qaza.includes(q) || v.parezga.includes(q))
+  );
+}
+function rowCard(v){
+  return `<div class="rowcard" data-open="${v.id}">
+    <div class="thumb">${vphoto(v, 0, 180, 150)}</div>
+    <div class="info"><b>${v.name}</b><small>${v.qaza} · پارێزگای ${v.parezga}</small><span class="d">دووری لە هەولێر ${kn(v.dist)} کم</span></div>
+    <button class="hbtn ${favs.has(v.id)?'on':''}" data-fav="${v.id}">${heartSVG(favs.has(v.id))}</button>
+  </div>`;
+}
+function renderHome(){
+  chipRow($("#home-chips"), renderHome);
+  const q = $("#home-search").value;
+  const list = filtered(q);
+  $("#home-featured").innerHTML = list.slice(0,6).map(v => `
+    <div class="vcard" data-open="${v.id}">
+      <div class="ph">${vphoto(v, 0, 480, 280)}</div>
+      <button class="fav ${favs.has(v.id)?'on':''}" data-fav="${v.id}">${heartSVG(favs.has(v.id))}</button>
+      <span class="dist">${kn(v.dist)} کم</span>
+      <div class="meta"><b>${v.name}</b>
+        <small><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.4"/></svg>${v.qaza} · ${v.parezga}</small>
+      </div>
+    </div>`).join("");
+  $("#home-list").innerHTML = list.map(rowCard).join("") || emptyHTML("هیچ گوندێک نەدۆزرایەوە","وشەی گەڕان یان پارێزگاکە بگۆڕە");
+}
+function emptyHTML(t, s){
+  return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><b>${t}</b><small>${s}</small></div>`;
+}
+
+/* ================= گەڕان و دڵخوازەکان ================= */
+function renderSearch(){
+  chipRow($("#search-chips"), renderSearch);
+  const q = $("#search-input").value;
+  $("#search-list").innerHTML = filtered(q).map(rowCard).join("") || emptyHTML("هیچ ئەنجامێک نییە","وشەیەکی تر تاقی بکەرەوە");
+}
+function renderFavs(){
+  const list = VILLAGES.filter(v => favs.has(v.id));
+  $("#fav-list").innerHTML = list.map(rowCard).join("") ||
+    `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 21s-7.5-4.8-9.5-9.3C1 8 3.5 4.5 7.2 4.5c2 0 3.6 1 4.8 2.6 1.2-1.6 2.8-2.6 4.8-2.6 3.7 0 6.2 3.5 4.7 7.2C19.5 16.2 12 21 12 21Z"/></svg><b>هێشتا دڵخوازت نییە</b><small>لەسەر نیشانەی دڵ کلیک بکە<br>بۆ زیادکردنی گوندەکان</small></div>`;
+}
+function renderProfileStats(){
+  $("#stat-count").textContent = kn(VILLAGES.length);
+  $("#stat-fav").textContent = kn(favs.size);
+}
+
+/* ================= نەخشە ================= */
+let leafMap = null, satLayer, topoLayer, curBase = "sat", markers = {};
+function tileSat(){ return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {maxZoom:18, attribution:"Esri"}); }
+function tileTopo(){ return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", {maxZoom:18, attribution:"Esri"}); }
+
+function pinIcon(sel){
+  return L.divIcon({
+    className:"", iconSize:[34,34], iconAnchor:[17,32],
+    html:`<div class="vpin${sel?' sel':''}"><div class="pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"><path d="M3 21h18M6 21v-7l6-4 6 4v7" /></svg></div></div>`
+  });
+}
+function initMap(){
+  if(window.navKurdMapInit) window.navKurdMapInit();
+}
+function refreshMarkers(){
+  if(window.navKurdMapSearch) window.navKurdMapSearch($("#map-search").value);
+}
+function selectVillage(){ /* main map uses text-only NAV KURD labels */ }
+function hideMapCard(){ $("#map-card").classList.remove("show"); }
+
+/* ================= پەڕەی وردەکاری ================= */
+let miniMap = null, dirMap = null;
+function openDetail(id){
+  const v = VILLAGES.find(x => x.id === id);
+  if(!v) return;
+  state.village = v;
+  $("#det-title").textContent = v.name;
+  $("#det-desc").textContent = v.desc;
+  const slides = $("#det-slides");
+  const N = (v.photos && v.photos.length) ? v.photos.length : 6;
+  slides.innerHTML = Array.from({length:N}, (_,i) => `<div class="slide">${vphoto(v, i, 480, 360)}</div>`).join("");
+  slides.scrollLeft = 0;
+  $("#det-count").textContent = "1/" + N;
+  slides.onscroll = () => {
+    const i = Math.round(slides.scrollLeft / slides.clientWidth) + 1;
+    $("#det-count").textContent = Math.min(i, N) + "/" + N;
+  };
+  $("#det-stats").innerHTML = `
+    ${statHTML('<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c1-3 3.4-4.5 6.5-4.5s5.5 1.5 6.5 4.5" /><circle cx="17" cy="9" r="2.6"/><path d="M15.5 15.7c2.9.1 5 1.5 6 4.3"/>', "دانیشتوان", knc(v.pop), "کەس")}
+    ${statHTML('<path d="M3 19L10 6l4 7 2.5-4L21 19Z" stroke-linejoin="round"/><path d="M3 19h18" stroke-linecap="round"/>', "بەرزی", knc(v.alt), "م")}
+    ${statHTML('<path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11Z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4"/>', "دووری لە هەولێر", kn(v.dist), "کم")}`;
+  if(v.photos && v.photos.length){
+    $("#det-gal").innerHTML = v.photos.map(p => `<div class="g"><img src="${p}" alt="" loading="lazy" style="width:100%;display:block"></div>`).join("");
+  } else {
+    $("#det-gal").innerHTML = Array.from({length:8}, (_,i) => {
+      const h = 150 + ((i*53 + v.id.length*17) % 110);
+      return `<div class="g">${scene((v.hue||140) + i*9, i*29 + v.id.length*3, 240, h)}</div>`;
+    }).join("");
+  }
+  $("#more-parezga").textContent = "پارێزگای " + v.parezga;
+  $("#more-qaza").textContent = v.qaza;
+  $("#more-gps").textContent = v.lat.toFixed(4) + ", " + v.lng.toFixed(4);
+  $("#more-homes").textContent = knc(v.homes) + " خانوو";
+  setTab("overview");
+  syncDetFav();
+  go("detail");
+}
+function statHTML(icon, label, val, unit){
+  return `<div class="stat"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">${icon}</svg></div><div class="sv"><small>${label}</small><b>${val}<i>${unit}</i></b></div></div>`;
+}
+function syncDetFav(){
+  const on = state.village && favs.has(state.village.id);
+  const b = $("#det-fav");
+  b.classList.toggle("on", !!on);
+  b.innerHTML = heartSVG(on);
+}
+function setTab(name){
+  $$("#det-tabs .tab").forEach(t => t.classList.toggle("on", t.dataset.pane === name));
+  $$(".det-pane").forEach(p => p.classList.toggle("on", p.id === "pane-" + name));
+  $("#det-cta").style.display = name === "overview" ? "block" : "none";
+  if(name === "mapv" && state.village && typeof L !== "undefined"){
+    setTimeout(() => {
+      if(!miniMap){
+        miniMap = L.map("det-minimap", {zoomControl:false, attributionControl:false, dragging:true});
+        tileSat().addTo(miniMap);
+      }
+      miniMap.setView([state.village.lat, state.village.lng], 13);
+      miniMap.invalidateSize();
+      if(miniMap._vMarker) miniMap.removeLayer(miniMap._vMarker);
+      miniMap._vMarker = L.marker([state.village.lat, state.village.lng], {icon: pinIcon(true)}).addTo(miniMap);
+    }, 60);
+  }
+}
+
+/* ================= ڕێنمایی ================= */
+function openDirections(){
+  const v = state.village;
+  if(!v) return;
+  $("#dir-title").textContent = "ڕێنمایی بۆ " + v.name;
+  $("#dir-km").textContent = kn(v.dist);
+  $("#dir-min").textContent = kn(v.time);
+  go("dir");
+  if(typeof L === "undefined") return;
+  setTimeout(() => {
+    if(!dirMap){
+      dirMap = L.map("dirmap", {zoomControl:false, attributionControl:false});
+      tileTopo().addTo(dirMap);
+    }
+    dirMap.invalidateSize();
+    if(dirMap._route) dirMap.removeLayer(dirMap._route);
+    if(dirMap._a) dirMap.removeLayer(dirMap._a);
+    if(dirMap._b) dirMap.removeLayer(dirMap._b);
+    const mid = {lat:(ERBIL.lat+v.lat)/2 + 0.12, lng:(ERBIL.lng+v.lng)/2 - 0.08};
+    const pts = [[ERBIL.lat, ERBIL.lng],[mid.lat, mid.lng],[v.lat, v.lng]];
+    dirMap._route = L.polyline(pts, {color:"#2E7CF6", weight:5, opacity:.9, lineJoin:"round"}).addTo(dirMap);
+    dirMap._a = L.circleMarker([ERBIL.lat, ERBIL.lng], {radius:8, color:"#fff", weight:3, fillColor:"#2E7CF6", fillOpacity:1}).addTo(dirMap).bindTooltip("هەولێر", {permanent:true, direction:"bottom", className:"lbl"});
+    dirMap._b = L.marker([v.lat, v.lng], {icon: pinIcon(true)}).addTo(dirMap).bindTooltip(v.name, {permanent:true, direction:"top", className:"lbl"});
+    dirMap.fitBounds(L.latLngBounds(pts), {padding:[60,60]});
+  }, 80);
+}
+
+/* ================= سایدبار ================= */
+function openDrawer(){ $("#drawer").classList.add("show"); $("#drawer-veil").classList.add("show"); }
+function closeDrawer(){ $("#drawer").classList.remove("show"); $("#drawer-veil").classList.remove("show"); }
+
+/* ================= شێوەی تاریک ================= */
+function applyDark(){
+  document.body.classList.toggle("dark", state.dark);
+  $("#dark-switch").classList.toggle("on", state.dark);
+  try { localStorage.setItem("gk_dark", state.dark ? "1" : "0"); } catch(e) {}
+}
+
+/* ================= ڕووداوەکان ================= */
+document.addEventListener("click", e => {
+  const goBtn = e.target.closest("[data-go]");
+  if(goBtn){ go(goBtn.dataset.go); return; }
+  const fv = e.target.closest("[data-fav]");
+  if(fv){ e.stopPropagation(); toggleFav(fv.dataset.fav); return; }
+  const op = e.target.closest("[data-open]");
+  if(op){ openDetail(op.dataset.open); return; }
+  const ts = e.target.closest("[data-toast]");
+  if(ts){ toast(ts.dataset.toast); return; }
+  if(e.target.closest("[data-open-drawer]")){ openDrawer(); return; }
+});
+/* ================= ٣ پەڕەی دەستپێک ================= */
+const obSlides = $("#ob-slides");
+let obIndex = 0;
+const OB_C = 194.8; /* چێوەی بازنەی ڕینگ */
+function obUpdate(){
+  const w = obSlides.clientWidth || 1;
+  obIndex = Math.min(2, Math.round(Math.abs(obSlides.scrollLeft) / w));
+  $$("#ob-dots span").forEach((d,i) => d.classList.toggle("on", i === obIndex));
+  const bar = $("#ob-ring-bar");
+  if(bar) bar.style.strokeDashoffset = (OB_C * (1 - (obIndex + 1) / 3)).toFixed(1);
+  $(".ob-next-wrap").classList.toggle("last", obIndex === 2);
+}
+obSlides.addEventListener("scroll", () => requestAnimationFrame(obUpdate));
+$("#btn-next").onclick = () => {
+  if(obIndex >= 2){ go("home"); return; }
+  const w = obSlides.clientWidth;
+  const dir = Math.sign(obSlides.scrollLeft || -1) || -1;
+  obSlides.scrollTo({left: (obIndex + 1) * w * dir, behavior: "smooth"});
+};
+$("#ob-skip").onclick = () => go("home");
+$("#ob-bg1").innerHTML = scene(150, 42, 480, 900);
+$("#ob-bg2").innerHTML = scene(115, 77, 480, 900);
+$("#ob-bg3").innerHTML = scene(210, 23, 480, 900);
+obUpdate();
+$("#drawer-veil").onclick = closeDrawer;
+$("#det-back").onclick = () => go("map");
+$("#dir-back").onclick = () => go("detail");
+$("#det-fav").onclick = () => state.village && toggleFav(state.village.id);
+$("#btn-directions").onclick = openDirections;
+$("#btn-start-nav").onclick = () => {
+  const v = state.village;
+  if(v) window.open(`https://www.google.com/maps/dir/?api=1&destination=${v.lat},${v.lng}`, "_blank");
+};
+$("#det-tabs").addEventListener("click", e => {
+  const t = e.target.closest(".tab");
+  if(t) setTab(t.dataset.pane);
+});
+$("#home-search").addEventListener("input", renderHome);
+$("#search-input").addEventListener("input", renderSearch);
+$("#map-search").addEventListener("input", () => refreshMarkers());
+$("#btn-layers").onclick = () => window.navKurdToggle3D && window.navKurdToggle3D();
+$("#btn-locate").onclick = () => window.navKurdLocate && window.navKurdLocate();
+$("#zoom-in").onclick = () => window.navKurdZoom && window.navKurdZoom(1);
+$("#zoom-out").onclick = () => window.navKurdZoom && window.navKurdZoom(-1);
+$("#dark-switch").onclick = () => { state.dark = !state.dark; applyDark(); };
+$("#btn-notif").onclick = $("#btn-notif2").onclick = () => toast("هیچ ئاگادارکردنەوەیەکی نوێ نییە");
+
+// map chips
+function renderMapChips(){
+  chipRow($("#map-chips"), () => { renderMapChips(); refreshMarkers(); renderHome(); });
+}
+
+/* ================= دەستپێک ================= */
+applyDark();
+renderHome();
+</script>
+<style>
+.lbl{background:var(--card);border:0;border-radius:10px;box-shadow:var(--shadow);color:var(--ink);font-family:var(--app-font);font-weight:700;font-size:12px;padding:4px 10px}
+.lbl::before{display:none}
+</style>
+<script src="/runtime-config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+<script type="module" src="/src/nav-map.js"></script>
+</body>
+</html>

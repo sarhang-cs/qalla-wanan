@@ -1,0 +1,4 @@
+Contact: mailto:sarhang.salah9@gmail.com
+Preferred-Languages: ckb, en, ar
+Canonical: /.well-known/security.txt
+Policy: /SECURITY.md
