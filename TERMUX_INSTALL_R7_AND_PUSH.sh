@@ -5,17 +5,17 @@ REPO_URL="https://github.com/sarhang-cs/qalla-wanan.git"
 TARGET="$HOME/QALLA-WANAN-NAV-KURD-MAP-R1"
 SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$HOME/QALLA-WANAN-backup-before-R6-$STAMP"
-GIT_RESTORE="$HOME/.qalla-r6-git-restore"
+BACKUP="$HOME/QALLA-WANAN-backup-before-R7-$STAMP"
+GIT_RESTORE="$HOME/.qalla-r7-git-restore"
 
 printf '\n=============================================\n'
-printf ' QALLA WANAN R6 — RTL + GEO STABILITY\n'
+printf ' QALLA WANAN R7 — PROGRESSIVE MAP STABILITY\n'
 printf '=============================================\n'
 
 pkg install -y git nodejs >/dev/null
 
 if [ ! -f "$SOURCE/package.json" ] || [ ! -f "$SOURCE/src/nav-map.js" ]; then
-  echo "❌ پەکەجی R6 ناتەواوە؛ package.json یان src/nav-map.js نەدۆزرایەوە."
+  echo "❌ پەکەجی R7 ناتەواوە؛ package.json یان src/nav-map.js نەدۆزرایەوە."
   exit 1
 fi
 
@@ -43,7 +43,7 @@ fi
 # Preserve local-only configuration, then replace the source cleanly.
 ENV_KEEP=""
 if [ -f "$TARGET/.env.local" ]; then
-  ENV_KEEP="$HOME/.qalla-r6-env-local-$STAMP"
+  ENV_KEEP="$HOME/.qalla-r7-env-local-$STAMP"
   cp -f "$TARGET/.env.local" "$ENV_KEEP"
 fi
 
@@ -84,17 +84,20 @@ npm run build
 
 # Hard checks before publishing.
 test -s public/fonts/UniQAIDAR_Hewal_031.ttf
-test -s public/data/nav/labels-major.geojson
-test -s public/data/nav/labels-poi.geojson
+test -s public/data/nav/labels-core.geojson
+test -s public/data/nav/label-shards-index.json
+test -d public/data/nav/label-shards
 test -s public/data/nav/labels.compact.json
 grep -q 'setRTLTextPlugin' src/nav-map.js
 grep -q "text-allow-overlap': false" src/nav-map.js
-grep -q 'maxzoom: 17' src/nav-map.js
+grep -q 'maxzoom: 16' src/nav-map.js
+grep -q 'refreshViewportLabels' src/nav-map.js
+grep -q 'failMapLoading' src/nav-map.js
 
 echo "📤 Commit و Push بۆ تەنها sarhang-cs/qalla-wanan..."
 git add -A
 if ! git diff --cached --quiet; then
-  git commit -m "R6: fix Kurdish RTL labels, stable zoom, loading and satellite overzoom"
+  git commit -m "R7: progressive stable labels, nonblocking loading and satellite fallback"
 else
   echo "ℹ️ هیچ گۆڕانکارییەکی نوێ بۆ Commit نییە."
 fi
@@ -102,7 +105,7 @@ fi
 git push -u origin main
 
 printf '\n=============================================\n'
-printf '✅ R6 بە سەرکەوتوویی Push کرا\n'
+printf '✅ R7 بە سەرکەوتوویی Push کرا\n'
 printf '✅ Repo: https://github.com/sarhang-cs/qalla-wanan\n'
 printf '✅ Backup: %s\n' "$BACKUP"
 printf '=============================================\n'

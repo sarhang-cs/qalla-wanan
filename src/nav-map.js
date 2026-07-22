@@ -2,9 +2,11 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r6-rtl-stable').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-22-qalla-wanan-r7-progressive-stable').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
+const SHARD_INDEX_URL = 'label-shards-index.json';
+const SHARD_DIR = 'label-shards';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');
 const EARTH_RADIUS_M = 6371008.8;
@@ -35,6 +37,12 @@ let itemById = new Map();
 let pendingCustomItems = [];
 let catalogPromise = null;
 let loaderHidden = false;
+let shardIndex = null;
+let shardIndexPromise = null;
+let shardCache = new Map();
+let shardRequestToken = 0;
+let shardRefreshTimer = 0;
+const MAX_SHARD_CACHE = 96;
 
 const q = (selector) => document.querySelector(selector);
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -63,7 +71,7 @@ function esriSatelliteSource() {
     // Esri has patchy native coverage at the deepest levels. Capping native
     // requests at z17 makes MapLibre overzoom a valid tile instead of asking
     // the server for its grey "Map data not yet available" placeholder.
-    maxzoom: 17,
+    maxzoom: 16,
     attribution: 'Esri, Maxar, Earthstar Geographics'
   };
 }
@@ -71,6 +79,13 @@ function esriSatelliteSource() {
 function baseStyle(boundary, mask) {
   const sources = {
     'satellite-primary': esriSatelliteSource(),
+    ...(MAPTILER_KEY ? {
+      'satellite-maptiler': {
+        type: 'raster',
+        url: `https://api.maptiler.com/tiles/satellite-v4/tiles.json?key=${encodeURIComponent(MAPTILER_KEY)}`,
+        tileSize: 256
+      }
+    } : {}),
     'nav-outside': { type: 'geojson', data: mask },
     'nav-boundary': { type: 'geojson', data: boundary },
     'nav-route': { type: 'geojson', data: emptyFeatureCollection() },
@@ -100,6 +115,18 @@ function baseStyle(boundary, mask) {
         'raster-resampling': 'linear'
       }
     },
+    ...(MAPTILER_KEY ? [{
+      id: 'satellite-maptiler',
+      type: 'raster',
+      source: 'satellite-maptiler',
+      minzoom: 0,
+      maxzoom: 22,
+      paint: {
+        'raster-fade-duration': 0,
+        'raster-opacity': 1,
+        'raster-resampling': 'linear'
+      }
+    }] : []),
     {
       id: 'nav-outside-dark',
       type: 'fill',
@@ -191,7 +218,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R6',
+    name: 'Qalla Wanan NAV KURD R7',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -286,17 +313,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.1, maxzoom: 7.9, size: ['interpolate', ['linear'], ['zoom'], 5.1, 17, 7.8, 22], color: '#ffe39a', halo: 2.1, padding: 14, maxWidth: 11 },
-  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.9, maxzoom: 9.0, size: ['interpolate', ['linear'], ['zoom'], 5.9, 12, 8.8, 16], color: '#fff0be', halo: 1.9, padding: 11, maxWidth: 10 },
-  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 6.6, maxzoom: 15.0, size: ['interpolate', ['linear'], ['zoom'], 6.6, 11.5, 10, 14.5, 14.5, 17], color: '#ffffff', halo: 1.9, padding: 9, maxWidth: 10 },
-  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 8.1, maxzoom: 18.0, size: ['interpolate', ['linear'], ['zoom'], 8.1, 10, 13, 12.5, 17.5, 14], color: '#ffffff', halo: 1.7, padding: 8, maxWidth: 10 },
-  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 10.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10, 9, 15, 11, 20, 12.5], color: '#f4f7fb', halo: 1.55, padding: 7, maxWidth: 9 },
-  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 9, 15, 10.8, 20, 12], color: '#c8f5dc', halo: 1.5, padding: 7, maxWidth: 10 },
-  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 12.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.7, 8.5, 17, 10.5, 20, 11.5], color: '#ffe0a1', halo: 1.45, padding: 6, maxWidth: 11 },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 10.1, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.1, 9, 15, 11, 20, 12.5], color: '#ffffff', halo: 1.6, padding: 8, maxWidth: 10 },
-  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 11.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.8, 8.8, 16, 10.7, 20, 12], color: '#ffffff', halo: 1.5, padding: 7, maxWidth: 9 },
-  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 13.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.8, 8.4, 18, 10.4, 20.5, 11.5], color: '#ffffff', halo: 1.45, padding: 6, maxWidth: 9 },
-  { id: 'nav-label-poi-detail', source: 'nav-label-poi', tier: 'poi_detail', minzoom: 16.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 16.2, 8.2, 19, 10, 20.5, 11], color: '#ffffff', halo: 1.35, padding: 5, maxWidth: 8.5 }
+  { id: 'nav-label-region', source: 'nav-label-core', tier: 'region', minzoom: 5.1, maxzoom: 7.9, size: ['interpolate', ['linear'], ['zoom'], 5.1, 17, 7.8, 22], color: '#ffe39a', halo: 2.1, padding: 14, maxWidth: 11 },
+  { id: 'nav-label-governorate', source: 'nav-label-core', tier: 'governorate', minzoom: 5.9, maxzoom: 9.0, size: ['interpolate', ['linear'], ['zoom'], 5.9, 12, 8.8, 16], color: '#fff0be', halo: 1.9, padding: 11, maxWidth: 10 },
+  { id: 'nav-label-city', source: 'nav-label-core', tier: 'city', minzoom: 6.6, maxzoom: 15.0, size: ['interpolate', ['linear'], ['zoom'], 6.6, 11.5, 10, 14.5, 14.5, 17], color: '#ffffff', halo: 1.9, padding: 9, maxWidth: 10 },
+  { id: 'nav-label-town', source: 'nav-label-core', tier: 'town', minzoom: 8.1, maxzoom: 18.0, size: ['interpolate', ['linear'], ['zoom'], 8.1, 10, 13, 12.5, 17.5, 14], color: '#ffffff', halo: 1.7, padding: 8, maxWidth: 10 },
+  { id: 'nav-label-locality', source: 'nav-label-view', tier: 'locality', minzoom: 10.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10, 9, 15, 11, 20, 12.5], color: '#f4f7fb', halo: 1.55, padding: 7, maxWidth: 9 },
+  { id: 'nav-label-natural', source: 'nav-label-view', tier: 'natural', minzoom: 10.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.8, 9, 15, 10.8, 20, 12], color: '#c8f5dc', halo: 1.5, padding: 7, maxWidth: 10 },
+  { id: 'nav-label-road', source: 'nav-label-view', tier: 'road', minzoom: 12.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 12.7, 8.5, 17, 10.5, 20, 11.5], color: '#ffe0a1', halo: 1.45, padding: 6, maxWidth: 11 },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-view', tier: 'poi_landmark', minzoom: 10.1, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.1, 9, 15, 11, 20, 12.5], color: '#ffffff', halo: 1.6, padding: 8, maxWidth: 10 },
+  { id: 'nav-label-poi-regional', source: 'nav-label-view', tier: 'poi_regional', minzoom: 11.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.8, 8.8, 16, 10.7, 20, 12], color: '#ffffff', halo: 1.5, padding: 7, maxWidth: 9 },
+  { id: 'nav-label-poi-local', source: 'nav-label-view', tier: 'poi_local', minzoom: 13.8, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.8, 8.4, 18, 10.4, 20.5, 11.5], color: '#ffffff', halo: 1.45, padding: 6, maxWidth: 9 },
+  { id: 'nav-label-poi-detail', source: 'nav-label-view', tier: 'poi_detail', minzoom: 16.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 16.2, 8.2, 19, 10, 20.5, 11], color: '#ffffff', halo: 1.35, padding: 5, maxWidth: 8.5 }
 ];
 
 function nativeLabelLayout(definition) {
@@ -335,9 +362,9 @@ function nativeLabelPaint(definition) {
 }
 
 function installNativeLabelLayers() {
-  map.addSource('nav-label-major', {
+  map.addSource('nav-label-core', {
     type: 'geojson',
-    data: assetUrl('labels-major.geojson'),
+    data: assetUrl('labels-core.geojson'),
     promoteId: 'id',
     cluster: false,
     tolerance: 0,
@@ -345,9 +372,9 @@ function installNativeLabelLayers() {
     maxzoom: 14,
     reparseOverscaled: false
   });
-  map.addSource('nav-label-poi', {
+  map.addSource('nav-label-view', {
     type: 'geojson',
-    data: assetUrl('labels-poi.geojson'),
+    data: emptyFeatureCollection(),
     promoteId: 'id',
     cluster: false,
     tolerance: 0,
@@ -380,6 +407,114 @@ function installNativeLabelLayers() {
     layout: nativeLabelLayout({ size: ['interpolate', ['linear'], ['zoom'], 11.8, 8.8, 17, 10.8, 20.5, 12], padding: 7, maxWidth: 9 }),
     paint: nativeLabelPaint({ color: '#ffffff', halo: 1.55 })
   }, 'nav-outside-dark');
+}
+
+
+function withTimeout(promise, timeout, fallback = null) {
+  return Promise.race([
+    Promise.resolve(promise),
+    new Promise((resolve) => window.setTimeout(() => resolve(fallback), timeout))
+  ]);
+}
+
+async function loadShardIndex() {
+  if (shardIndex) return shardIndex;
+  if (!shardIndexPromise) {
+    shardIndexPromise = fetch(assetUrl(SHARD_INDEX_URL), { cache: 'force-cache' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`shard index HTTP ${response.status}`);
+        return response.json();
+      })
+      .then((value) => {
+        shardIndex = value;
+        return value;
+      })
+      .catch((error) => {
+        console.warn('[NAV shard index]', error);
+        shardIndexPromise = null;
+        return null;
+      });
+  }
+  return shardIndexPromise;
+}
+
+function visibleShardKeys(index) {
+  if (!map || !index || map.getZoom() < 8.2) return [];
+  const bounds = map.getBounds();
+  const paddingLng = Math.max(0.18, (bounds.getEast() - bounds.getWest()) * 0.18);
+  const paddingLat = Math.max(0.14, (bounds.getNorth() - bounds.getSouth()) * 0.18);
+  const west = bounds.getWest() - paddingLng;
+  const east = bounds.getEast() + paddingLng;
+  const south = bounds.getSouth() - paddingLat;
+  const north = bounds.getNorth() + paddingLat;
+  const [originLng, originLat] = index.gridOrigin;
+  const size = Number(index.gridSize) || 0.25;
+  const minX = Math.floor((west - originLng) / size);
+  const maxX = Math.floor((east - originLng) / size);
+  const minY = Math.floor((south - originLat) / size);
+  const maxY = Math.floor((north - originLat) / size);
+  const keys = [];
+  for (let x = minX; x <= maxX; x += 1) {
+    for (let y = minY; y <= maxY; y += 1) {
+      const key = `${x}_${y}`;
+      if (index.shards?.[key]) keys.push(key);
+    }
+  }
+  return keys;
+}
+
+function touchShardCache(key, features) {
+  shardCache.delete(key);
+  shardCache.set(key, features);
+  while (shardCache.size > MAX_SHARD_CACHE) {
+    const oldest = shardCache.keys().next().value;
+    shardCache.delete(oldest);
+  }
+}
+
+async function fetchShard(index, key) {
+  if (shardCache.has(key)) {
+    const features = shardCache.get(key);
+    touchShardCache(key, features);
+    return features;
+  }
+  const file = index.shards?.[key]?.file;
+  if (!file) return [];
+  const response = await fetch(assetUrl(`${SHARD_DIR}/${file}`), { cache: 'force-cache' });
+  if (!response.ok) throw new Error(`label shard ${key} HTTP ${response.status}`);
+  const value = await response.json();
+  const features = Array.isArray(value.features) ? value.features : [];
+  touchShardCache(key, features);
+  return features;
+}
+
+async function refreshViewportLabels({ force = false } = {}) {
+  const source = map?.getSource('nav-label-view');
+  if (!source) return { count: 0 };
+  const index = await loadShardIndex();
+  if (!index) return { count: 0, error: true };
+  const keys = visibleShardKeys(index);
+  if (!keys.length) {
+    source.setData(emptyFeatureCollection());
+    return { count: 0 };
+  }
+  const token = ++shardRequestToken;
+  const settled = await Promise.allSettled(keys.map((key) => fetchShard(index, key)));
+  if (token !== shardRequestToken && !force) return { count: 0, stale: true };
+  const features = [];
+  for (const result of settled) {
+    if (result.status === 'fulfilled') features.push(...result.value);
+    else console.warn('[NAV label shard]', result.reason);
+  }
+  source.setData({ type: 'FeatureCollection', features });
+  return { count: features.length, shards: keys.length };
+}
+
+function scheduleViewportLabels() {
+  window.clearTimeout(shardRefreshTimer);
+  shardRefreshTimer = window.setTimeout(() => {
+    refreshViewportLabels().catch((error) => console.warn('[NAV viewport labels]', error));
+  }, 120);
 }
 
 function compactItemToFeature(item) {
@@ -443,6 +578,26 @@ function hideMapLoading() {
   window.setTimeout(() => overlay.remove(), 500);
 }
 
+function failMapLoading(error) {
+  const overlay = q('#nav-map-loading');
+  if (!overlay) return;
+  const text = q('#nav-map-loading-text');
+  const card = overlay.querySelector('.nav-map-loading-card');
+  if (text) text.textContent = 'هەندێ داتای ورد دوای کردنەوە بار دەبێت؛ نەخشە بەردەوامە.';
+  const bar = q('#nav-map-loading-bar');
+  if (bar) bar.style.width = '100%';
+  if (card && !card.querySelector('.nav-map-retry')) {
+    const button = document.createElement('button');
+    button.className = 'nav-map-retry';
+    button.type = 'button';
+    button.textContent = 'دووبارە هەوڵدانەوە';
+    button.addEventListener('click', () => window.location.reload());
+    card.appendChild(button);
+  }
+  console.error('[NAV map loading]', error);
+  window.setTimeout(hideMapLoading, 1800);
+}
+
 async function ensureRtlSupport() {
   if (!window.maplibregl?.setRTLTextPlugin) throw new Error('MapLibre RTL API is unavailable');
   const status = window.maplibregl.getRTLTextPluginStatus?.();
@@ -462,22 +617,22 @@ async function ensureRtlSupport() {
   if (finalStatus && finalStatus !== 'loaded') throw new Error(`RTL plugin status: ${finalStatus}`);
 }
 
-function waitForSourceLoaded(sourceId, timeout = 35000) {
-  return new Promise((resolve, reject) => {
+function waitForSourceLoaded(sourceId, timeout = 10000) {
+  return new Promise((resolve) => {
     if (map?.getSource(sourceId) && map.isSourceLoaded(sourceId)) {
-      resolve();
+      resolve(true);
       return;
     }
     const timer = window.setTimeout(() => {
       map?.off('sourcedata', onSourceData);
-      reject(new Error(`${sourceId} load timeout`));
+      resolve(false);
     }, timeout);
     function onSourceData(event) {
       if (event.sourceId !== sourceId) return;
       if (!map?.getSource(sourceId) || !map.isSourceLoaded(sourceId)) return;
       window.clearTimeout(timer);
       map.off('sourcedata', onSourceData);
-      resolve();
+      resolve(true);
     }
     map.on('sourcedata', onSourceData);
   });
@@ -863,15 +1018,14 @@ async function createMap() {
   loaderHidden = false;
   installMapUi();
   configureMapWorkers();
-  setLoadingProgress(5, 'پشکنینی فۆنت و ڕێکخستنی زمانی کوردی…');
+  setLoadingProgress(6, 'پشکنینی فۆنت و ڕێکخستنی زمانی کوردی…');
 
-  const fontAndRtlPromise = Promise.all([
-    (async () => {
-      if (document.fonts?.load) await document.fonts.load('12px "Qalla Hewal"');
-      if (document.fonts?.ready) await document.fonts.ready;
-    })(),
-    ensureRtlSupport()
-  ]);
+  const fontPromise = (async () => {
+    if (document.fonts?.load) await document.fonts.load('12px "Qalla Hewal"');
+    if (document.fonts?.ready) await document.fonts.ready;
+    return true;
+  })();
+  const rtlPromise = ensureRtlSupport();
 
   const [boundaryResponse, maskResponse] = await Promise.all([
     fetch(assetUrl('boundary.geojson'), { cache: 'force-cache' }),
@@ -884,18 +1038,21 @@ async function createMap() {
   const bbox = geometryBbox(boundaryGeometry);
 
   setLoadingProgress(18, 'فۆنت و نووسینی ڕاست‌بۆچەپ خەریکە ئامادە دەبێت…');
-  await fontAndRtlPromise;
-  setLoadingProgress(28, 'بنەمای ساتەلایت و سنووری کوردستان بار دەبێت…');
+  const [fontResult, rtlResult] = await Promise.allSettled([
+    withTimeout(fontPromise, 7000, false),
+    withTimeout(rtlPromise, 9000, false)
+  ]);
+  if (fontResult.status === 'rejected') console.warn('[NAV font]', fontResult.reason);
+  if (rtlResult.status === 'rejected') console.warn('[NAV RTL]', rtlResult.reason);
 
-  catalogPromise = loadDeferredCatalog();
-
+  setLoadingProgress(30, 'بنەمای ساتەلایت و سنووری کوردستان بار دەبێت…');
   map = new maplibregl.Map({
     container: 'leafmap',
     style: baseStyle(boundary, mask),
     center: [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2],
     zoom: 6.2,
     minZoom: 5.1,
-    maxZoom: 19.75,
+    maxZoom: 19.25,
     maxPitch: 60,
     renderWorldCopies: false,
     pitchWithRotate: true,
@@ -919,10 +1076,12 @@ async function createMap() {
     map.on('error', (event) => console.warn('[NAV map resource]', event.error || event));
   });
 
-  setLoadingProgress(42, 'ناوی شار و ناوچەکان دەخرێنە ناو engine ـی نەخشە…');
+  setLoadingProgress(52, 'ناوی شار و ناوچە سەرەکییەکان ئامادە دەبن…');
   installNativeLabelLayers();
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
   map.on('zoom', updateGpsAccuracyPaint);
+  map.on('moveend', scheduleViewportLabels);
+  map.on('zoomend', scheduleViewportLabels);
   map.on('click', (event) => {
     const label = nativeLabelAtPoint(event.point);
     if (label) {
@@ -932,22 +1091,21 @@ async function createMap() {
     if (!pointInBoundary(event.lngLat.lng, event.lngLat.lat)) toast('دەرەوەی سنووری کارپێکردنی نەخشە داخراوە');
   });
 
-  await waitForSourceLoaded('nav-label-major');
-  setLoadingProgress(67, 'ناوی گوند و شوێنە سروشتییەکان ئامادەن…');
-  await waitForSourceLoaded('nav-label-poi');
-  setLoadingProgress(84, 'دوکان و شوێنە وردەکان و گەڕان تەواو دەکرێن…');
+  await waitForSourceLoaded('nav-label-core', 9000);
+  setLoadingProgress(76, 'ناوە وردەکان بەپێی شوێنی بینین بار دەبن…');
+  await withTimeout(refreshViewportLabels({ force: true }), 7000, { count: 0, timeout: true });
 
-  const catalog = await catalogPromise;
-  if (pendingCustomItems.length) {
-    setNativeCustomLabels(pendingCustomItems);
-    await waitForSourceLoaded('nav-custom-label-source', 12000).catch(() => {});
-  }
-
-  setLoadingProgress(96, 'کۆتا پشکنینی tile، ناو و ماسک…');
-  await waitForMapIdle();
+  setLoadingProgress(94, 'کۆتا پشکنینی tile و ماسک…');
+  await waitForMapIdle(6500);
   setLoadingProgress(100, 'نەخشە ئامادەیە');
-  window.setTimeout(hideMapLoading, 180);
-  setStatus(`${Number(catalog?.count || allItems.length).toLocaleString('en-US')} ناوی شوێن و گەڕان ئامادەیە`, 3000);
+  window.setTimeout(hideMapLoading, 140);
+
+  window.setTimeout(() => {
+    catalogPromise = loadDeferredCatalog().then((catalog) => {
+      setStatus(`${Number(catalog?.count || allItems.length).toLocaleString('en-US')} ناوی شوێن و گەڕان ئامادەیە`, 3000);
+      return catalog;
+    });
+  }, 450);
   return map;
 }
 
@@ -956,8 +1114,9 @@ function init() {
     mapReadyPromise = createMap().catch((error) => {
       console.error('[NAV map init]', error);
       mapReadyPromise = null;
-      toast('داتای نەخشە بار نەبوو؛ پەڕەکە نوێ بکەرەوە');
-      throw error;
+      failMapLoading(error);
+      toast('نەخشە بە بەشی سەرەکی کراوەتەوە؛ داتای ورد دوایەوە بار دەبێت');
+      return map;
     });
   }
   return mapReadyPromise;

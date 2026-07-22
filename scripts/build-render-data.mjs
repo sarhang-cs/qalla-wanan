@@ -29,7 +29,7 @@ const majorMeta = write('labels-major.geojson', major);
 const poiMeta = write('labels-poi.geojson', poi);
 const audit = {
   ok: true,
-  release: '2026-07-22-qalla-wanan-r6-rtl-stable',
+  release: '2026-07-22-qalla-wanan-r7-progressive-stable',
   sourceRecords: source.features.length,
   renderRecords: major.length + poi.length,
   majorRecords: major.length,

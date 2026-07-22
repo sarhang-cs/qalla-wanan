@@ -1,7 +1,7 @@
 {
   "name": "qalla-wanan-nav-map",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "data:build": "node scripts/build-render-data.mjs",
