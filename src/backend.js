@@ -20,10 +20,11 @@ async function fromSupabase(config) {
   if (!url || !key) return [];
   const select = 'id,name_ku,name_ar,name_en,category,category_ku,latitude,longitude,admin_governorate_ku,admin_district_ku,priority,min_zoom,status';
   const endpoint = `${url}/rest/v1/places?select=${encodeURIComponent(select)}&status=eq.published&limit=10000`;
-  const response = await fetch(endpoint, {
-    headers: { apikey: key, Authorization: `Bearer ${key}`, Accept: 'application/json' },
-    credentials: 'omit'
-  });
+  const headers = { apikey: key, Accept: 'application/json' };
+  // New sb_publishable_* keys are public browser keys, but they are not JWTs.
+  // Only legacy anon JWT keys belong in Authorization: Bearer.
+  if (!String(key).startsWith('sb_publishable_')) headers.Authorization = `Bearer ${key}`;
+  const response = await fetch(endpoint, { headers, credentials: 'omit' });
   if (!response.ok) throw new Error(`Supabase REST HTTP ${response.status}`);
   return (await response.json()).map(cleanPlace).filter(Boolean);
 }

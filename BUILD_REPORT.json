@@ -1,12 +1,9 @@
 {
-  "project": "QALLA WANAN + NAV KURD MAP",
-  "release": "R1",
-  "built_at": "2026-07-22",
-  "source_ui": "index (87).html",
-  "source_map": "NAV-KURD-6.4.0-FINAL-R42-1-CHECKSUM-SYNC-ROOT-FIX-2027-SOURCE.zip",
-  "map_data_release": "2026-07-19-nav-kurd-kirkuk-language-icon-r26-2027",
-  "map_labels_total": 47040,
-  "map_label_counts": {
+  "ok": true,
+  "release": "R2-FIX",
+  "builtAt": "2026-07-22T14:02:22.665Z",
+  "placeCount": 47040,
+  "counts": {
     "region": 1,
     "governorate": 8,
     "locality": 233,
@@ -25,34 +22,11 @@
     46.34873,
     37.377264
   ],
-  "boundary_validation": {
-    "labels_outside_boundary": 0,
-    "outside_mask_enabled": true,
-    "operational_scope_only": true
-  },
-  "map_features": {
-    "satellite_only": true,
-    "text_only_places": true,
-    "purple_clusters_removed": true,
-    "place_icons_removed": true,
-    "weather_removed": true,
-    "search": true,
-    "gps_watch": true,
-    "routing": true,
-    "terrain_3d": true,
-    "supabase_adapter": true,
-    "mysql_hostinger_adapter": true
-  },
-  "font": {
-    "expected_path": "public/fonts/UniQAIDAR_Hewal_031.ttf",
-    "included_in_archive": false,
-    "installer": "scripts/install-font.sh"
-  },
-  "checks": [
-    "data schema and count",
-    "all static label coordinates inside boundary",
-    "JavaScript syntax",
-    "static production build",
-    "local HTTP path checks"
+  "fixes": [
+    "GitHub Pages relative paths",
+    "map labels refresh after style load",
+    "onboarding third-button mobile layout",
+    "Supabase publishable-key REST headers",
+    "GitHub Actions repository variables"
   ]
 }

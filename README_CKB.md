@@ -1,3 +1,10 @@
+# R2 Fix
+
+- ناوی 47,040 شوێن لە GitHub Pages چاک کرا.
+- دوگمەی پەڕەی سێیەمی دەستپێک لە مۆبایل چاک کرا.
+- ڕێڕەوی فایلەکان بۆ GitHub Pages، Hostinger و localhost گشتی کرا.
+- Publishable key ـی نوێی Supabase بە هێدەری دروست پشتیوانی دەکرێت.
+
 # QALLA WANAN + NAV KURD MAP — R1
 
 ئەم پڕۆژەیە `index (87).html` ـەکە وەک بنەمای UI پاراستووە و **تەنها تابی نەخشە**ی بە داتای NAV KURD گۆڕیوە.
@@ -63,7 +70,7 @@ VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=YOUR_SUPABASE_PUBLISHABLE_KEY
 VITE_ROUTING_BASE_URL=https://router.project-osrm.org
 VITE_MYSQL_API_BASE_URL=
-VITE_MAP_DATA_VERSION=2026-07-22-qalla-wanan-nav-map-r1
+VITE_MAP_DATA_VERSION=2026-07-22-qalla-wanan-nav-map-r2
 ```
 
 ### تێبینی گرنگ

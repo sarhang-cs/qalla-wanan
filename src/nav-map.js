@@ -1,6 +1,6 @@
 import { loadPublishedPlaces } from './backend.js';
 
-const DATA_BASE = './data/nav';
+const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');
@@ -139,6 +139,9 @@ class DomLabelManager {
     mapInstance.on('moveend', this.onRefresh);
     mapInstance.on('zoomend', this.onRefresh);
     mapInstance.on('resize', this.onRefresh);
+    mapInstance.on('idle', this.onRefresh);
+    mapInstance.on('styledata', this.onRefresh);
+    this.waitingForIdle = false;
   }
 
   buildIndex() {
@@ -185,7 +188,17 @@ class DomLabelManager {
   }
 
   refresh() {
-    if (!this.map || !this.map.loaded()) return;
+    if (!this.map) return;
+    if (!this.map.isStyleLoaded()) {
+      if (!this.waitingForIdle) {
+        this.waitingForIdle = true;
+        this.map.once('idle', () => {
+          this.waitingForIdle = false;
+          this.refresh();
+        });
+      }
+      return;
+    }
     const zoom = this.map.getZoom();
     const width = this.map.getContainer().clientWidth;
     const maxLabels = width < 500 ? (zoom >= 13 ? 260 : 180) : (zoom >= 13 ? 650 : 420);
@@ -395,7 +408,7 @@ async function routeToSelected(options = {}) {
 async function toggle3D() {
   if (!map) return;
   if (!MAPTILER_KEY || !map.getSource('terrain')) {
-    toast('بۆ ٣D، VITE_MAPTILER_KEY لە Vercel زیاد بکە');
+    toast('بۆ ٣D، VITE_MAPTILER_KEY لە GitHub Actions زیاد بکە');
     return;
   }
   terrainEnabled = !terrainEnabled;
@@ -439,6 +452,7 @@ async function createMap() {
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
   labelManager = new DomLabelManager(map, allItems);
   labelManager.refresh();
+  map.once('idle', () => labelManager?.refresh());
   map.on('click', (event) => {
     if (!pointInBoundary(event.lngLat.lng, event.lngLat.lat)) toast('دەرەوەی سنووری کارپێکردنی نەخشە داخراوە');
   });
