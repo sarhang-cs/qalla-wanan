@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "file_expected_in_downloads": "UniQAIDAR-Money-Heist-002.ttf",
+  "font_family_records": [
+    "UniQAIDAR_Money Heist 002"
+  ],
+  "font_full_name_records": [
+    "UniQAIDAR_Money Heist 002"
+  ],
+  "postscript_names": [
+    "UniQAIDAR_MoneyHeist002"
+  ],
+  "glyph_count": 335,
+  "arabic_gsub": true,
+  "arabic_gpos": true,
+  "representative_character_coverage": true,
+  "missing_representative_characters": [],
+  "binary_bundled_in_zip": false,
+  "installer_destination": "public/fonts/UniQAIDAR-Money-Heist-002.ttf"
+}

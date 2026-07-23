@@ -2,16 +2,14 @@ import { loadPublishedPlaces } from './backend.js';
 
 const DATA_BASE = new URL('../data/nav/', import.meta.url).href.replace(/\/$/, '');
 const CONFIG = window.__APP_CONFIG__ || {};
-const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-23-qalla-wanan-r13-nav-readable-labels').trim();
+const DATA_VERSION = String(CONFIG.VITE_MAP_DATA_VERSION || '2026-07-23-qalla-wanan-r14-money-heist-rtl').trim();
 const MAPTILER_KEY = String(CONFIG.VITE_MAPTILER_KEY || '').trim();
 const RTL_PLUGIN_URL = 'https://unpkg.com/@mapbox/mapbox-gl-rtl-text@0.3.0/dist/mapbox-gl-rtl-text.js';
 const assetUrl = (relative) => `${DATA_BASE}/${relative}?v=${encodeURIComponent(DATA_VERSION)}`;
 const ROUTING_BASE = String(CONFIG.VITE_ROUTING_BASE_URL || 'https://router.project-osrm.org').replace(/\/$/, '');
 const EARTH_RADIUS_M = 6371008.8;
-const LABEL_FONT_UI = 'Vazirmatn';
-const LABEL_FONT_HEADING = 'Noto Kufi Arabic';
-const LABEL_FONT_STACK = [LABEL_FONT_UI, 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Tahoma', 'Arial', 'sans-serif'];
-const LABEL_FONT_HEADING_STACK = [LABEL_FONT_HEADING, LABEL_FONT_UI, 'Noto Sans Arabic', 'Tahoma', 'Arial', 'sans-serif'];
+const MAP_LABEL_FONT = 'UniQAIDAR Money Heist 002';
+const MAP_LABEL_FONT_STACK = [MAP_LABEL_FONT, 'Noto Sans Arabic', 'Noto Naskh Arabic', 'Tahoma', 'Arial', 'sans-serif'];
 const SAFE_LABEL_FONT_STACK = ['Noto Sans Arabic', 'Noto Naskh Arabic', 'Tahoma', 'Arial', 'sans-serif'];
 const CAPSULE_IMAGE_IDS = new Set(['nav-capsule-major', 'nav-capsule-place', 'nav-capsule-poi']);
 const CAPSULE_IMAGE_STYLES = Object.freeze({
@@ -261,7 +259,7 @@ function baseStyle(boundary, mask) {
 
   return {
     version: 8,
-    name: 'Qalla Wanan NAV KURD R13 Readable Native Labels 69000',
+    name: 'Qalla Wanan NAV KURD R14 Money Heist RTL Labels 69000',
     sources,
     layers,
     transition: { duration: 0, delay: 0 }
@@ -356,17 +354,17 @@ const kindNames = {
 };
 
 const nativeLabelDefinitions = [
-  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.8, size: ['interpolate', ['linear'], ['zoom'], 5.0, 22, 8.5, 27], capsule: 'nav-capsule-major', boxPadding: [2, 7, 2, 7], collisionPadding: 10, maxWidth: 18, overlap: true, opacity: 0.91, font: 'heading' },
-  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.5, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.5, 19, 10.4, 23], capsule: 'nav-capsule-major', boxPadding: [2, 7, 2, 7], collisionPadding: 9, maxWidth: 18, overlap: false, opacity: 0.90, font: 'heading' },
-  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.8, maxzoom: 18.0, size: ['interpolate', ['linear'], ['zoom'], 5.8, 18, 11, 21, 17.8, 23], capsule: 'nav-capsule-major', boxPadding: [2, 7, 2, 7], collisionPadding: 9, maxWidth: 18, overlap: false, opacity: 0.90, font: 'heading' },
-  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.4, maxzoom: 20.5, size: ['interpolate', ['linear'], ['zoom'], 7.4, 16.5, 13, 18.5, 20.2, 20.5], capsule: 'nav-capsule-place', boxPadding: [1.7, 6, 1.7, 6], collisionPadding: 8, maxWidth: 18, overlap: false, opacity: 0.88, font: 'heading' },
-  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 10.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.2, 16.5, 15, 18.5, 20.5, 20], capsule: 'nav-capsule-place', boxPadding: [1.5, 5.5, 1.5, 5.5], collisionPadding: 10, maxWidth: 18, overlap: false, opacity: 0.86, font: 'ui' },
-  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 11.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.0, 16, 15, 18, 20.5, 19.5], capsule: 'nav-capsule-place', boxPadding: [1.5, 5.5, 1.5, 5.5], collisionPadding: 10, maxWidth: 18, overlap: false, opacity: 0.84, font: 'ui' },
-  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 15.2, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.2, 15.5, 18, 17, 20.5, 18], capsule: 'nav-capsule-place', boxPadding: [1.2, 4.8, 1.2, 4.8], collisionPadding: 7, maxWidth: 20, overlap: false, opacity: 0.80, font: 'ui' },
-  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 13.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.0, 17, 17, 18.5, 20.5, 20], capsule: 'nav-capsule-poi', boxPadding: [1.5, 5.5, 1.5, 5.5], collisionPadding: 12, maxWidth: 19, overlap: false, opacity: 0.84, font: 'ui' },
-  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 14.7, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 14.7, 16.5, 18, 18, 20.5, 19], capsule: 'nav-capsule-poi', boxPadding: [1.4, 5.2, 1.4, 5.2], collisionPadding: 12, maxWidth: 19, overlap: false, opacity: 0.82, font: 'ui' },
-  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 16.1, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 16.1, 16, 18.5, 17, 20.5, 18], capsule: 'nav-capsule-poi', boxPadding: [1.2, 4.8, 1.2, 4.8], collisionPadding: 11, maxWidth: 20, overlap: false, opacity: 0.80, font: 'ui' },
-  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 17.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 17.6, 15.5, 19.2, 16.5, 20.5, 17.5], capsule: 'nav-capsule-poi', boxPadding: [1.1, 4.5, 1.1, 4.5], collisionPadding: 10, maxWidth: 21, overlap: false, opacity: 0.78, font: 'ui' }
+  { id: 'nav-label-region', source: 'nav-label-major', tier: 'region', minzoom: 5.0, maxzoom: 8.8, size: ['interpolate', ['linear'], ['zoom'], 5.0, 20, 8.5, 24], capsule: 'nav-capsule-major', boxPadding: [1.6, 5.2, 1.6, 5.2], collisionPadding: 11, maxWidth: 15, overlap: true, opacity: 0.90 },
+  { id: 'nav-label-governorate', source: 'nav-label-major', tier: 'governorate', minzoom: 5.6, maxzoom: 10.8, size: ['interpolate', ['linear'], ['zoom'], 5.6, 17.5, 10.4, 20.5], capsule: 'nav-capsule-major', boxPadding: [1.5, 5, 1.5, 5], collisionPadding: 10, maxWidth: 15, overlap: false, opacity: 0.89 },
+  { id: 'nav-label-city', source: 'nav-label-major', tier: 'city', minzoom: 5.9, maxzoom: 18.0, size: ['interpolate', ['linear'], ['zoom'], 5.9, 17, 11, 19, 17.8, 21], capsule: 'nav-capsule-major', boxPadding: [1.5, 5, 1.5, 5], collisionPadding: 10, maxWidth: 15, overlap: false, opacity: 0.89 },
+  { id: 'nav-label-town', source: 'nav-label-major', tier: 'town', minzoom: 7.7, maxzoom: 20.5, size: ['interpolate', ['linear'], ['zoom'], 7.7, 15.5, 13, 17, 20.2, 18.5], capsule: 'nav-capsule-place', boxPadding: [1.3, 4.5, 1.3, 4.5], collisionPadding: 9, maxWidth: 14, overlap: false, opacity: 0.87 },
+  { id: 'nav-label-locality', source: 'nav-label-major', tier: 'locality', minzoom: 10.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 10.6, 14, 15, 15.5, 20.5, 17], capsule: 'nav-capsule-place', boxPadding: [1.2, 4.2, 1.2, 4.2], collisionPadding: 11, maxWidth: 13, overlap: false, opacity: 0.85 },
+  { id: 'nav-label-natural', source: 'nav-label-major', tier: 'natural', minzoom: 11.4, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 11.4, 13.8, 15, 15, 20.5, 16.5], capsule: 'nav-capsule-place', boxPadding: [1.2, 4.2, 1.2, 4.2], collisionPadding: 11, maxWidth: 13, overlap: false, opacity: 0.83 },
+  { id: 'nav-label-road', source: 'nav-label-major', tier: 'road', minzoom: 15.6, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.6, 12.8, 18, 14, 20.5, 15.2], capsule: 'nav-capsule-place', boxPadding: [1, 3.8, 1, 3.8], collisionPadding: 8, maxWidth: 15, overlap: false, opacity: 0.79 },
+  { id: 'nav-label-poi-landmark', source: 'nav-label-poi', tier: 'poi_landmark', minzoom: 13.4, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 13.4, 14.5, 17, 16, 20.5, 17.2], capsule: 'nav-capsule-poi', boxPadding: [1.2, 4.2, 1.2, 4.2], collisionPadding: 13, maxWidth: 14, overlap: false, opacity: 0.83 },
+  { id: 'nav-label-poi-regional', source: 'nav-label-poi', tier: 'poi_regional', minzoom: 15.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 15.0, 13.8, 18, 15, 20.5, 16.2], capsule: 'nav-capsule-poi', boxPadding: [1.1, 4, 1.1, 4], collisionPadding: 13, maxWidth: 14, overlap: false, opacity: 0.81 },
+  { id: 'nav-label-poi-local', source: 'nav-label-poi', tier: 'poi_local', minzoom: 16.5, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 16.5, 13.2, 18.5, 14.2, 20.5, 15.4], capsule: 'nav-capsule-poi', boxPadding: [1, 3.8, 1, 3.8], collisionPadding: 12, maxWidth: 14, overlap: false, opacity: 0.79 },
+  { id: 'nav-label-poi-detail', source: 'nav-label-detail', tier: 'poi_detail', minzoom: 18.0, maxzoom: 21.0, size: ['interpolate', ['linear'], ['zoom'], 18.0, 12.5, 19.2, 13.3, 20.5, 14.3], capsule: 'nav-capsule-poi', boxPadding: [0.9, 3.6, 0.9, 3.6], collisionPadding: 11, maxWidth: 15, overlap: false, opacity: 0.77 }
 ];
 
 function nativeLabelLayout(definition) {
@@ -376,7 +374,7 @@ function nativeLabelLayout(definition) {
     'symbol-sort-key': ['-', 0, ['to-number', ['get', 'priority']]],
     'symbol-avoid-edges': true,
     'icon-image': definition.capsule || 'nav-capsule-poi',
-    'icon-size': 0.90,
+    'icon-size': 0.80,
     'icon-anchor': 'center',
     'icon-text-fit': 'both',
     'icon-text-fit-padding': definition.boxPadding || [1.5, 4, 1.5, 4],
@@ -387,13 +385,13 @@ function nativeLabelLayout(definition) {
     'icon-rotation-alignment': 'viewport',
     'icon-pitch-alignment': 'viewport',
     'text-field': ['coalesce', ['get', 'display_name'], ['get', 'name']],
-    'text-font': definition.font === 'heading' ? LABEL_FONT_HEADING_STACK : LABEL_FONT_STACK,
+    'text-font': MAP_LABEL_FONT_STACK,
     'text-size': definition.size,
     'text-anchor': 'center',
     'text-justify': 'center',
     'text-offset': [0, 0],
     'text-max-width': definition.maxWidth ?? 18,
-    'text-line-height': 1.12,
+    'text-line-height': 1.06,
     'text-writing-mode': ['horizontal'],
     'text-letter-spacing': 0,
     'text-padding': definition.collisionPadding ?? 8,
@@ -429,8 +427,8 @@ function roundedRectPath(context, x, y, width, height, radius) {
 }
 
 function createCapsuleLabelImage(style) {
-  const width = 52;
-  const height = 22;
+  const width = 46;
+  const height = 20;
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
@@ -446,17 +444,17 @@ function createCapsuleLabelImage(style) {
   context.shadowColor = 'rgba(0,0,0,0.16)';
   context.shadowBlur = 2;
   context.shadowOffsetY = 1;
-  roundedRectPath(context, 2, 2, width - 4, height - 4, 7);
+  roundedRectPath(context, 2, 2, width - 4, height - 4, 6);
   context.fillStyle = gradient;
   context.fill();
   context.restore();
 
-  roundedRectPath(context, 2, 2, width - 4, height - 4, 7);
+  roundedRectPath(context, 2, 2, width - 4, height - 4, 6);
   context.lineWidth = 0.75;
   context.strokeStyle = style.edge;
   context.stroke();
 
-  roundedRectPath(context, 5, 3, width - 10, 3, 3);
+  roundedRectPath(context, 5, 3, width - 10, 2.5, 2.5);
   context.fillStyle = style.highlight;
   context.fill();
   return context.getImageData(0, 0, width, height);
@@ -467,9 +465,9 @@ function ensureCapsuleLabelImage(id) {
   const image = createCapsuleLabelImage(CAPSULE_IMAGE_STYLES[id]);
   map.addImage(id, image, {
     pixelRatio: 2,
-    stretchX: [[18, 34]],
-    stretchY: [[8, 14]],
-    content: [7, 3, 45, 19]
+    stretchX: [[15, 31]],
+    stretchY: [[7, 13]],
+    content: [6, 3, 40, 17]
   });
 }
 
@@ -587,14 +585,17 @@ function failMapLoading(error) {
 
 async function ensureProjectFont() {
   if (!document.fonts?.load) return false;
-  const requests = [
-    document.fonts.load(`700 24px "${LABEL_FONT_HEADING}"`, 'هەولێر سلێمانی کەرکووک'),
-    document.fonts.load(`700 22px "${LABEL_FONT_UI}"`, 'گوند شار دوکان قوتابخانە'),
-    document.fonts.load(`500 18px "${LABEL_FONT_UI}"`, 'ڕێگا شوێن نەخۆشخانە')
+  const samples = [
+    'هەولێر سلێمانی کەرکووک دهۆک',
+    'گوند شار دوکان قوتابخانە نەخۆشخانە',
+    'العراق أربيل السليمانية كركوك دهوك'
   ];
+  const requests = samples.map((sample, index) =>
+    document.fonts.load(`${index === 0 ? 22 : 17}px "${MAP_LABEL_FONT}"`, sample)
+  );
   const settled = await Promise.allSettled(requests);
   await document.fonts.ready;
-  return settled.some((result) => result.status === 'fulfilled' && result.value?.length);
+  return settled.every((result) => result.status === 'fulfilled' && result.value?.length);
 }
 
 async function verifyNativeLabelVisibility() {
@@ -1037,7 +1038,7 @@ async function createMap() {
   loaderHidden = false;
   installMapUi();
   configureMapWorkers();
-  setLoadingProgress(6, 'پشکنینی فۆنتی ئەپ و ڕێکخستنی ناوەکان…');
+  setLoadingProgress(6, 'پشکنینی فۆنتی ناوەکانی نەخشە و RTL…');
 
   const fontPromise = ensureProjectFont();
   const rtlPromise = ensureRtlSupport();
@@ -1052,7 +1053,7 @@ async function createMap() {
   boundaryGeometry = boundary.features?.[0]?.geometry || null;
   const bbox = geometryBbox(boundaryGeometry);
 
-  setLoadingProgress(18, 'فۆنتی ئەپ و نووسینی ڕاست‌بۆچەپ ئامادە دەبێت…');
+  setLoadingProgress(18, 'فۆنتی تایبەتی نەخشە و نووسینی کوردی/عەرەبی ئامادە دەبێت…');
   const [fontResult, rtlResult] = await Promise.allSettled([
     withTimeout(fontPromise, 7000, false),
     withTimeout(rtlPromise, 9000, false)
@@ -1093,7 +1094,7 @@ async function createMap() {
     map.on('error', (event) => console.warn('[NAV map resource]', event.error || event));
   });
 
-  setLoadingProgress(52, 'قالبی فشردە و ناوە خوێنراوەکان ئامادە دەبن…');
+  setLoadingProgress(52, 'قالبی فشردە و ناوە ڕێکخراوەکانی نەخشە ئامادە دەبن…');
   installCapsuleLabelImages();
   installNativeLabelLayers();
   map.fitBounds([[bbox[0], bbox[1]], [bbox[2], bbox[3]]], { padding: 28, duration: 0 });
@@ -1108,7 +1109,7 @@ async function createMap() {
   });
 
   const labelHealth = await verifyNativeLabelVisibility();
-  if (labelHealth.fallback) console.warn('[NAV font] embedded font unavailable to WebGL text renderer; safe local fallback enabled');
+  if (labelHealth.fallback) console.warn('[NAV font] map label font unavailable to WebGL text renderer; safe local fallback enabled');
   setLoadingProgress(76, 'هەموو 69,000 ناوی گوند، شوێن، دوکان و ڕێگا پشکنین دەکرێن…');
   const [majorReady, poiReady, detailReady] = await Promise.all([
     waitForSourceLoaded('nav-label-major', 75000),

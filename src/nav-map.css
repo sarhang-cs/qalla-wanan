@@ -1,3 +1,4 @@
+@font-face{font-family:"UniQAIDAR Money Heist 002";src:url("../fonts/UniQAIDAR-Money-Heist-002.ttf") format("truetype");font-style:normal;font-weight:400;font-display:block}
 :root{--app-font:"Vazirmatn","Noto Sans Arabic",Tahoma,Arial,sans-serif;--app-heading-font:"Noto Kufi Arabic","Vazirmatn","Noto Sans Arabic",sans-serif}
 #view-map,#leafmap,#view-map *{font-family:var(--app-font)!important}
 #leafmap{background:#050a12}
@@ -69,8 +70,8 @@
 }
 
 
-/* R13 compact NAV capsules with readable app typography and progressive density. */
+/* R14 compact native capsules; map labels use the local Money Heist Kurdish/Arabic font only. */
 #map-side{gap:10px}
 #btn-locate{background:rgba(247,250,252,.96);color:#0b1824}
 
-/* R13 labels use the same Vazirmatn/Noto Kufi typography as the app; WebGL nine-slice capsules remain native. */
+/* App UI stays Vazirmatn/Noto Kufi; native MapLibre labels use UniQAIDAR Money Heist 002. */

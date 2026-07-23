@@ -1,10 +1,19 @@
-# Qalla Wanan — NAV KURD R13
+# Qalla Wanan — R14
 
-- هەموو 69,000 تۆمارەکە پارێزراون.
-- فۆنتی ناوەکان لەگەڵ فۆنتی ئەپ یەکخراوەتەوە: Vazirmatn و Noto Kufi Arabic.
-- بۆکسە دارکەکان فشردەترن و فۆنتەکان خوێنراوترن.
-- ناوی دوکان و POI بە پێی Zoom بە تەدریج دەردەکەون، نەک هەموویان یەکجار.
-- label ـەکان native MapLibre/WebGL ـن؛ Overlay، DOM یان Canvas نین.
-- Satellite، GPS و route پارێزراون.
+لە R14 ـدا فۆنتی ڕووکاری گشتی ئەپەکە هەروا `Vazirmatn / Noto Kufi Arabic` ماوەتەوە. تەنها ناوی شوێنەکانی native ـی MapLibre بە فۆنتی `UniQAIDAR Money Heist 002` نیشان دەدرێن.
 
-`TERMUX_INSTALL_R13_AND_PUSH.sh` جێبەجێ بکە.
+## گۆڕانکارییەکان
+
+- چارەسەری RTL و پچرانی پیتی کوردی و عەرەبی بە NFC normalization و RTL plugin
+- قەبارەی دەق بە پێی شار، گوند، ڕێگا و POI ڕێکخراوە
+- بۆکسە دارکەکان بچووکتر و فشردەترن
+- هیچ DOM/Canvas overlay ـێک نییە؛ ناوەکان native WebGL symbol ـن
+- 69,000 تۆمار، coordinate، mask، Satellite، GPS و route پارێزراون
+
+## فۆنت
+
+پێش دامەزراندن ئەم فایلە بخەرە ناو Downloads:
+
+`UniQAIDAR-Money-Heist-002.ttf`
+
+فۆنتەکە لە ZIP ـدا دانەنراوە. سکریپتی Termux خۆی لە Downloads دەیدۆزێتەوە، دەیخاتە `public/fonts/`، build دەکات و دواتر push دەکات.

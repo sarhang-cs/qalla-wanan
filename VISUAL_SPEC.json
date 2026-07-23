@@ -1,31 +1,38 @@
 {
-  "release": "2026-07-23-qalla-wanan-r13-nav-readable-labels",
+  "release": "2026-07-23-qalla-wanan-r14-money-heist-rtl",
   "renderer": "MapLibre GL JS native WebGL symbol layers",
   "fontFamilies": {
-    "major": "Noto Kufi Arabic",
-    "other": "Vazirmatn",
+    "mapLabels": "UniQAIDAR Money Heist 002",
+    "appUI": [
+      "Vazirmatn",
+      "Noto Kufi Arabic"
+    ],
     "fallback": [
       "Noto Sans Arabic",
       "Tahoma",
       "Arial"
     ]
   },
+  "fontInstall": {
+    "bundled": false,
+    "source": "Downloads/UniQAIDAR-Money-Heist-002.ttf",
+    "destination": "public/fonts/UniQAIDAR-Money-Heist-002.ttf"
+  },
+  "rtl": {
+    "plugin": true,
+    "unicodeNormalization": "NFC",
+    "bidiControlsRemoved": true,
+    "horizontalWritingMode": true
+  },
   "capsule": {
     "type": "native nine-slice image",
-    "widthPx": 52,
-    "heightPx": 22,
+    "widthPx": 46,
+    "heightPx": 20,
     "pixelRatio": 2,
     "darkTranslucent": true,
     "textHalo": 0
   },
-  "density": {
-    "localityMinZoom": 10.2,
-    "roadMinZoom": 15.2,
-    "poiLandmarkMinZoom": 13.0,
-    "poiRegionalMinZoom": 14.7,
-    "poiLocalMinZoom": 16.1,
-    "poiDetailMinZoom": 17.6
-  },
+  "textSizeRangePx": "12.5-24 by category and zoom",
   "data": {
     "sourceRecords": 69000,
     "renderRecords": 69000,

@@ -1,1 +1,1 @@
-R13 uses the app web-font stack (Vazirmatn and Noto Kufi Arabic) with safe local fallbacks. No font binary is redistributed in this package.
+R14 does not redistribute the font binary. The Termux installer copies UniQAIDAR-Money-Heist-002.ttf from the device Downloads folder into this directory before build and push.

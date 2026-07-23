@@ -1,6 +1,6 @@
 {
-  "release": "2026-07-23-qalla-wanan-r13-nav-readable-labels",
-  "architecture": "three immutable MapLibre GeoJSON sources; fixed native symbol labels using app web fonts, compact dark capsules and progressive zoom density; satellite-only basemap with GPS/route",
+  "release": "2026-07-23-qalla-wanan-r14-money-heist-rtl",
+  "architecture": "three immutable MapLibre GeoJSON sources; fixed native symbol labels using a local user-supplied Kurdish/Arabic map font, compact dark capsules and progressive zoom density; app UI font unchanged; satellite-only basemap with GPS/route",
   "source_records": 69000,
   "baseline_records_preserved": 47040,
   "source_backed_records_added": 21960,

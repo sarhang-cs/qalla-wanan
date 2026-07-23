@@ -1,88 +1,55 @@
 {
   "ok": true,
-  "release": "2026-07-23-qalla-wanan-r13-nav-readable-labels",
-  "package_version": "1.10.0",
-  "generated_at_utc": "2026-07-23T00:00:00Z",
+  "release": "2026-07-23-qalla-wanan-r14-money-heist-rtl",
+  "package_version": "1.11.0",
+  "generated_at_utc": "2026-07-23T06:08:25.661698+00:00",
   "checks": {
     "data_integrity": "passed",
     "exact_source_records": 69000,
     "exact_native_render_records": 69000,
-    "source_linked_records": 69000,
     "source_backed_records_added": 21960,
     "fake_or_placeholder_records_added": 0,
     "coordinate_mismatch": 0,
     "outside_canonical_boundary": 0,
     "duplicate_source_ids": 0,
     "duplicate_render_ids": 0,
-    "malformed_source_names": 0,
     "malformed_rtl_display_names": 0,
     "runtime_contract": "passed",
     "javascript_syntax": "passed",
-    "production_build": "passed",
-    "installer_shell_syntax": "passed"
+    "production_build_with_user_font": "passed",
+    "installer_shell_syntax": "passed",
+    "font_arabic_shaping_tables": "passed",
+    "font_representative_character_coverage": "passed"
   },
   "renderer": {
     "labels": "MapLibre native WebGL symbol layers",
-    "background": "52x22 compact dark translucent nine-slice capsules fitted with icon-text-fit",
-    "fonts": {
-      "major": "Noto Kufi Arabic",
-      "other": "Vazirmatn",
-      "fallback": "Noto Sans Arabic / Tahoma / Arial"
-    },
-    "text_size_range_px": "15.5-27 by category and zoom",
+    "map_label_font": "UniQAIDAR Money Heist 002",
+    "app_ui_fonts": [
+      "Vazirmatn",
+      "Noto Kufi Arabic"
+    ],
+    "font_scope": "map labels only",
+    "background": "46x20 compact dark translucent nine-slice capsules fitted with icon-text-fit",
+    "text_size_range_px": "12.5-24 by category and zoom",
     "text_color": "#f8fbff",
     "black_text_halo": false,
-    "rtl": "MapLibre RTL plugin plus normalized render display names",
+    "rtl": "NFC-normalized display names plus MapLibre RTL plugin; font contains Arabic GSUB and GPOS tables",
     "fixed_point_anchor": true,
     "variable_anchor": false,
     "dom_marker_labels": false,
     "canvas_label_overlay": false,
-    "viewport_source_mutation": false,
     "coordinate_mutation": 0,
-    "progressive_density": {
-      "locality": 10.2,
-      "road": 15.2,
-      "poi_landmark": 13.0,
-      "poi_regional": 14.7,
-      "poi_local": 16.1,
-      "poi_detail": 17.6
-    },
     "basemap": "satellite only (MapTiler when configured, Esri fallback)",
     "terrain_3d": false,
     "gps": "native MapLibre GeoJSON circle layers",
     "route": "native MapLibre GeoJSON line layers"
   },
-  "data": {
-    "source_records": 69000,
-    "render_records": 69000,
-    "major_records": 28926,
-    "poi_records": 10783,
-    "detail_records": 29291,
-    "full_source_bytes": 108501210
+  "font_handling": {
+    "binary_bundled_in_zip": false,
+    "download_filename": "UniQAIDAR-Money-Heist-002.ttf",
+    "installer_copy_destination": "public/fonts/UniQAIDAR-Money-Heist-002.ttf",
+    "build_copy_destination": "dist/fonts/UniQAIDAR-Money-Heist-002.ttf"
   },
-  "files": {
-    "labels_major": {
-      "bytes": 10504824,
-      "sha256": "f39a6cbe5686b35389643ba5634c4dfedc5de0f314d4f943418dcff9b643c258"
-    },
-    "labels_poi": {
-      "bytes": 4071492,
-      "sha256": "d8981ef41794cc74a9018c3b311c7e46ab504968de4e7b29a12057dc840b0929"
-    },
-    "labels_detail": {
-      "bytes": 10890419,
-      "sha256": "2cb8a95a0ce9b887211ead82fa7ceab15360a35999f8bfeaa6abb346771536c1"
-    },
-    "labels_native": {
-      "bytes": 36081448,
-      "sha256": "a0443da74d627abdf4e73451b4538360cedd9701f2953d387d6c0e07227dcf44"
-    },
-    "search_catalog": {
-      "bytes": 10586420,
-      "sha256": "626662d7cca1d44af1dc73d64a2e7663202afe7dfd0ad608417c265d2422156e"
-    }
-  },
-  "font_handling": "Uses the same web-font families as the original app (Vazirmatn and Noto Kufi Arabic); no font binary is redistributed.",
   "variables_required": [
     "VITE_MAPTILER_KEY",
     "VITE_SUPABASE_URL",
@@ -90,5 +57,5 @@
   ],
   "new_sql_required": false,
   "authorized_repository": "https://github.com/sarhang-cs/qalla-wanan",
-  "visual_test_note": "Static data, runtime-contract, JavaScript syntax, production build, and installer checks passed. Final GPU rendering is confirmed after deployment on the target mobile browser."
+  "visual_test_note": "Static data, font-table, runtime-contract, JavaScript syntax, production-build and installer checks passed. Final GPU rendering is confirmed after deployment on the target mobile browser."
 }

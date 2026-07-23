@@ -1,12 +1,20 @@
-# Qalla Wanan — NAV KURD R13 Readable Native Labels 69,000
+# Qalla Wanan — R14 Money Heist RTL Map Labels
 
-R13 keeps the complete 69,000-record map/search dataset and rebuilds the native MapLibre label presentation around the app typography:
+This package keeps the application UI typography unchanged (`Vazirmatn` / `Noto Kufi Arabic`) and uses the user-provided `UniQAIDAR-Money-Heist-002.ttf` only for native MapLibre place labels.
 
-- Noto Kufi Arabic for region/city/town labels
-- Vazirmatn for villages, roads, shops and POIs
-- compact dark translucent native capsules
-- progressive zoom thresholds to prevent label flooding
-- no DOM/canvas label overlay
-- satellite-only map, native GPS and route layers
+## Included behavior
 
-Run `TERMUX_INSTALL_R13_AND_PUSH.sh` in Termux.
+- Satellite-only basemap with the Kurdistan outside mask
+- Native MapLibre labels for all 69,000 source-backed records
+- Native GPS marker, accuracy layer and route line
+- Fixed geographic coordinates during zoom and pan
+- NFC-normalized Kurdish/Arabic display names and RTL plugin shaping
+- Compact dark capsules with category-aware label sizing
+
+## Font installation
+
+The font binary is not bundled in this ZIP. Put this file in Android Downloads before running the installer:
+
+`UniQAIDAR-Money-Heist-002.ttf`
+
+`TERMUX_INSTALL_R14_AND_PUSH.sh` copies it to `public/fonts/`, verifies it is non-empty, builds the project, confirms the generated copy in `dist/fonts/`, and pushes only to `sarhang-cs/qalla-wanan`.
