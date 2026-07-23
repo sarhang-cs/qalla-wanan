@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const base = 'public/data/nav';
-const release = '2026-07-23-qalla-wanan-r12-compact-large-rtl';
+const release = '2026-07-23-qalla-wanan-r13-nav-readable-labels';
 const source = JSON.parse(fs.readFileSync(`${base}/labels-native.geojson`, 'utf8'));
 const keepProperties = ['id', 'name', 'kind', 'tier', 'priority', 'context', 'category'];
 const normalizeDisplayName = (value) => String(value || '')
@@ -41,7 +41,7 @@ const poiMeta = write('labels-poi.geojson', poi);
 const detailMeta = write('labels-detail.geojson', detail);
 const renderRecords = major.length + poi.length + detail.length;
 if (renderRecords !== 69_000 || renderRecords !== source.features.length) {
-  throw new Error(`R12 render count mismatch: source=${source.features.length} render=${renderRecords}`);
+  throw new Error(`R13 render count mismatch: source=${source.features.length} render=${renderRecords}`);
 }
 
 const audit = {

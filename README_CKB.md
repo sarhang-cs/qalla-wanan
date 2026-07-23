@@ -1,15 +1,10 @@
-# Qalla Wanan — NAV KURD R12
+# Qalla Wanan — NAV KURD R13
 
-ئەم وەشانە چارەسەری بنەڕەتی قالب و فۆنتی ناوی شوێنەکانە:
+- هەموو 69,000 تۆمارەکە پارێزراون.
+- فۆنتی ناوەکان لەگەڵ فۆنتی ئەپ یەکخراوەتەوە: Vazirmatn و Noto Kufi Arabic.
+- بۆکسە دارکەکان فشردەترن و فۆنتەکان خوێنراوترن.
+- ناوی دوکان و POI بە پێی Zoom بە تەدریج دەردەکەون، نەک هەموویان یەکجار.
+- label ـەکان native MapLibre/WebGL ـن؛ Overlay، DOM یان Canvas نین.
+- Satellite، GPS و route پارێزراون.
 
-- بۆکسە دارکەکان بچووک و فشردە کراون.
-- فۆنتی شار، گوند، دوکان و شوێنەکان بە پلەبەندی Zoom گەورەتر کراوە.
-- دەقەکان NFC normalize دەکرێن و Bidi control ـە زیانبەخشەکان لادەبرێن.
-- ناوەکان native MapLibre/WebGL ـن؛ DOM، Canvas یان overlay نین.
-- coordinate ـی 69,000 شوێن گۆڕانکاری ناکرێت.
-- تەنها Satellite، GPS، destination، route و search ماون.
-- `.git`، `.env.local` و فۆنتی بەکارهێنەر لە کاتی دامەزراندن دەپارێزرێن.
-
-هیچ Variable یان SQL ـی نوێ پێویست نییە.
-
-`TERMUX_INSTALL_R12_AND_PUSH.sh` جێبەجێ بکە.
+`TERMUX_INSTALL_R13_AND_PUSH.sh` جێبەجێ بکە.

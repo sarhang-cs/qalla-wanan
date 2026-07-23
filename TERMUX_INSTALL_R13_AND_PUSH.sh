@@ -5,18 +5,17 @@ REPO_URL="https://github.com/sarhang-cs/qalla-wanan.git"
 TARGET="$HOME/QALLA-WANAN-NAV-KURD-MAP-R1"
 SOURCE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAMP="$(date +%Y%m%d-%H%M%S)"
-BACKUP="$HOME/QALLA-WANAN-backup-before-R12-$STAMP"
-GIT_RESTORE="$HOME/.qalla-r12-git-restore"
-ENV_KEEP="$HOME/.qalla-r12-env-local-$STAMP"
-FONT_KEEP="$HOME/.qalla-r12-font-$STAMP.ttf"
+BACKUP="$HOME/QALLA-WANAN-backup-before-R13-$STAMP"
+GIT_RESTORE="$HOME/.qalla-r13-git-restore"
+ENV_KEEP="$HOME/.qalla-r13-env-local-$STAMP"
 
 printf '\n=================================================\n'
-printf ' QALLA WANAN R12 — COMPACT LARGE RTL + SATELLITE + GPS\n'
+printf ' QALLA WANAN R13 — READABLE NAV LABELS + SATELLITE + GPS\n'
 printf '=================================================\n'
 
 pkg install -y git nodejs >/dev/null
 for required in package.json src/nav-map.js scripts/check-data.mjs public/data/nav/labels-native.geojson; do
-  [ -s "$SOURCE/$required" ] || { echo "❌ پەکەجی R12 ناتەواوە: $required"; exit 1; }
+  [ -s "$SOURCE/$required" ] || { echo "❌ پەکەجی R13 ناتەواوە: $required"; exit 1; }
 done
 
 mkdir -p "$TARGET"
@@ -36,24 +35,11 @@ if ! git -C "$TARGET" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 [ -f "$TARGET/.env.local" ] && cp -f "$TARGET/.env.local" "$ENV_KEEP"
-if [ -s "$TARGET/public/fonts/UniQAIDAR_Hewal_031.ttf" ]; then
-  cp -f "$TARGET/public/fonts/UniQAIDAR_Hewal_031.ttf" "$FONT_KEEP"
-else
-  FOUND_FONT="$(find "$HOME/storage/downloads" /sdcard/Download -maxdepth 1 -type f -iname 'UniQAIDAR*Hewal*031*.ttf' 2>/dev/null | head -n 1 || true)"
-  [ -n "$FOUND_FONT" ] && cp -f "$FOUND_FONT" "$FONT_KEEP"
-fi
 
 find "$TARGET" -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.env.local' -exec rm -rf -- {} +
 tar -C "$SOURCE" --exclude='.git' --exclude='node_modules' --exclude='dist' -cf - . | tar -C "$TARGET" -xf -
 
 if [ -f "$ENV_KEEP" ]; then cp -f "$ENV_KEEP" "$TARGET/.env.local"; rm -f "$ENV_KEEP"; fi
-if [ -s "$FONT_KEEP" ]; then
-  mkdir -p "$TARGET/public/fonts"
-  cp -f "$FONT_KEEP" "$TARGET/public/fonts/UniQAIDAR_Hewal_031.ttf"
-  rm -f "$FONT_KEEP"
-else
-  echo "⚠️ فۆنتی ناوخۆ نەدۆزرایەوە؛ fallback ـی کوردی بەکار دەهێنرێت."
-fi
 
 cd "$TARGET"
 git config user.name "Sarhang Salah"
@@ -62,7 +48,7 @@ if git remote get-url origin >/dev/null 2>&1; then git remote set-url origin "$R
 git branch -M main
 [ "$(git remote get-url origin)" = "$REPO_URL" ] || { echo "❌ Remote هەڵەیە"; exit 1; }
 
-printf '📦 69,000 ناو، قالبی NAV KURD، Satellite و GPS دەپشکنرێن...\n'
+printf '📦 69,000 ناو، فۆنتی ئەپ، قالبی NAV، Satellite و GPS دەپشکنرێن...\n'
 npm install --no-audit --no-fund
 npm run check
 npm run build
@@ -80,24 +66,25 @@ test -s public/data/nav/labels-detail.geojson
 test -s dist/data/nav/labels-major.geojson
 test -s dist/data/nav/labels-poi.geojson
 test -s dist/data/nav/labels-detail.geojson
-grep -q "nav-capsule-major" src/nav-map.js
-grep -q "slim.display_name = normalizeDisplayName" scripts/build-render-data.mjs
-grep -q "20.5" src/nav-map.js
+grep -q "Noto Kufi Arabic" src/nav-map.js
+grep -q "Vazirmatn" src/nav-map.js
+grep -q "minzoom: 17.6" src/nav-map.js
 grep -q "text-halo-width': 0" src/nav-map.js
 ! grep -q "toggle3D\|setTerrain\|navKurdToggle3D\|btn-layers" src/nav-map.js index.html
 
 printf '📤 Push بۆ تەنها sarhang-cs/qalla-wanan...\n'
 git add -A
 if ! git diff --cached --quiet; then
-  git commit -m "R12: compact capsules, larger RTL labels, satellite-only map and stable GPS"
+  git commit -m "R13: readable app-font labels, compact NAV capsules, decluttered satellite map and stable GPS"
 else
   echo "ℹ️ هیچ گۆڕانکارییەکی نوێ بۆ Commit نییە."
 fi
 git push -u origin main
 
 printf '\n=================================================\n'
-printf '✅ R12 Push کرا\n'
+printf '✅ R13 Push کرا\n'
 printf '✅ 69,000 تۆمار پارێزرا و پشکنرا\n'
+printf '✅ ناوەکان native و جێگیرن، فۆنتی ئەپ خوێنراوە\n'
 printf '✅ Satellite + GPS/route تەنها map runtime ـن\n'
 printf '✅ Repo: https://github.com/sarhang-cs/qalla-wanan\n'
 printf '✅ Backup: %s\n' "$BACKUP"

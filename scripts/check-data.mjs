@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const root = 'public/data/nav';
-const release = '2026-07-23-qalla-wanan-r12-compact-large-rtl';
+const release = '2026-07-23-qalla-wanan-r13-nav-readable-labels';
 const labels = JSON.parse(fs.readFileSync(`${root}/labels.compact.json`, 'utf8'));
 const native = JSON.parse(fs.readFileSync(`${root}/labels-native.geojson`, 'utf8'));
 const major = JSON.parse(fs.readFileSync(`${root}/labels-major.geojson`, 'utf8'));
@@ -56,7 +56,7 @@ function insideGeometry(point, geometry) {
 const geometry = boundary.features?.[0]?.geometry;
 if (!geometry) throw new Error('canonical boundary geometry missing');
 if (!mask.features?.length) throw new Error('outside mask missing');
-if (!Array.isArray(labels.items) || labels.items.length !== 69_000) throw new Error(`R12 requires exactly 69,000 catalog records, found ${labels.items?.length}`);
+if (!Array.isArray(labels.items) || labels.items.length !== 69_000) throw new Error(`R13 requires exactly 69,000 catalog records, found ${labels.items?.length}`);
 if (labels.count !== 69_000) throw new Error(`catalog count metadata mismatch: ${labels.count}`);
 if (native.type !== 'FeatureCollection' || !Array.isArray(native.features)) throw new Error('native labels are not a FeatureCollection');
 if (native.features.length !== 69_000 || native.features.length !== labels.items.length) throw new Error(`native/source count mismatch: ${native.features.length}/${labels.items.length}`);
@@ -102,7 +102,7 @@ if (malformedDisplayNames) throw new Error(`${malformedDisplayNames} malformed R
 if (renderFeatures.length !== 69_000 || renderIds.size !== 69_000) throw new Error(`not all 69,000 records are in native map sources: ${renderFeatures.length}/${renderIds.size}`);
 if (major.features.length !== renderAudit.majorRecords || poi.features.length !== renderAudit.poiRecords || detail.features.length !== renderAudit.detailRecords) throw new Error('split render count mismatch');
 if (renderFeatures.length !== renderAudit.renderRecords || labels.items.length !== renderAudit.sourceRecords) throw new Error('render audit count mismatch');
-if (renderAudit.visualDuplicatesSuppressed !== 0) throw new Error('R12 must not suppress source records');
+if (renderAudit.visualDuplicatesSuppressed !== 0) throw new Error('R13 must not suppress source records');
 
 const sha = (file) => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 if (sha(`${root}/labels-major.geojson`) !== renderAudit.majorSha256) throw new Error('major labels SHA-256 mismatch');

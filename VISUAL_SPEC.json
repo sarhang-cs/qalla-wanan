@@ -1,31 +1,37 @@
 {
-  "release": "2026-07-23-qalla-wanan-r12-compact-large-rtl",
-  "reference_image": "255722.jpg and user mobile screenshot 255737.jpg",
-  "label_background": {
-    "mode": "native nine-slice image + icon-text-fit",
-    "shape": "compact dark rounded capsule",
-    "size": "64x28 source image at pixelRatio 2; 1.2-2 px vertical and 3.7-5 px horizontal fit padding by tier",
-    "edge": "subtle cool edge; no text halo"
+  "release": "2026-07-23-qalla-wanan-r13-nav-readable-labels",
+  "renderer": "MapLibre GL JS native WebGL symbol layers",
+  "fontFamilies": {
+    "major": "Noto Kufi Arabic",
+    "other": "Vazirmatn",
+    "fallback": [
+      "Noto Sans Arabic",
+      "Tahoma",
+      "Arial"
+    ]
   },
-  "label_text": {
-    "color": "#f8fbff",
-    "halo_width": 0,
-    "fixed_anchor": "center",
-    "writing_mode": "horizontal",
-    "font": "existing project UniQAIDAR Hewal 031 with safe Kurdish/Arabic fallback",
-    "sizes": "15.5-35 px by category and zoom",
-    "rtl": "NFC normalization + bidi-control cleanup + MapLibre RTL shaping plugin"
+  "capsule": {
+    "type": "native nine-slice image",
+    "widthPx": 52,
+    "heightPx": 22,
+    "pixelRatio": 2,
+    "darkTranslucent": true,
+    "textHalo": 0
   },
-  "map": {
-    "basemap": "satellite only",
-    "gps": true,
-    "route": true,
-    "terrain_3d": false
+  "density": {
+    "localityMinZoom": 10.2,
+    "roadMinZoom": 15.2,
+    "poiLandmarkMinZoom": 13.0,
+    "poiRegionalMinZoom": 14.7,
+    "poiLocalMinZoom": 16.1,
+    "poiDetailMinZoom": 17.6
   },
   "data": {
-    "source_records": 69000,
-    "render_records": 69000,
-    "coordinate_mutation": 0,
-    "outside_boundary": 0
-  }
+    "sourceRecords": 69000,
+    "renderRecords": 69000,
+    "coordinateMutation": 0,
+    "outsideCanonicalBoundary": 0
+  },
+  "satelliteOnly": true,
+  "gpsAndRouteNative": true
 }

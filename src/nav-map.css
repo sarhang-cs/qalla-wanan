@@ -1,19 +1,4 @@
-@font-face{
-  font-family:"UniQAIDAR Hewal 031";
-  src:url("../fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-}
-
-@font-face{
-  font-family:"Qalla Hewal";
-  src:url("../fonts/UniQAIDAR_Hewal_031.ttf") format("truetype");
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-}
-:root{--app-font:"UniQAIDAR Hewal 031","Qalla Hewal","Noto Sans Arabic",Tahoma,Arial,sans-serif}
+:root{--app-font:"Vazirmatn","Noto Sans Arabic",Tahoma,Arial,sans-serif;--app-heading-font:"Noto Kufi Arabic","Vazirmatn","Noto Sans Arabic",sans-serif}
 #view-map,#leafmap,#view-map *{font-family:var(--app-font)!important}
 #leafmap{background:#050a12}
 #map-chips,#map-card{display:none!important}
@@ -84,8 +69,8 @@
 }
 
 
-/* R12 compact capsules with larger native Kurdish labels: the actual capsules are native MapLibre images. */
+/* R13 compact NAV capsules with readable app typography and progressive density. */
 #map-side{gap:10px}
 #btn-locate{background:rgba(247,250,252,.96);color:#0b1824}
 
-/* R12 native label typography contract: app font is preloaded; label boxes are WebGL nine-slice images, not DOM overlays. */
+/* R13 labels use the same Vazirmatn/Noto Kufi typography as the app; WebGL nine-slice capsules remain native. */

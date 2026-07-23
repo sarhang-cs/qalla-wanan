@@ -1,13 +1,12 @@
-# Qalla Wanan — NAV KURD R12 Compact Large RTL 69,000
+# Qalla Wanan — NAV KURD R13 Readable Native Labels 69,000
 
-Root-level map-label release with compact capsules and larger RTL-normalized Kurdish text.
+R13 keeps the complete 69,000-record map/search dataset and rebuilds the native MapLibre label presentation around the app typography:
 
-- Satellite-only MapLibre map
-- Stable native GPS marker and route line
-- 69,000 source-linked places preserved
-- Compact dark nine-slice capsules
-- Larger Kurdish text using the app font when installed
-- Normalized NFC display names with harmful bidi controls removed
-- Fixed geographic coordinates; no DOM/Canvas label overlays
+- Noto Kufi Arabic for region/city/town labels
+- Vazirmatn for villages, roads, shops and POIs
+- compact dark translucent native capsules
+- progressive zoom thresholds to prevent label flooding
+- no DOM/canvas label overlay
+- satellite-only map, native GPS and route layers
 
-Run `TERMUX_INSTALL_R12_AND_PUSH.sh` in Termux.
+Run `TERMUX_INSTALL_R13_AND_PUSH.sh` in Termux.

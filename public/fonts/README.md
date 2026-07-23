@@ -1,1 +1,1 @@
-R12 preserves the existing user-provided Kurdish font during installation. The font file is not redistributed in this package.
+R13 uses the app web-font stack (Vazirmatn and Noto Kufi Arabic) with safe local fallbacks. No font binary is redistributed in this package.

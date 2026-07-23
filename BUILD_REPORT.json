@@ -1,13 +1,14 @@
 {
   "ok": true,
-  "release": "2026-07-23-qalla-wanan-r12-compact-large-rtl",
-  "package_version": "1.9.0",
+  "release": "2026-07-23-qalla-wanan-r13-nav-readable-labels",
+  "package_version": "1.10.0",
   "generated_at_utc": "2026-07-23T00:00:00Z",
   "checks": {
     "data_integrity": "passed",
     "exact_source_records": 69000,
     "exact_native_render_records": 69000,
     "source_linked_records": 69000,
+    "source_backed_records_added": 21960,
     "fake_or_placeholder_records_added": 0,
     "coordinate_mismatch": 0,
     "outside_canonical_boundary": 0,
@@ -22,17 +23,30 @@
   },
   "renderer": {
     "labels": "MapLibre native WebGL symbol layers",
-    "background": "64x28 compact dark nine-slice capsules fitted with icon-text-fit",
-    "text_size_range_px": "15.5-35 by category and zoom",
+    "background": "52x22 compact dark translucent nine-slice capsules fitted with icon-text-fit",
+    "fonts": {
+      "major": "Noto Kufi Arabic",
+      "other": "Vazirmatn",
+      "fallback": "Noto Sans Arabic / Tahoma / Arial"
+    },
+    "text_size_range_px": "15.5-27 by category and zoom",
     "text_color": "#f8fbff",
     "black_text_halo": false,
-    "rtl_normalization": "NFC + removal of bidi embedding/isolate controls in render copies",
+    "rtl": "MapLibre RTL plugin plus normalized render display names",
     "fixed_point_anchor": true,
     "variable_anchor": false,
     "dom_marker_labels": false,
     "canvas_label_overlay": false,
     "viewport_source_mutation": false,
     "coordinate_mutation": 0,
+    "progressive_density": {
+      "locality": 10.2,
+      "road": 15.2,
+      "poi_landmark": 13.0,
+      "poi_regional": 14.7,
+      "poi_local": 16.1,
+      "poi_detail": 17.6
+    },
     "basemap": "satellite only (MapTiler when configured, Esri fallback)",
     "terrain_3d": false,
     "gps": "native MapLibre GeoJSON circle layers",
@@ -68,7 +82,7 @@
       "sha256": "626662d7cca1d44af1dc73d64a2e7663202afe7dfd0ad608417c265d2422156e"
     }
   },
-  "font_handling": "Installer preserves the user-provided UniQAIDAR font already in the project; no font binary is redistributed.",
+  "font_handling": "Uses the same web-font families as the original app (Vazirmatn and Noto Kufi Arabic); no font binary is redistributed.",
   "variables_required": [
     "VITE_MAPTILER_KEY",
     "VITE_SUPABASE_URL",
@@ -76,5 +90,5 @@
   ],
   "new_sql_required": false,
   "authorized_repository": "https://github.com/sarhang-cs/qalla-wanan",
-  "visual_test_note": "Static source, data, runtime-contract, syntax and production-build checks passed. Final GPU rendering is confirmed after deployment on the target mobile browser."
+  "visual_test_note": "Static data, runtime-contract, JavaScript syntax, production build, and installer checks passed. Final GPU rendering is confirmed after deployment on the target mobile browser."
 }
