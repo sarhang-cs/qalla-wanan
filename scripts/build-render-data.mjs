@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import crypto from 'node:crypto';
 
 const base = 'public/data/nav';
-const release = '2026-07-23-qalla-wanan-r14-money-heist-rtl';
+const release = '2026-07-23-qalla-wanan-r15-large-readable-rtl';
 const source = JSON.parse(fs.readFileSync(`${base}/labels-native.geojson`, 'utf8'));
 const keepProperties = ['id', 'name', 'kind', 'tier', 'priority', 'context', 'category'];
 const normalizeDisplayName = (value) => String(value || '')

@@ -1,8 +1,8 @@
 {
-  "release": "2026-07-23-qalla-wanan-r14-money-heist-rtl",
+  "release": "2026-07-23-qalla-wanan-r15-large-readable-rtl",
   "renderer": "MapLibre GL JS native WebGL symbol layers",
   "fontFamilies": {
-    "mapLabels": "UniQAIDAR Money Heist 002",
+    "mapLabels": "UniQAIDAR_Money Heist 002",
     "appUI": [
       "Vazirmatn",
       "Noto Kufi Arabic"
@@ -15,8 +15,10 @@
   },
   "fontInstall": {
     "bundled": false,
+    "automaticFromDownloads": true,
     "source": "Downloads/UniQAIDAR-Money-Heist-002.ttf",
-    "destination": "public/fonts/UniQAIDAR-Money-Heist-002.ttf"
+    "destination": "public/fonts/UniQAIDAR-Money-Heist-002.ttf",
+    "uploadedToRepositoryByInstaller": true
   },
   "rtl": {
     "plugin": true,
@@ -26,13 +28,14 @@
   },
   "capsule": {
     "type": "native nine-slice image",
-    "widthPx": 46,
+    "widthPx": 44,
     "heightPx": 20,
     "pixelRatio": 2,
     "darkTranslucent": true,
     "textHalo": 0
   },
-  "textSizeRangePx": "12.5-24 by category and zoom",
+  "textSizeRangePx": "18-38 by category and zoom",
+  "density": "progressive visibility by category and zoom with collision management",
   "data": {
     "sourceRecords": 69000,
     "renderRecords": 69000,
